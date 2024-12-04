@@ -15,7 +15,7 @@ const Shadow = Loadable(lazy(() => import('../views/utilities/Shadow')))
 const Error = Loadable(lazy(() => import('../views/authentication/Error')));
 const Register = Loadable(lazy(() => import('../views/authentication/Register')));
 const Login = Loadable(lazy(() => import('../views/authentication/Login')));
-
+const Hotels= Loadable(lazy(() => import('../pages/Hotels')));
 const Router = [
   {
     path: '/',
@@ -23,10 +23,11 @@ const Router = [
     children: [
       { path: '/', element: <Navigate to="/dashboard" /> },
       { path: '/dashboard', exact: true, element: <Dashboard /> },
-      { path: '/sample-page', exact: true, element: <SamplePage /> },
+      // { path: '/sample-page', exact: true, element: <SamplePage /> },
+      { path: '/hotels', exact: true, element: <Hotels /> },
       { path: '/icons', exact: true, element: <Icons /> },
-      { path: '/ui/typography', exact: true, element: <TypographyPage /> },
-      { path: '/ui/shadow', exact: true, element: <Shadow /> },
+      // { path: '/ui/typography', exact: true, element: <TypographyPage /> },
+      // { path: '/ui/shadow', exact: true, element: <Shadow /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },

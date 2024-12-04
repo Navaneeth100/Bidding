@@ -57,7 +57,7 @@ const MSidebar = (props) => {
               width={'270px'}
               collapsewidth="80px"
               open={props.isSidebarOpen}
-              themeColor="#5d87ff"
+              themeColor="#262256"
               themeSecondaryColor="#49beff"
               showProfile={false}
             >
@@ -98,7 +98,7 @@ const MSidebar = (props) => {
         isCollapse={false}
         mode="light"
         direction="ltr"
-        themeColor="#5d87ff"
+        themeColor="#262256"
         themeSecondaryColor="#49beff"
         showProfile={false}
       >
