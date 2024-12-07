@@ -16,6 +16,7 @@ const Error = Loadable(lazy(() => import('../views/authentication/Error')));
 const Register = Loadable(lazy(() => import('../views/authentication/Register')));
 const Login = Loadable(lazy(() => import('../views/authentication/Login')));
 const Hotels= Loadable(lazy(() => import('../pages/Hotels')));
+const HotelView= Loadable(lazy(() => import('../pages/HotelView')));
 const Router = [
   {
     path: '/',
@@ -25,6 +26,7 @@ const Router = [
       { path: '/dashboard', exact: true, element: <Dashboard /> },
       // { path: '/sample-page', exact: true, element: <SamplePage /> },
       { path: '/hotels', exact: true, element: <Hotels /> },
+      { path: '/hotels/:id', exact: true, element: <HotelView /> },
       { path: '/icons', exact: true, element: <Icons /> },
       // { path: '/ui/typography', exact: true, element: <TypographyPage /> },
       // { path: '/ui/shadow', exact: true, element: <Shadow /> },

@@ -6,6 +6,7 @@ import BlankCard from 'src/components/shared/BlankCard';
 import ProductPerformance from '../views/dashboard/components/ProductPerformance';
 import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton } from '@mui/material';
 import { IconStar, IconEye, IconEdit, IconTrash } from '@tabler/icons-react';
+import { useNavigate } from 'react-router-dom';
 
 const hotels = [
     {
@@ -65,18 +66,24 @@ const HotelPage = () => {
         setModal((prev) => ({ ...prev, [type]: !prev[type] }));
     };
 
+    const navigate = useNavigate();
+
+    const handleNavigateToViewHotel = (id) => {
+        navigate(`/hotels/${id}`);
+    }
+
     return (
         <PageContainer title="Hotels" description="Hotels">
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }} gap={2} mb={2}>
-                            <Button size="small" variant="text" color='info'>Calendar</Button>
-                            <Button size="small" variant="text" color='info'>Filters</Button>
-                            <Button size="small" variant="outlined" color='success' onClick={() => toggleModal('add')}>Add Hotel</Button>
-                        </Box>
+                <Button size="small" variant="text" color='info'>Calendar</Button>
+                <Button size="small" variant="text" color='info'>Filters</Button>
+                <Button size="small" variant="outlined" color='success' onClick={() => toggleModal('add')}>Add Hotel</Button>
+            </Box>
             <Grid container spacing={3}>
                 <Grid item sm={12} lg={12}>
                     <DashboardCard title="Our Hotels">
-                        
-                        <Box sx={{ overflow: 'auto', width: { xs: '280px', sm: 'auto' } }}>
+
+                        <Box sx={{ overflow: 'auto', width: { xs: '300px', sm: 'auto' } }}>
                             <Table
                                 aria-label="simple table"
                                 sx={{
@@ -85,6 +92,11 @@ const HotelPage = () => {
                             >
                                 <TableHead>
                                     <TableRow>
+                                        <TableCell>
+                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                SN
+                                            </Typography>
+                                        </TableCell>
                                         <TableCell>
                                             <Typography variant="subtitle2" fontWeight={600}>
                                                 Image
@@ -121,7 +133,12 @@ const HotelPage = () => {
                                     {hotels.map((hotels) => (
                                         <TableRow key={hotels.id}>
                                             <TableCell>
-                                                <Box component="img" src={hotels.image} alt="Hotel Image" width="100px" height="auto" />
+                                                <Typography variant="subtitle2" fontWeight={600}>
+                                                    {hotels.id}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Box component="img" src={hotels.image} alt="Hotel Image" width="100px" height="auto" onClick={() => { handleNavigateToViewHotel(hotels.id) }} />
                                             </TableCell>
                                             <TableCell>
                                                 <Typography variant="subtitle2" fontWeight={600}>
