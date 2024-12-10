@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { Typography, Grid, CardContent } from '@mui/material';
+import { Typography, Grid, CardContent, Rating } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
 import ProductPerformance from '../views/dashboard/components/ProductPerformance';
-import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton, Chip } from '@mui/material';
 import { IconStar, IconEye, IconEdit, IconTrash, IconStarFilled, IconMapPinFilled, IconPhone, IconMail } from '@tabler/icons-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Card, CardBody, CardImg, CardText, CardTitle } from 'reactstrap';
+import { Badge, Card, CardBody, CardImg, CardText, CardTitle } from 'reactstrap';
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
-
-
+import { deepPurple } from '@mui/material/colors';
 
 const hotels = [
     {
@@ -96,6 +95,57 @@ const ecoCard = [
     },
 ];
 
+const reviews = [
+    { name: "John Doe", rating: 5, comment: "Amazing stay! Highly recommended!", color: "orange" },
+    { name: "Sam Smith", rating: 4, comment: "Great service, but the pool could be bigger.", color: "blue" },
+    { name: "Michael Johnson", rating: 4.5, comment: "Good value for money, but breakfast could be improved.", color: "purple" },
+    { name: "Emily Davis", rating: 5, comment: "Excellent experience,friendly staff and beautiful rooms!", color: "green" }
+]
+
+const spec = [
+    { specs: "4-Wheeler Parking" },
+    { specs: "4 Beds" },
+    { specs: "AC Rooms" },
+    { specs: "Free Wi-Fi" },
+    { specs: "Room Service" },
+    { specs: "Swimming Pool" },
+    { specs: "Fitness Center" },
+    { specs: "Restaurant" },
+    { specs: "Conference Rooms" },
+    { specs: "Free Breakfast" },
+    { specs: "Private Balcony" }
+];
+
+const bookingHistory = [
+    {
+        id: 10023,
+        hotelName: 'The Grand Resort',
+        customerName: 'John Doe',
+        checkInDate: '2024-12-01',
+        checkOutDate: '2024-12-05',
+        status: 'Completed',
+        contact: '9876543210',
+    },
+    {
+        id: 10024,
+        hotelName: 'Ocean View Hotel',
+        customerName: 'Alice Smith',
+        checkInDate: '2024-11-20',
+        checkOutDate: '2024-11-23',
+        status: 'Cancelled',
+        contact: '9123456789',
+    },
+    {
+        id: 10025,
+        hotelName: 'Mountain Retreat',
+        customerName: 'Michael Johnson',
+        checkInDate: '2024-12-10',
+        checkOutDate: '2024-12-15',
+        status: 'Pending',
+        contact: '9988776655',
+    },
+];
+
 
 const HotelPage = () => {
 
@@ -115,7 +165,7 @@ const HotelPage = () => {
         <PageContainer title="Hotels" description="Hotels">
             <Grid container spacing={3}>
                 <Grid item sm={12} lg={12}>
-                    <DashboardCard title={`#Hotel ${hotel.id}`}>
+                    <DashboardCard title="">
                         <Grid container spacing={1} columns={12}>
                             <Grid item xs={4} md={4}>
                                 <Box
@@ -132,7 +182,7 @@ const HotelPage = () => {
                                     }}
                                 >
                                     <Stack direction="row" spacing={2}>
-                                        <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" sx={{ width: 56, height: 56 }} />
+                                        <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" sx={{ width: 56, height: 56, bgcolor: deepPurple[500] }} >J</Avatar>
                                     </Stack>
                                     <Box sx={{ mt: 2 }}>
                                         <Typography variant="h4" sx={{ fontWeight: "bold", textAlign: "center" }}>
@@ -145,7 +195,7 @@ const HotelPage = () => {
                                             </Box>
                                             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                                                 <IconPhone fontSize="small" />
-                                                <Typography variant="h6">+0495 2345678</Typography>
+                                                <Typography variant="h6">+0495 234567890</Typography>
                                             </Box>
                                         </Box>
                                     </Box>
@@ -166,52 +216,162 @@ const HotelPage = () => {
                                             width="100%"
                                         /> */}
                                         <CardBody>
-                                            <CardTitle tag="h5">
+                                            <CardTitle tag="h5" className='fw-bold'>
                                                 {hotel.name}
                                             </CardTitle>
                                             <CardText>
-                                                {hotel.location} &nbsp; | &nbsp; {hotel.rating}  ( 52,427 Ratings )
+                                                {hotel.location} &nbsp; | &nbsp; <span className='fw-bold'>{hotel.rating}</span>  ( 52,427 Ratings )
                                             </CardText>
                                             <CardText>
                                                 A luxurious palace resort on the banks of Lake Pichola, offering breathtaking views, world-class service, and a blend of traditional Rajasthani architecture with modern amenities.
                                             </CardText>
-                                            {/* <CardText>
-                                        <small className="text-muted">
-                                            Last updated 3 mins ago
-                                        </small>
-                                    </CardText> */}
+                                            <CardText>
+                                                {spec.map((item, index) => (
+                                                    <Badge className='text-dark me-2' color="light" pill>
+                                                        {item.specs}
+                                                    </Badge>
+                                                ))}
+                                            </CardText>
                                         </CardBody>
-                                        <Box
-                                            sx={{
-                                                display: "flex",
-                                                overflowX: "auto", // Enable horizontal scrolling
-                                                overflowY: "hidden", // Prevent vertical scrolling
-                                                gap: "16px", // Add spacing between items
-                                                padding: "16px", // Optional padding
-                                            }}
-                                        >
-                                            {ecoCard.map((product, index) => (
-                                                <Box
-                                                    key={index}
-                                                    sx={{
-                                                        minWidth: "300px", // Set a fixed width for each card
-                                                        flexShrink: 0, // Prevent the item from shrinking
-                                                    }}
-                                                >
-                                                    <BlankCard>
-                                                        <Typography>
-                                                            <img src={product.photo} alt="img" width="100%" height="200px" />
-                                                        </Typography>
-                                                    </BlankCard>
-                                                </Box>
-                                            ))}
-                                        </Box>
-
                                     </Card>
                                 </Box>
                             </Grid>
                         </Grid>
-                        <Typography className='mb-3 mt-2' variant="h4">More Images</Typography>
+
+                        {/* Images Section */}
+
+                        <Typography className='mb-3 mt-2' variant="h5">Images</Typography>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                gap: "16px", // Add spacing between items
+                                padding: "16px", // Optional padding
+                            }}
+                        >
+                            {ecoCard.map((product, index) => (
+                                <Box
+                                    key={index}
+                                    sx={{ minWidth: "250px" }}
+                                >
+                                    <BlankCard>
+                                        <Typography>
+                                            <img src={product.photo} alt="img" width="100%" height="200px" />
+                                        </Typography>
+                                    </BlankCard>
+                                </Box>
+                            ))}
+                        </Box>
+
+                        {/* booking History */}
+
+                        <Typography className='mt-2' variant="h5">Booking History</Typography>
+
+                        <Grid container spacing={3} className='mb-5 mt-2'>
+                            <Grid item sm={12} lg={12}>
+                                <DashboardCard title="">
+                                    <Box sx={{ overflow: 'auto', width: { xs: '300px', sm: 'auto' } }}>
+                                        <Table aria-label="booking history table" sx={{ whiteSpace: 'nowrap' }}>
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell>
+                                                        <Typography variant="subtitle2" fontWeight={600}>
+                                                            Booking ID
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Typography variant="subtitle2" fontWeight={600}>
+                                                            Hotel Name
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Typography variant="subtitle2" fontWeight={600}>
+                                                            Customer Name
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Typography variant="subtitle2" fontWeight={600}>
+                                                            Check-In Date
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Typography variant="subtitle2" fontWeight={600}>
+                                                            Check-Out Date
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Typography variant="subtitle2" fontWeight={600} align='center'>
+                                                            Status
+                                                        </Typography>
+                                                    </TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {bookingHistory.map((booking) => (
+                                                    <TableRow key={booking.id}>
+                                                        <TableCell>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {booking.id}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {booking.hotelName}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {booking.customerName}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {booking.checkInDate}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {booking.checkOutDate}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align='center'>
+                                                            <Chip
+                                                                sx={{
+                                                                    px: "4px",
+                                                                }}
+                                                                size="small"
+                                                                label={booking.status}
+                                                            ></Chip>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </Box>
+                                </DashboardCard>
+                            </Grid>
+                        </Grid>
+
+                        {/* Reviews Section */}
+
+                        <Typography className='mb-4 mt-2' variant="h5">Guest Reviews</Typography>
+                        <Grid container spacing={2}>
+                            {reviews.map((review, index) => (
+                                <Grid item xs={12} sm={3} key={index}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
+                                        <Box><Avatar sx={{ marginRight: 2 }} alt={review.name}>{review.name.charAt(0)}</Avatar></Box>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ fontStyle: 'italic', fontWeight: 'bold', fontSize: "13px" }}>
+                                                "{review.comment}"
+                                            </Typography>
+                                            {/* <Typography variant="body2" sx={{ fontWeight: 'bold'}}>
+                                                {review.name}
+                                            </Typography> */}
+                                            <Rating value={review.rating} readOnly />
+                                        </Box>
+                                    </Box>
+                                </Grid>
+                            ))}
+                        </Grid>
                     </DashboardCard>
                 </Grid>
             </Grid>

@@ -5,10 +5,10 @@ import {
 import { uniqueId } from 'lodash';
 
 const Menuitems = [
-  // {
-  //   navlabel: true,
-  //   subheader: 'Home',
-  // },
+  {
+    navlabel: true,
+    subheader: 'Home',
+  },
 
   {
     id: uniqueId(),
@@ -16,10 +16,10 @@ const Menuitems = [
     icon: IconLayoutDashboard,
     href: '/dashboard',
   },
-  // {
-  //   navlabel: true,
-  //   subheader: 'Utilities',
-  // },
+  {
+    navlabel: true,
+    subheader: 'Our Hotels',
+  },
   {
     id: uniqueId(),
     title: 'Hotels',
@@ -27,20 +27,24 @@ const Menuitems = [
     href: '/hotels',
   },
   {
+    navlabel: true,
+    subheader: 'Our Bookings',
+  },
+  {
     id: uniqueId(),
     title: 'Bookings',
     icon: IconCopy,
-    href: '/ui/shadow',
+    href: '/bookings',
   },
-  // {
-  //   navlabel: true,
-  //   subheader: 'Auth',
-  // },
+  {
+    navlabel: true,
+    subheader: 'My Settings',
+  },
   {
     id: uniqueId(),
     title: 'Settings',
     icon: IconSettings,
-    href: '/auth/login',
+    href: '/settings',
   },
   // {
   //   id: uniqueId(),
@@ -52,18 +56,18 @@ const Menuitems = [
   //   navlabel: true,
   //   subheader: 'Extra',
   // },
-  {
-    id: uniqueId(),
-    title: 'Icons',
-    icon: IconMoodHappy,
-    href: '/icons',
-  },
-  {
-    id: uniqueId(),
-    title: 'Sample Page',
-    icon: IconAperture,
-    href: '/sample-page',
-  },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Icons',
+  //   icon: IconMoodHappy,
+  //   href: '/icons',
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Sample Page',
+  //   icon: IconAperture,
+  //   href: '/sample-page',
+  // },
 ];
 
 export default Menuitems;

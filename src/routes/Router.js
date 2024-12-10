@@ -17,6 +17,10 @@ const Register = Loadable(lazy(() => import('../views/authentication/Register'))
 const Login = Loadable(lazy(() => import('../views/authentication/Login')));
 const Hotels= Loadable(lazy(() => import('../pages/Hotels')));
 const HotelView= Loadable(lazy(() => import('../pages/HotelView')));
+const HotelAdd= Loadable(lazy(() => import('../pages/AddHotel')));
+const Booking= Loadable(lazy(() => import('../pages/Bookings')));
+const Settings= Loadable(lazy(() => import('../pages/Settings')));
+
 const Router = [
   {
     path: '/',
@@ -26,8 +30,11 @@ const Router = [
       { path: '/dashboard', exact: true, element: <Dashboard /> },
       // { path: '/sample-page', exact: true, element: <SamplePage /> },
       { path: '/hotels', exact: true, element: <Hotels /> },
+      { path: '/addhotel', exact: true, element: <HotelAdd /> },
       { path: '/hotels/:id', exact: true, element: <HotelView /> },
-      { path: '/icons', exact: true, element: <Icons /> },
+      { path: '/bookings', exact: true, element: <Booking /> },
+      { path: '/settings', exact: true, element: <Settings /> },
+      // { path: '/icons', exact: true, element: <Icons /> },
       // { path: '/ui/typography', exact: true, element: <TypographyPage /> },
       // { path: '/ui/shadow', exact: true, element: <Shadow /> },
       { path: '*', element: <Navigate to="/auth/404" /> },

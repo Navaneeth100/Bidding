@@ -9,51 +9,61 @@ import {
     Chip
 } from '@mui/material';
 import DashboardCard from '../../../components/shared/DashboardCard';
+import { IconStar } from '@tabler/icons-react';
 
-const products = [
+const hotels = [
     {
-        id: "1",
-        name: "Sunil Joshi",
-        post: "Web Designer",
-        pname: "Elite Admin",
-        priority: "Low",
-        pbg: "primary.main",
-        budget: "3.9",
+        "id": 1,
+        "name": "The Oberoi Udaivilas",
+        "location": "Udaipur, Rajasthan",
+        "address": "Haridasji Ki Magri",
+        "rating": 4.9,
+        "contact": "+91 294 2433300",
+        "image": "https://lh3.googleusercontent.com/p/AF1QipMuXeRSEy6AIfsfaADUJ0WavsP_oJVDRIvrFraH=s680-w680-h510"
     },
     {
-        id: "2",
-        name: "Andrew McDownland",
-        post: "Project Manager",
-        pname: "Real Homes WP Theme",
-        priority: "Medium",
-        pbg: "secondary.main",
-        budget: "24.5",
+        "id": 2,
+        "name": "Taj Mahal Palace",
+        "location": "Mumbai, Maharashtra",
+        "address": "Apollo Bandar, Colaba",
+        "rating": 4.8,
+        "contact": "+91 22 6665 3366",
+        "image": "https://lh3.googleusercontent.com/p/AF1QipPjR_st_vsnuJdZwzWkJ3P1ur1QdjRyNcq4VS--=s680-w680-h510"
     },
     {
-        id: "3",
-        name: "Christopher Jamil",
-        post: "Project Manager",
-        pname: "MedicalPro WP Theme",
-        priority: "High",
-        pbg: "error.main",
-        budget: "12.8",
+        "id": 3,
+        "name": "ITC Grand Chola",
+        "location": "Chennai, Tamil Nadu",
+        "address": "No 63, Mount Road, Guindy",
+        "rating": 4.7,
+        "contact": "+91 44 2220 0000",
+        "image": "https://lh3.googleusercontent.com/proxy/2YOdQuWql5MgFZmCJ5L2cp__fLizlxr3AyvqLi6DvDJNr54Wo17kSojTAPMcb_MbkklvwNKftFYB0f-z-hPLWbxW0iFLNvPzzuRWLburuyX8O9EoDwG9vNfLGLEqYD4YZWzsLGhGKZgv5ZpE0oO1i6tlK0oVkLQ=s680-w680-h510"
     },
     {
-        id: "4",
-        name: "Nirav Joshi",
-        post: "Frontend Engineer",
-        pname: "Hosting Press HTML",
-        priority: "Critical",
-        pbg: "success.main",
-        budget: "2.4",
+        "id": 4,
+        "name": "Leela Palace",
+        "location": "New Delhi, Delhi",
+        "address": "Diplomatic Enclave, Chanakyapuri",
+        "rating": 4.9,
+        "contact": "+91 11 3933 1234",
+        "image": "https://lh3.googleusercontent.com/p/AF1QipMyFampnjTQttMvO8BTEgylpimVrAbXg5sAtBuO=s680-w680-h510"
     },
-];
+    {
+        "id": 5,
+        "name": "Radisson Blu",
+        "location": "Kochi, Kerala",
+        "address": "Sahodaran Ayyappan Road, Elamkulam",
+        "rating": 4.5,
+        "contact": "+91 484 4129999",
+        "image": "https://lh3.googleusercontent.com/p/AF1QipNsP26P4ImwPNap7CoHs_jUO-44JasvVB9w8Dir=w287-h192-n-k-rw-no-v1"
+    }
+]
 
 
 const ProductPerformance = () => {
     return (
 
-        <DashboardCard title="Product Performance">
+        <DashboardCard title="Top Rated  Hotels">
             <Box sx={{ overflow: 'auto', width: { xs: '280px', sm: 'auto' } }}>
                 <Table
                     aria-label="simple table"
@@ -66,12 +76,12 @@ const ProductPerformance = () => {
                         <TableRow>
                             <TableCell>
                                 <Typography variant="subtitle2" fontWeight={600}>
-                                    Id
+                                    SN
                                 </Typography>
                             </TableCell>
                             <TableCell>
                                 <Typography variant="subtitle2" fontWeight={600}>
-                                    Assigned
+                                    Image
                                 </Typography>
                             </TableCell>
                             <TableCell>
@@ -81,27 +91,30 @@ const ProductPerformance = () => {
                             </TableCell>
                             <TableCell>
                                 <Typography variant="subtitle2" fontWeight={600}>
-                                    Priority
+                                    Location
                                 </Typography>
                             </TableCell>
-                            <TableCell align="right">
+                            <TableCell>
                                 <Typography variant="subtitle2" fontWeight={600}>
-                                    Budget
+                                    Ratings
                                 </Typography>
                             </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {products.map((product) => (
-                            <TableRow key={product.name}>
+                        {hotels.map((hotels) => (
+                            <TableRow key={hotels.id}>
                                 <TableCell>
-                                    <Typography
-                                        sx={{
-                                            fontSize: "15px",
-                                            fontWeight: "500",
-                                        }}
-                                    >
-                                        {product.id}
+                                    <Typography variant="subtitle2" fontWeight={600}>
+                                        {hotels.id}
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Box component="img" src={hotels.image} alt="Hotel Image" width="100px" height="auto" onClick={() => { handleNavigateToViewHotel(hotels.id) }} />
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant="subtitle2" fontWeight={600}>
+                                        {hotels.name}
                                     </Typography>
                                 </TableCell>
                                 <TableCell>
@@ -113,7 +126,7 @@ const ProductPerformance = () => {
                                     >
                                         <Box>
                                             <Typography variant="subtitle2" fontWeight={600}>
-                                                {product.name}
+                                                {hotels.address}
                                             </Typography>
                                             <Typography
                                                 color="textSecondary"
@@ -121,29 +134,18 @@ const ProductPerformance = () => {
                                                     fontSize: "13px",
                                                 }}
                                             >
-                                                {product.post}
+                                                {hotels.location}
                                             </Typography>
                                         </Box>
                                     </Box>
                                 </TableCell>
                                 <TableCell>
-                                    <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
-                                        {product.pname}
-                                    </Typography>
-                                </TableCell>
-                                <TableCell>
-                                    <Chip
-                                        sx={{
-                                            px: "4px",
-                                            backgroundColor: product.pbg,
-                                            color: "#fff",
-                                        }}
-                                        size="small"
-                                        label={product.priority}
-                                    ></Chip>
-                                </TableCell>
-                                <TableCell align="right">
-                                    <Typography variant="h6">${product.budget}k</Typography>
+                                    <Box display="flex" alignItems="center">
+                                        <IconStar width={15} style={{ marginRight: "5px" }} />
+                                        <Typography variant="subtitle2" fontWeight={600} fontSize={18}>
+                                            {hotels.rating}
+                                        </Typography>
+                                    </Box>
                                 </TableCell>
                             </TableRow>
                         ))}

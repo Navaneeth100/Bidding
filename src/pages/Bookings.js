@@ -5,8 +5,9 @@ import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
 import ProductPerformance from '../views/dashboard/components/ProductPerformance';
 import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton } from '@mui/material';
-import { IconStar, IconEye, IconEdit, IconTrash } from '@tabler/icons-react';
+import { IconStar, IconEye, IconEdit, IconTrash, IconDots } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
+import Menu from '@mui/material/Menu';
 
 const hotels = [
     {
@@ -16,7 +17,13 @@ const hotels = [
         "address": "Haridasji Ki Magri",
         "rating": 4.9,
         "contact": "+91 294 2433300",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipMuXeRSEy6AIfsfaADUJ0WavsP_oJVDRIvrFraH=s680-w680-h510"
+        "image": "https://lh3.googleusercontent.com/p/AF1QipMuXeRSEy6AIfsfaADUJ0WavsP_oJVDRIvrFraH=s680-w680-h510",
+        "checkin": "29-12-2024",
+        "checkout": "31-12-2024",
+        "bookedby": "John",
+        "useremail": "john@gmail.com",
+        "phone": "9876543210"
+
     },
     {
         "id": 2,
@@ -25,7 +32,12 @@ const hotels = [
         "address": "Apollo Bandar, Colaba",
         "rating": 4.8,
         "contact": "+91 22 6665 3366",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipPjR_st_vsnuJdZwzWkJ3P1ur1QdjRyNcq4VS--=s680-w680-h510"
+        "image": "https://lh3.googleusercontent.com/p/AF1QipPjR_st_vsnuJdZwzWkJ3P1ur1QdjRyNcq4VS--=s680-w680-h510",
+        "checkin": "29-12-2024",
+        "checkout": "31-12-2024",
+        "bookedby": "John",
+        "useremail": "john@gmail.com",
+        "phone": "9876543210"
     },
     {
         "id": 3,
@@ -36,6 +48,10 @@ const hotels = [
         "contact": "+91 44 2220 0000",
         "image": "https://lh3.googleusercontent.com/proxy/2YOdQuWql5MgFZmCJ5L2cp__fLizlxr3AyvqLi6DvDJNr54Wo17kSojTAPMcb_MbkklvwNKftFYB0f-z-hPLWbxW0iFLNvPzzuRWLburuyX8O9EoDwG9vNfLGLEqYD4YZWzsLGhGKZgv5ZpE0oO1i6tlK0oVkLQ=s680-w680-h510",
         "checkin": "29-12-2024",
+        "checkout": "31-12-2024",
+        "bookedby": "John",
+        "useremail": "john@gmail.com",
+        "phone": "9876543210"
     },
     {
         "id": 4,
@@ -44,7 +60,12 @@ const hotels = [
         "address": "Diplomatic Enclave, Chanakyapuri",
         "rating": 4.9,
         "contact": "+91 11 3933 1234",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipMyFampnjTQttMvO8BTEgylpimVrAbXg5sAtBuO=s680-w680-h510"
+        "image": "https://lh3.googleusercontent.com/p/AF1QipMyFampnjTQttMvO8BTEgylpimVrAbXg5sAtBuO=s680-w680-h510",
+        "checkin": "29-12-2024",
+        "checkout": "31-12-2024",
+        "bookedby": "John",
+        "useremail": "john@gmail.com",
+        "phone": "9876543210"
     },
     {
         "id": 5,
@@ -53,12 +74,17 @@ const hotels = [
         "address": "Sahodaran Ayyappan Road, Elamkulam",
         "rating": 4.5,
         "contact": "+91 484 4129999",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipNsP26P4ImwPNap7CoHs_jUO-44JasvVB9w8Dir=w287-h192-n-k-rw-no-v1"
+        "image": "https://lh3.googleusercontent.com/p/AF1QipNsP26P4ImwPNap7CoHs_jUO-44JasvVB9w8Dir=w287-h192-n-k-rw-no-v1",
+        "checkin": "29-12-2024",
+        "checkout": "31-12-2024",
+        "bookedby": "John",
+        "useremail": "john@gmail.com",
+        "phone": "9876543210"
     }
 ]
 
 
-const HotelPage = () => {
+const Bookings = () => {
 
     const [modal, setModal] = useState({ add: false, view: false, edit: false });
 
@@ -73,9 +99,16 @@ const HotelPage = () => {
         navigate(`/hotels/${id}`);
     }
 
-    const addHotel = () => {
-        navigate(`/addhotel`);
-    }
+    // menu
+
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
     // filter toggle
 
@@ -85,7 +118,7 @@ const HotelPage = () => {
         setCalendarvisible(false)
     };
 
-     // calendar toggle
+    // calendar toggle
 
     const [calendarvisible, setCalendarvisible] = useState(false)
 
@@ -95,11 +128,11 @@ const HotelPage = () => {
     }
 
     return (
-        <PageContainer title="Hotels" description="Hotels">
+        <PageContainer title="Bookings" description="Bookings">
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }} gap={2} mb={2}>
                 <Button size="small" variant={calendarvisible ? "contained" : "outlined"} color='primary' onClick={toggleCalenadar}>Calendar</Button>
                 <Button size="small" variant={filtersVisible ? "contained" : "outlined"} color='primary' onClick={toggleFilters}>Filters</Button>
-                <Button size="small" variant="outlined" color='success' onClick={() => addHotel()}>Add Hotel</Button>
+                {/* <Button size="small" variant="outlined" color='success' onClick={() => toggleModal('add')}>Add Hotel</Button> */}
             </Box>
 
             {/* Filter Box */}
@@ -166,14 +199,14 @@ const HotelPage = () => {
                     <Typography variant="h6" mb={2}>Date Filter</Typography>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={3}>
-                        <Typography variant="body1" mb={1}>From Date</Typography>
+                            <Typography variant="body1" mb={1}>From Date</Typography>
                             <input
                                 type="date"
                                 className="form-control"
                             />
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                        <Typography variant="body1" mb={1}>To Date</Typography>
+                            <Typography variant="body1" mb={1}>To Date</Typography>
                             <input
                                 type="date"
                                 className="form-control"
@@ -184,10 +217,9 @@ const HotelPage = () => {
             )}
 
 
-
             <Grid container spacing={3}>
                 <Grid item sm={12} lg={12}>
-                    <DashboardCard title="Our Hotels">
+                    <DashboardCard title="Our Bookings">
 
                         <Box sx={{ overflow: 'auto', width: { xs: '300px', sm: 'auto' } }}>
                             <Table
@@ -205,33 +237,31 @@ const HotelPage = () => {
                                         </TableCell>
                                         <TableCell>
                                             <Typography variant="subtitle2" fontWeight={600}>
-                                                Image
+                                                Hotel Image
                                             </Typography>
                                         </TableCell>
                                         <TableCell>
                                             <Typography variant="subtitle2" fontWeight={600}>
-                                                Name
+                                                Hotel Name
                                             </Typography>
                                         </TableCell>
                                         <TableCell>
                                             <Typography variant="subtitle2" fontWeight={600}>
-                                                Location
+                                                Booked By
                                             </Typography>
                                         </TableCell>
                                         <TableCell>
                                             <Typography variant="subtitle2" fontWeight={600}>
-                                                Ratings
+                                                Check In
                                             </Typography>
                                         </TableCell>
                                         <TableCell>
                                             <Typography variant="subtitle2" fontWeight={600} align='center'>
-                                                Contact
+                                                Check Out
                                             </Typography>
                                         </TableCell>
                                         <TableCell align="center">
-                                            <Typography variant="subtitle2" fontWeight={600}>
-                                                Action
-                                            </Typography>
+                                            <Typography variant="h6">Action</Typography>
                                         </TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -244,11 +274,30 @@ const HotelPage = () => {
                                                 </Typography>
                                             </TableCell>
                                             <TableCell>
-                                                <Box component="img" src={hotels.image} alt="Hotel Image" width="100px" height="auto" onClick={() => { handleNavigateToViewHotel(hotels.id) }} />
+                                                <Box component="img" src={hotels.image} alt="Hotel Image" width="100px" height="auto" />
                                             </TableCell>
                                             <TableCell>
                                                 <Typography variant="subtitle2" fontWeight={600}>
-                                                    {hotels.name}
+                                                    <Box
+                                                        sx={{
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                        }}
+                                                    >
+                                                        <Box>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {hotels.name}
+                                                            </Typography>
+                                                            <Typography
+                                                                color="textSecondary"
+                                                                sx={{
+                                                                    fontSize: "13px",
+                                                                }}
+                                                            >
+                                                                {hotels.location}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Box>
                                                 </Typography>
                                             </TableCell>
                                             <TableCell>
@@ -260,7 +309,7 @@ const HotelPage = () => {
                                                 >
                                                     <Box>
                                                         <Typography variant="subtitle2" fontWeight={600}>
-                                                            {hotels.address}
+                                                            {hotels.bookedby}
                                                         </Typography>
                                                         <Typography
                                                             color="textSecondary"
@@ -268,28 +317,53 @@ const HotelPage = () => {
                                                                 fontSize: "13px",
                                                             }}
                                                         >
-                                                            {hotels.location}
+                                                            <a>{hotels.useremail}</a>
+                                                        </Typography>
+                                                        <Typography
+                                                            color="textSecondary"
+                                                            sx={{
+                                                                fontSize: "13px",
+                                                            }}
+                                                        >
+                                                            {hotels.phone}
                                                         </Typography>
                                                     </Box>
                                                 </Box>
                                             </TableCell>
                                             <TableCell>
                                                 <Box display="flex" alignItems="center">
-                                                    <IconStar width={15} style={{ marginRight: "5px" }} />
-                                                    <Typography variant="subtitle2" fontWeight={600} fontSize={18}>
-                                                        {hotels.rating}
+                                                    <Typography variant="h6">
+                                                        {hotels.checkin}
                                                     </Typography>
                                                 </Box>
                                             </TableCell>
                                             <TableCell>
-                                                <Typography variant="h6">{hotels.contact}</Typography>
+                                                <Typography variant="h6">{hotels.checkout}</Typography>
                                             </TableCell>
-                                            <TableCell align="right">
-                                                <Box display="flex" alignItems="center" justifyContent="flex-end">
-                                                    <IconEye width={20} style={{ marginRight: "15px" }} />
-                                                    <IconEdit width={20} style={{ marginRight: "15px" }} />
-                                                    <IconTrash width={20} />
-                                                </Box>
+                                            <TableCell align="center">
+                                                <Typography variant="h6"><IconDots onClick={handleClick} /></Typography>
+                                                {/* <Button
+                                                    id="basic-button"
+                                                    aria-controls={open ? 'basic-menu' : undefined}
+                                                    aria-haspopup="true"
+                                                    aria-expanded={open ? 'true' : undefined}
+                                                    onClick={handleClick}
+                                                >
+                                                    Dashboard
+                                                </Button> */}
+                                                <Menu
+                                                    id="basic-menu"
+                                                    anchorEl={anchorEl}
+                                                    open={open}
+                                                    onClose={handleClose}
+                                                    MenuListProps={{
+                                                        'aria-labelledby': 'basic-button',
+                                                    }}
+                                                >
+                                                    <MenuItem onClick={handleClose}>Check-In</MenuItem>
+                                                    <MenuItem onClick={handleClose}>Check-Out</MenuItem>
+                                                    <MenuItem onClick={handleClose}>Cancel Booking</MenuItem>
+                                                </Menu>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -397,4 +471,4 @@ const HotelPage = () => {
     );
 };
 
-export default HotelPage;
+export default Bookings;

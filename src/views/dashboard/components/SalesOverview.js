@@ -79,18 +79,18 @@ const SalesOverview = () => {
     };
     const seriescolumnchart = [
         {
-            name: 'Eanings this month',
+            name: 'Bookings this month',
             data: [355, 390, 300, 350, 390, 180, 355, 390],
         },
         {
-            name: 'Expense this month',
+            name: 'Bookings this month',
             data: [280, 250, 325, 215, 250, 310, 280, 250],
         },
     ];
 
     return (
 
-        <DashboardCard title="Sales Overview" action={
+        <DashboardCard title="Booking Overview" action={
             <Select
                 labelId="month-dd"
                 id="month-dd"
@@ -98,9 +98,9 @@ const SalesOverview = () => {
                 size="small"
                 onChange={handleChange}
             >
-                <MenuItem value={1}>March 2023</MenuItem>
-                <MenuItem value={2}>April 2023</MenuItem>
-                <MenuItem value={3}>May 2023</MenuItem>
+                <MenuItem value={1}>Dec 2024</MenuItem>
+                <MenuItem value={2}>Nov 2024</MenuItem>
+                <MenuItem value={3}>Oct 2024</MenuItem>
             </Select>
         }>
             <Chart
