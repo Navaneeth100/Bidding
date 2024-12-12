@@ -86,7 +86,7 @@ const Settings = () => {
                 <Typography variant="body1" gutterBottom>
                     Are you sure you want to log out ? Make sure to save any unsaved changes before proceeding.
                 </Typography>
-                <Button variant="contained" color="primary" sx={{ mt: 2 }} component="a" href="/auth/login">
+                <Button variant="contained" color="primary" sx={{ mt: 2 }} component={Link} to="/auth/login">
                     Logout
                 </Button>
             </CustomTabPanel>
