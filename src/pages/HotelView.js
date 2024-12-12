@@ -15,80 +15,80 @@ import { deepPurple } from '@mui/material/colors';
 const hotels = [
     {
         "id": 1,
-        "name": "The Oberoi Udaivilas",
-        "location": "Udaipur, Rajasthan",
-        "address": "Haridasji Ki Magri",
+        "name": "TIME Moonstone Hotel Apartments",
+        "location": "Fujairah, United Arab Emirates",
+        "address": "Fujairah City Center",
         "rating": 4.9,
-        "contact": "+91 294 2433300",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipMuXeRSEy6AIfsfaADUJ0WavsP_oJVDRIvrFraH=s680-w680-h510"
+        "contact": "+971 9 203 0000",
+        "image": "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no"
     },
     {
         "id": 2,
-        "name": "Taj Mahal Palace",
-        "location": "Mumbai, Maharashtra",
-        "address": "Apollo Bandar, Colaba",
+        "name": "TIME Onyx Hotel Apartments",
+        "location": "Dubai, United Arab Emirates",
+        "address": "Al Qusais Industrial Area - Al Qusais Industrial Area 5",
         "rating": 4.8,
-        "contact": "+91 22 6665 3366",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipPjR_st_vsnuJdZwzWkJ3P1ur1QdjRyNcq4VS--=s680-w680-h510"
+        "contact": "+971 4 604 2999",
+        "image": "https://lh3.googleusercontent.com/proxy/fRmAhI1AexkpJd2S0xadJC1-LUAqp03Xn-iNTmWQ9F4-DbI2VWS7dguTHtp_2e8DGjFVbaYmFUzP3moJVp20mv9rYTmqLKjhI1PSxIs_Q-1LubN7LKhYp4EqpPxYaYKRo2X-82ETINajS5gUqHgDkYnVf14I-Bo=s680-w680-h510"
     },
     {
         "id": 3,
-        "name": "ITC Grand Chola",
-        "location": "Chennai, Tamil Nadu",
-        "address": "No 63, Mount Road, Guindy",
-        "rating": 4.7,
-        "contact": "+91 44 2220 0000",
-        "image": "https://lh3.googleusercontent.com/proxy/69Ilu49qMjZ042ky0BWyqGfwRT5z-GZ6gdYALkAKUM_-EJzPwMfnVS5npRXGpn_U7Lkz4zrpfIiOCVaJMIeUAxoRmOg8ajNhTcTQejBW_O2-GkowJ8e_NIrprA3GdorM07UqvCtcR7Kl40jM-VsGMPaRaxJdMg=s680-w680-h510"
+        "name": "TIME Moonstone Hotel Apartments",
+        "location": "Fujairah, United Arab Emirates",
+        "address": "Fujairah City Center",
+        "rating": 4.9,
+        "contact": "+971 9 203 0000",
+        "image": "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no"
     },
     {
         "id": 4,
-        "name": "Leela Palace",
-        "location": "New Delhi, Delhi",
-        "address": "Diplomatic Enclave, Chanakyapuri",
-        "rating": 4.9,
-        "contact": "+91 11 3933 1234",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipMyFampnjTQttMvO8BTEgylpimVrAbXg5sAtBuO=s680-w680-h510"
+        "name": "TIME Onyx Hotel Apartments",
+        "location": "Dubai, United Arab Emirates",
+        "address": "Al Qusais Industrial Area - Al Qusais Industrial Area 5",
+        "rating": 4.8,
+        "contact": "+971 4 604 2999",
+        "image": "https://lh3.googleusercontent.com/proxy/fRmAhI1AexkpJd2S0xadJC1-LUAqp03Xn-iNTmWQ9F4-DbI2VWS7dguTHtp_2e8DGjFVbaYmFUzP3moJVp20mv9rYTmqLKjhI1PSxIs_Q-1LubN7LKhYp4EqpPxYaYKRo2X-82ETINajS5gUqHgDkYnVf14I-Bo=s680-w680-h510"
     },
     {
         "id": 5,
-        "name": "Radisson Blu",
-        "location": "Kochi, Kerala",
-        "address": "Sahodaran Ayyappan Road, Elamkulam",
-        "rating": 4.5,
-        "contact": "+91 484 4129999",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipNsP26P4ImwPNap7CoHs_jUO-44JasvVB9w8Dir=w287-h192-n-k-rw-no-v1"
+        "name": "TIME Moonstone Hotel Apartments",
+        "location": "Fujairah, United Arab Emirates",
+        "address": "Fujairah City Center",
+        "rating": 4.9,
+        "contact": "+971 9 203 0000",
+        "image": "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no"
     }
 ]
 
 const ecoCard = [
     {
-        title: 'Boat Headphone',
+        title: 'TIME Moonstone Hotel Apartments',
         subheader: 'September 14, 2023',
-        photo: "https://cf.bstatic.com/xdata/images/hotel/max1024x768/524179649.jpg?k=bec3ef93405efa3dd41a3efd4695b88e0b54200d98c64099e73bd2e80bb50d32&o=&hp=1",
+        photo: "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no",
         salesPrice: 375,
         price: 285,
         rating: 4,
     },
     {
-        title: 'MacBook Air Pro',
+        title: 'TIME Moonstone Hotel Apartments',
         subheader: 'September 14, 2023',
-        photo: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/29/dc/25/88/swimming-pool.jpg?w=1200&h=-1&s=1",
+        photo: "https://lh3.googleusercontent.com/p/AF1QipPJZj8iOPLn-NqxR82kuX6b39G9acRjkGlWabM8=s680-w680-h510",
         salesPrice: 650,
         price: 900,
         rating: 5,
     },
     {
-        title: 'Red Valvet Dress',
+        title: 'TIME Moonstone Hotel Apartments',
         subheader: 'September 14, 2023',
-        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHaU_4zeIgqNvq3VcdTndWjlZYmPkZREv2kA&s",
+        photo: "https://lh3.googleusercontent.com/proxy/Y0SqcGvjxq13D6P1GqftgUe1sYtxLOM2mOPwXvduhxAg19tL_B8nDTT8Ge2-3WMdOISCXdv2zomSBsVkMAomKjHRuz0TvvVjoGr7zrsw2J3hN1eUt2jqZcuA0k-UNMJuyBOx_boEgDkBc4GO1hERniVM0YCHmg=s680-w680-h510",
         salesPrice: 150,
         price: 200,
         rating: 3,
     },
     {
-        title: 'Cute Soft Teddybear',
+        title: 'TIME Moonstone Hotel Apartments',
         subheader: 'September 14, 2023',
-        photo: "https://content.jdmagicbox.com/v2/comp/hyderabad/42/040p9100342/catalogue/food-exchange-novotel-hyderabad--madhapur-hyderabad-restaurants-518wi-250.jpg",
+        photo: "https://lh3.googleusercontent.com/p/AF1QipPFPJbszSL9AZSCpmeQKSmRaeJVMrdpuFSILckl=s680-w680-h510",
         salesPrice: 285,
         price: 345,
         rating: 2,

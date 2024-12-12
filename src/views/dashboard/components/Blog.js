@@ -11,36 +11,36 @@ import BlankCard from '../../../components/shared/BlankCard';
 
 const ecoCard = [
     {
-        title: 'Aman-i-khas',
+        title: 'TIME Moonstone Hotel Apartments',
         subheader: 'September 14, 2023',
-        photo: "https://www.aman.com/sites/default/files/2023-03/Aman-i-Khas-Tent-Living-Area_0.jpg",
+        photo: "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no",
         salesPrice: 2799,
         price: 3500,
         rating: 4,
     },
     {
-        title: 'The Taj Mahal Palace',
+        title: 'TIME Moonstone Hotel Apartments',
         subheader: 'September 14, 2023',
-        photo: "https://lh3.googleusercontent.com/p/AF1QipM7vWH5iIqKCGb_UVheeOKtGJsEL4fjRp1yHQrm=s680-w680-h510",
-        salesPrice: 1999,
-        price: 2499,
-        rating: 5,
-    },
-    {
-        title: 'Rambagh Palace',
-        subheader: 'September 14, 2023',
-        photo: "https://lh5.googleusercontent.com/p/AF1QipOjxPtDfff5gOnLMArHGOiAhULL8jL35fHZCKyE=w255-h174-n-k-no",
-        salesPrice: 2199,
-        price: 2400,
+        photo: "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no",
+        salesPrice: 2799,
+        price: 3500,
         rating: 4,
     },
     {
-        title: 'The Raviz Kadavu',
+        title: 'TIME Moonstone Hotel Apartments',
         subheader: 'September 14, 2023',
-        photo: "https://content.skyscnr.com/available/1637984106/1637984106_960x576.jpg",
-        salesPrice: 2099,
-        price: 2399,
-        rating: 5,
+        photo: "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no",
+        salesPrice: 2799,
+        price: 3500,
+        rating: 4,
+    },
+    {
+        title: 'TIME Moonstone Hotel Apartments',
+        subheader: 'September 14, 2023',
+        photo: "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no",
+        salesPrice: 2799,
+        price: 3500,
+        rating: 4,
     },
 ];
 
@@ -66,12 +66,12 @@ const Blog = () => {
                         <CardContent sx={{ p: 3, pt: 2 }}>
                             <Typography variant="h6">{product.title}</Typography>
                             <Stack direction="row" alignItems="center" justifyContent="space-between" mt={1}>
-                                <Stack direction="row" alignItems="center">
+                                {/* <Stack direction="row" alignItems="center">
                                     <Typography variant="h6">${product.price}</Typography>
                                     <Typography color="textSecondary" ml={1} sx={{ textDecoration: 'line-through' }}>
                                         ${product.salesPrice}
                                     </Typography>
-                                </Stack>
+                                </Stack> */}
                                 <Rating name="read-only" size="small" value={product.rating} readOnly />
                             </Stack>
                         </CardContent>

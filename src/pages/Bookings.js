@@ -12,12 +12,12 @@ import Menu from '@mui/material/Menu';
 const hotels = [
     {
         "id": 1,
-        "name": "The Oberoi Udaivilas",
-        "location": "Udaipur, Rajasthan",
-        "address": "Haridasji Ki Magri",
+        "name": "TIME Moonstone Hotel Apartments",
+        "location": "Fujairah, United Arab Emirates",
+        "address": "Fujairah City Center",
         "rating": 4.9,
-        "contact": "+91 294 2433300",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipMuXeRSEy6AIfsfaADUJ0WavsP_oJVDRIvrFraH=s680-w680-h510",
+        "contact": "+971 9 203 0000",
+        "image": "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no",
         "checkin": "29-12-2024",
         "checkout": "31-12-2024",
         "bookedby": "John",
@@ -27,12 +27,12 @@ const hotels = [
     },
     {
         "id": 2,
-        "name": "Taj Mahal Palace",
-        "location": "Mumbai, Maharashtra",
-        "address": "Apollo Bandar, Colaba",
+        "name": "TIME Onyx Hotel Apartments",
+        "location": "Dubai, United Arab Emirates",
+        "address": "Al Qusais Industrial Area - Al Qusais Industrial Area 5",
         "rating": 4.8,
-        "contact": "+91 22 6665 3366",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipPjR_st_vsnuJdZwzWkJ3P1ur1QdjRyNcq4VS--=s680-w680-h510",
+        "contact": "+971 4 604 2999",
+        "image": "https://lh3.googleusercontent.com/proxy/fRmAhI1AexkpJd2S0xadJC1-LUAqp03Xn-iNTmWQ9F4-DbI2VWS7dguTHtp_2e8DGjFVbaYmFUzP3moJVp20mv9rYTmqLKjhI1PSxIs_Q-1LubN7LKhYp4EqpPxYaYKRo2X-82ETINajS5gUqHgDkYnVf14I-Bo=s680-w680-h510",
         "checkin": "29-12-2024",
         "checkout": "31-12-2024",
         "bookedby": "John",
@@ -41,12 +41,12 @@ const hotels = [
     },
     {
         "id": 3,
-        "name": "ITC Grand Chola",
-        "location": "Chennai, Tamil Nadu",
-        "address": "No 63, Mount Road, Guindy",
-        "rating": 4.7,
-        "contact": "+91 44 2220 0000",
-        "image": "https://lh3.googleusercontent.com/proxy/2YOdQuWql5MgFZmCJ5L2cp__fLizlxr3AyvqLi6DvDJNr54Wo17kSojTAPMcb_MbkklvwNKftFYB0f-z-hPLWbxW0iFLNvPzzuRWLburuyX8O9EoDwG9vNfLGLEqYD4YZWzsLGhGKZgv5ZpE0oO1i6tlK0oVkLQ=s680-w680-h510",
+        "name": "TIME Moonstone Hotel Apartments",
+        "location": "Fujairah, United Arab Emirates",
+        "address": "Fujairah City Center",
+        "rating": 4.9,
+        "contact": "+971 9 203 0000",
+        "image": "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no",
         "checkin": "29-12-2024",
         "checkout": "31-12-2024",
         "bookedby": "John",
@@ -55,12 +55,12 @@ const hotels = [
     },
     {
         "id": 4,
-        "name": "Leela Palace",
-        "location": "New Delhi, Delhi",
-        "address": "Diplomatic Enclave, Chanakyapuri",
-        "rating": 4.9,
-        "contact": "+91 11 3933 1234",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipMyFampnjTQttMvO8BTEgylpimVrAbXg5sAtBuO=s680-w680-h510",
+        "name": "TIME Onyx Hotel Apartments",
+        "location": "Dubai, United Arab Emirates",
+        "address": "Al Qusais Industrial Area - Al Qusais Industrial Area 5",
+        "rating": 4.8,
+        "contact": "+971 4 604 2999",
+        "image": "https://lh3.googleusercontent.com/proxy/fRmAhI1AexkpJd2S0xadJC1-LUAqp03Xn-iNTmWQ9F4-DbI2VWS7dguTHtp_2e8DGjFVbaYmFUzP3moJVp20mv9rYTmqLKjhI1PSxIs_Q-1LubN7LKhYp4EqpPxYaYKRo2X-82ETINajS5gUqHgDkYnVf14I-Bo=s680-w680-h510",
         "checkin": "29-12-2024",
         "checkout": "31-12-2024",
         "bookedby": "John",
@@ -69,12 +69,12 @@ const hotels = [
     },
     {
         "id": 5,
-        "name": "Radisson Blu",
-        "location": "Kochi, Kerala",
-        "address": "Sahodaran Ayyappan Road, Elamkulam",
-        "rating": 4.5,
-        "contact": "+91 484 4129999",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipNsP26P4ImwPNap7CoHs_jUO-44JasvVB9w8Dir=w287-h192-n-k-rw-no-v1",
+        "name": "TIME Moonstone Hotel Apartments",
+        "location": "Fujairah, United Arab Emirates",
+        "address": "Fujairah City Center",
+        "rating": 4.9,
+        "contact": "+971 9 203 0000",
+        "image": "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no",
         "checkin": "29-12-2024",
         "checkout": "31-12-2024",
         "bookedby": "John",
@@ -171,9 +171,13 @@ const Bookings = () => {
                             <FormControl fullWidth>
                                 <InputLabel>Location</InputLabel>
                                 <Select label="Location">
-                                    <MenuItem value="Ooty">Ooty</MenuItem>
-                                    <MenuItem value="Kodaikanal">Kodaikanal</MenuItem>
-                                    <MenuItem value="Coorg">Coorg</MenuItem>
+                                    <MenuItem value="Abu Dhabi">Abu Dhabi</MenuItem>
+                                    <MenuItem value="Dubai">Dubai</MenuItem>
+                                    <MenuItem value="Sharjah">Sharjah</MenuItem>
+                                    <MenuItem value="Fujairah">Fujairah</MenuItem>
+                                    <MenuItem value="Ajman">Ajman</MenuItem>
+                                    <MenuItem value="Umm Al Quwain">Umm Al Quwain</MenuItem>
+                                    <MenuItem value="Ras Al Khaimah">Ras Al Khaimah</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -186,7 +190,7 @@ const Bookings = () => {
                                     <MenuItem value="Parking">Parking</MenuItem>
                                     <MenuItem value="Breakfast">Breakfast</MenuItem>
                                     <MenuItem value="Gym">Gym</MenuItem>
-                                    <MenuItem value="Breakfast">Breakfast</MenuItem>
+                                    {/* <MenuItem value="Breakfast">Breakfast</MenuItem> */}
                                 </Select>
                             </FormControl>
                         </Grid>
