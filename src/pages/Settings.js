@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import { Switch, Typography, Button, Link } from '@mui/material';
+import { Switch, Typography, Button, } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 
 function CustomTabPanel(props) {
