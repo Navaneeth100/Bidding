@@ -3,7 +3,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
 import ProductPerformance from '../views/dashboard/components/ProductPerformance';
-import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton, Badge } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton, Badge, Paper } from '@mui/material';
 import { IconStar, IconEye, IconEdit, IconTrash } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -163,6 +163,12 @@ const AddHotel = () => {
     });
 
 
+    const [categories, setCategories] = useState([]);
+    const [facilities, setfacilities] = useState([]);
+    const [tags, settags] = useState([])
+    const [roomList, setRoomList] = useState([{}])
+
+
     return (
         <PageContainer title="Hotels" description="Hotels">
             <Grid container spacing={3}>
@@ -293,7 +299,7 @@ const AddHotel = () => {
                                                 </Typography>
                                                 <Button
                                                     size="small"
-                                                    style={{color:"red"}}
+                                                    style={{ color: "red" }}
                                                     onClick={() => handleRemoveFile(file)}
                                                 >
                                                     Remove
@@ -315,7 +321,7 @@ const AddHotel = () => {
                                 </Typography>
                                 <Grid container spacing={2}>
                                     {/* Dropdowns */}
-                                    <Grid item xs={12} sm={6}>
+                                    {/* <Grid item xs={12} sm={6}>
                                         <FormControl fullWidth>
                                             <InputLabel>Category</InputLabel>
                                             <Select label="Category">
@@ -325,7 +331,7 @@ const AddHotel = () => {
                                                 <MenuItem value="Resort">Resort</MenuItem>
                                             </Select>
                                         </FormControl>
-                                    </Grid>
+                                    </Grid> */}
 
                                     {/* Text Inputs */}
                                     {[
@@ -348,6 +354,185 @@ const AddHotel = () => {
                                 </Grid>
                             </form>
                         </Box>
+
+                        {/* Category Details Form */}
+
+                        <Box sx={{ mt: 4 }}>
+                            <form>
+                                <Typography variant="h5" className='mb-3' gutterBottom>
+                                    Category and Facilities
+                                </Typography>
+                                <Grid container spacing={2}>
+                                    {/* Dropdowns */}
+                                    <Grid item xs={12} sm={6}>
+                                        <FormControl fullWidth>
+                                            <InputLabel>Category</InputLabel>
+                                            <Select
+                                                multiple
+                                                value={categories}
+                                                onChange={(e) => { setCategories(e.target.value) }}
+                                                renderValue={(selected) => selected.join(', ')}
+                                                label="Category">
+                                                <MenuItem value="Luxury">Luxury</MenuItem>
+                                                <MenuItem value="Budget">Budget</MenuItem>
+                                                <MenuItem value="Business">Business</MenuItem>
+                                                <MenuItem value="Resort">Resort</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid item xs={12} sm={6}>
+                                        <FormControl fullWidth>
+                                            <InputLabel>Facilities</InputLabel>
+                                            <Select
+                                                multiple
+                                                value={facilities}
+                                                onChange={(e) => { setfacilities(e.target.value) }}
+                                                renderValue={(selected) => selected.join(', ')}
+                                                label="Facilities">
+                                                <MenuItem value="Breakfast">Breakfast</MenuItem>
+                                                <MenuItem value="Parking">Parking</MenuItem>
+                                                <MenuItem value="Pool">Pool</MenuItem>
+                                                <MenuItem value="Spa">Spa</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+
+                                    <Grid item xs={12} sm={6}>
+                                        <FormControl fullWidth>
+                                            <InputLabel>Tags</InputLabel>
+                                            <Select
+                                                multiple
+                                                value={tags}
+                                                onChange={(e) => { settags(e.target.value) }}
+                                                renderValue={(selected) => selected.join(', ')}
+                                                label="Tags">
+                                                <MenuItem value="">Breakfast</MenuItem>
+                                                <MenuItem value="Parking">Parking</MenuItem>
+                                                <MenuItem value="Pool">Pool</MenuItem>
+                                                <MenuItem value="Spa">Spa</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+
+                                </Grid>
+                            </form>
+                        </Box>
+
+                        {/* Add Room Form */}
+
+                        <Box sx={{ mt: 4 }}>
+                            <Grid container alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                                <Typography variant="h5" gutterBottom>
+                                    Room Details
+                                </Typography>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => setRoomList([...roomList, {}])}
+                                >
+                                    Add Rooms
+                                </Button>
+                            </Grid>
+
+                            <Paper elevation={2} sx={{ p: 2 }}>
+                                <Grid container spacing={2}>
+                                    {roomList.map((_, index) => (
+                                        <Grid key={index} item xs={12} sm={6} md={4}>
+                                            {/* Room Details Card */}
+                                            <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: '8px' }}>
+                                                <Typography variant="subtitle1" gutterBottom>
+                                                    Room {index + 1}
+                                                </Typography>
+
+                                                <Grid container spacing={2}>
+                                                    <Grid item xs={12} sm={6}>
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Room No"
+                                                            variant="outlined"
+                                                            margin="normal"
+                                                            name={`room_no_${index}`}
+                                                        />
+                                                    </Grid>
+
+                                                    <Grid item xs={12} sm={6}>
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Room Area (sq ft)"
+                                                            variant="outlined"
+                                                            margin="normal"
+                                                            name={`room_area_${index}`}
+                                                        />
+                                                    </Grid>
+
+                                                    <Grid item xs={12} sm={3}>
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Room Type"
+                                                            variant="outlined"
+                                                            margin="normal"
+                                                            name={`room_type_${index}`}
+                                                        />
+                                                    </Grid>
+
+                                                    <Grid item xs={12} sm={3}>
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Floor"
+                                                            variant="outlined"
+                                                            margin="normal"
+                                                            name={`floor_${index}`}
+                                                        />
+                                                    </Grid>
+
+                                                    <Grid item xs={12} sm={3}>
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Beds"
+                                                            variant="outlined"
+                                                            margin="normal"
+                                                            name={`beds_${index}`}
+                                                        />
+                                                    </Grid>
+
+                                                    <Grid item xs={12} sm={3}>
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Bathrooms"
+                                                            variant="outlined"
+                                                            margin="normal"
+                                                            name={`bathrooms_${index}`}
+                                                        />
+                                                    </Grid>
+
+                                                    <Grid item xs={12} sm={3}>
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Guests"
+                                                            variant="outlined"
+                                                            margin="normal"
+                                                            name={`guests_${index}`}
+                                                        />
+                                                    </Grid>
+
+                                                    <Grid item xs={12} sm={3}>
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Room Price"
+                                                            variant="outlined"
+                                                            margin="normal"
+                                                            name={`room_price_${index}`}
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                            </Box>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </Paper>
+                        </Box>
+
 
                         {/* Owner Details Form */}
 
