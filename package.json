@@ -17,6 +17,7 @@
     "@mui/system": "^5.14.11",
     "@svgr/rollup": "^8.1.0",
     "@tabler/icons-react": "^2.35.0",
+    "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
     "lodash": "^4.17.21",
     "prop-types": "^15.8.1",
