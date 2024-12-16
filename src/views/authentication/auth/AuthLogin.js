@@ -8,21 +8,21 @@ import {
     Stack,
     Checkbox
 } from '@mui/material';
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
 import { url } from '../../../../mainurl';
-
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import axios from 'axios';
 
 const AuthLogin = ({ title, subtitle, subtext }) => {
 
-    const [formData, setFormData] = useState({ email: 'stay4hotel@gmail.com', password: 'stayadmin' });
+    const [formData, setFormData] = useState({ email: '', password: '' });
 
     const handleChange = (e) => {
-        const { id, value } = e.target;
-        setFormData({ ...formData, [id]: value });
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
+
+    const navigate = useNavigate()
 
     const handleSubmit = async () => {
         try {
@@ -34,16 +34,16 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
                     'Content-Type': 'application/json',
                 },
             });
-            console.log('Login successful:', response.data);
-            alert('Login successful!');
+            if (response.status === 200) {
+                const data = response.data;
+                alert('Login successful!');
+                localStorage.setItem('authTokens', JSON.stringify(data));
+                navigate("/dashboard")
+            }
         } catch (err) {
-            console.error('Error:', err.response?.data || err.message);
-            alert('Login failed. Please check your credentials.');
+            alert(err.response.data.error);
         }
     };
-
-
-    console.log(formData);
 
     return (
         <>
@@ -58,13 +58,13 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
             <Stack>
                 <Box>
                     <Typography variant="subtitle1"
-                        fontWeight={600} component="label" htmlFor='username' mb="5px" value={formData.username} onChange={() => { handleChange(e) }}>Username</Typography>
-                    <CustomTextField id="username" variant="outlined" fullWidth />
+                        fontWeight={600} component="label" htmlFor='email' mb="5px">Email</Typography>
+                    <CustomTextField id="email" name="email" variant="outlined" fullWidth onChange={(e) => { handleChange(e) }} />
                 </Box>
                 <Box mt="25px">
                     <Typography variant="subtitle1"
-                        fontWeight={600} component="label" htmlFor='password' mb="5px" value={formData.password} onChange={() => { handleChange(e) }} >Password</Typography>
-                    <CustomTextField id="password" type="password" variant="outlined" fullWidth />
+                        fontWeight={600} component="label" htmlFor='password' mb="5px">Password</Typography>
+                    <CustomTextField id="password" name="password" type="password" variant="outlined" fullWidth onChange={(e) => { handleChange(e) }} />
                 </Box>
                 <Stack justifyContent="space-between" direction="row" alignItems="center" my={2}>
                     <FormGroup>
