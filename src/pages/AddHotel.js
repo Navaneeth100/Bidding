@@ -261,8 +261,8 @@ const AddHotel = () => {
                                                         <label htmlFor="file-upload" style={{ cursor: 'pointer', display: 'inline-block' }}>
                                                             <img
                                                                 src={imageSrc}
-                                                                width="200"
-                                                                height="200"
+                                                                width="100%"
+                                                                height="100%"
                                                                 alt="file"
                                                                 className="object-cover w-full h-full rounded-lg"
                                                             />
@@ -304,41 +304,11 @@ const AddHotel = () => {
                                                     </Grid>
                                                 </Grid>
 
-                                                {/* Hotel Specifications */}
-
-                                                <Grid container spacing={2} sx={{ mt: 3, textAlign: 'center' }}>
-                                                    {[
-                                                        { label: 'Area', placeholder: "eg: 1000sqft" },
-                                                        { label: 'Floor', placeholder: "eg: 3" },
-                                                        { label: 'Rooms', placeholder: "eg: 5" },
-                                                        { label: 'Beds', placeholder: "eg: 5" },
-                                                        { label: 'Bathrooms', placeholder: "eg: 5" },
-                                                        { label: 'Guests', placeholder: "eg: 1 - 4" },
-                                                    ].map((spec, index) => (
-                                                        <Grid item xs={6} sm={4} md={2} key={index}>
-                                                            <Typography variant="body2" color="textSecondary" fontWeight="bold">
-                                                                {spec.label.toUpperCase()}
-                                                            </Typography>
-                                                            <Typography variant="body1" fontWeight="bold" className='mt-2' classes="text-center">
-                                                                <TextField
-                                                                    label=""
-                                                                    required
-                                                                    variant="outlined"
-                                                                    placeholder={spec.placeholder}
-                                                                    fullWidth
-                                                                    sx={{ mb: 2 }}
-                                                                    onChange={(e) => handleChange('name', e.target.value)}
-                                                                />
-                                                            </Typography>
-                                                        </Grid>
-                                                    ))}
-                                                </Grid>
-
 
                                                 {/* Hotel Image Upload Section */}
 
-                                                <Grid container spacing={2} sx={{ mt: 2 }}>
-                                                    <Grid item lg={12} sm={12}>
+                                                <Grid container spacing={1} sx={{ mt: 2 }}>
+                                                    <Grid item xs={12} sm={12}>
                                                         <Typography variant="h6" gutterBottom>
                                                             Upload Multiple Images
                                                         </Typography>
@@ -510,85 +480,182 @@ const AddHotel = () => {
                                                                         <Grid key={index} item xs={12} sm={6} md={4}>
                                                                             {/* Room Details Card */}
                                                                             <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: '8px' }}>
-                                                                                <Typography variant="subtitle1" gutterBottom>
+                                                                                <Typography variant="subtitle1" className='mb-3' gutterBottom>
                                                                                     Room {index + 1}
                                                                                 </Typography>
 
                                                                                 <Grid container spacing={2}>
-                                                                                    <Grid item xs={12} sm={6}>
+                                                                                    <Grid item xs={12} sm={12}>
+                                                                                        <FormControl fullWidth>
+                                                                                            <InputLabel>Category</InputLabel>
+                                                                                            <Select
+                                                                                                multiple
+                                                                                                value={categories}
+                                                                                                onChange={(e) => { setCategories(e.target.value) }}
+                                                                                                renderValue={(selected) => selected.join(', ')}
+                                                                                                label="Category">
+                                                                                                <MenuItem value="Luxury">Luxury</MenuItem>
+                                                                                                <MenuItem value="Budget">Budget</MenuItem>
+                                                                                                <MenuItem value="Business">Business</MenuItem>
+                                                                                                <MenuItem value="Resort">Resort</MenuItem>
+                                                                                            </Select>
+                                                                                        </FormControl>
+                                                                                    </Grid>
+
+                                                                                    <Grid item xs={12} sm={12}>
+                                                                                        <FormControl fullWidth>
+                                                                                            <InputLabel>Facilities</InputLabel>
+                                                                                            <Select
+                                                                                                multiple
+                                                                                                value={facilities}
+                                                                                                onChange={(e) => { setfacilities(e.target.value) }}
+                                                                                                renderValue={(selected) => selected.join(', ')}
+                                                                                                label="Facilities">
+                                                                                                <MenuItem value="Breakfast">Breakfast</MenuItem>
+                                                                                                <MenuItem value="Parking">Parking</MenuItem>
+                                                                                                <MenuItem value="Pool">Pool</MenuItem>
+                                                                                                <MenuItem value="Spa">Spa</MenuItem>
+                                                                                            </Select>
+                                                                                        </FormControl>
+                                                                                    </Grid>
+
+                                                                                    <Grid item xs={12} sm={12}>
+                                                                                        <FormControl fullWidth>
+                                                                                            <InputLabel>Tags</InputLabel>
+                                                                                            <Select
+                                                                                                multiple
+                                                                                                value={tags}
+                                                                                                onChange={(e) => { settags(e.target.value) }}
+                                                                                                renderValue={(selected) => selected.join(', ')}
+                                                                                                label="Tags">
+                                                                                                <MenuItem value="">Breakfast</MenuItem>
+                                                                                                <MenuItem value="Parking">Parking</MenuItem>
+                                                                                                <MenuItem value="Pool">Pool</MenuItem>
+                                                                                                <MenuItem value="Spa">Spa</MenuItem>
+                                                                                            </Select>
+                                                                                        </FormControl>
+                                                                                    </Grid>
+                                                                                    <Grid item sm={12}>
+                                                                                        {/* <Typography variant="h6" gutterBottom>
+                                                                                            Room Images
+                                                                                        </Typography> */}
+                                                                                        <Box
+                                                                                            {...getRootProps()}
+                                                                                            sx={{
+                                                                                                border: "2px dashed #ccc",
+                                                                                                borderRadius: "4px",
+                                                                                                padding: "20px",
+                                                                                                textAlign: "center",
+                                                                                                cursor: "pointer",
+                                                                                                backgroundColor: isDragActive ? "#f0f0f0" : "transparent",
+                                                                                                marginTop: "10px"
+                                                                                            }}
+                                                                                        >
+                                                                                            <input {...getInputProps()} />
+                                                                                            <Typography variant="body1" color="textSecondary">
+                                                                                                {isDragActive ? "Drop files here..." : "Drag and drop files here or click to upload"}
+                                                                                            </Typography>
+                                                                                            <Button variant="contained" sx={{ mt: 2 }}>
+                                                                                                Select Files
+                                                                                            </Button>
+                                                                                        </Box>
+                                                                                        <Grid container spacing={2} style={{ marginTop: "15px", textAlign: "center" }}>
+                                                                                            {files.map((file, index) => (
+                                                                                                <Grid item key={index} xs={12} sm={3} md={3}>
+                                                                                                    <Card>
+                                                                                                        <CardMedia
+                                                                                                            component="img"
+                                                                                                            width="100%"
+                                                                                                            height="100"
+                                                                                                            image={file.preview}
+                                                                                                            alt={file.name}
+                                                                                                        />
+                                                                                                        <Typography variant="body2" align="center" gutterBottom>
+                                                                                                            {file.name}
+                                                                                                        </Typography>
+                                                                                                        <Button
+                                                                                                            size="small"
+                                                                                                            style={{ color: "red" }}
+                                                                                                            onClick={() => handleRemoveFile(file)}
+                                                                                                        >
+                                                                                                            Remove
+                                                                                                        </Button>
+                                                                                                    </Card>
+                                                                                                </Grid>
+                                                                                            ))}
+                                                                                        </Grid>
+                                                                                    </Grid>
+                                                                                    <Grid item xs={4}>
                                                                                         <TextField
                                                                                             fullWidth
                                                                                             label="Room No"
+                                                                                            placeholder='eg: 123'
                                                                                             variant="outlined"
                                                                                             margin="normal"
                                                                                             name={`room_no_${index}`}
                                                                                         />
                                                                                     </Grid>
 
-                                                                                    <Grid item xs={12} sm={6}>
+                                                                                    <Grid item xs={4}>
                                                                                         <TextField
                                                                                             fullWidth
-                                                                                            label="Room Area (sq ft)"
+                                                                                            label="Room Area"
+                                                                                            placeholder='eg: in sq ft'
                                                                                             variant="outlined"
                                                                                             margin="normal"
                                                                                             name={`room_area_${index}`}
                                                                                         />
                                                                                     </Grid>
 
-                                                                                    <Grid item xs={12} sm={3}>
-                                                                                        <TextField
-                                                                                            fullWidth
-                                                                                            label="Room Type"
-                                                                                            variant="outlined"
-                                                                                            margin="normal"
-                                                                                            name={`room_type_${index}`}
-                                                                                        />
-                                                                                    </Grid>
-
-                                                                                    <Grid item xs={12} sm={3}>
+                                                                                    <Grid item xs={4}>
                                                                                         <TextField
                                                                                             fullWidth
                                                                                             label="Floor"
+                                                                                            placeholder='eg: 1'
                                                                                             variant="outlined"
                                                                                             margin="normal"
                                                                                             name={`floor_${index}`}
                                                                                         />
                                                                                     </Grid>
 
-                                                                                    <Grid item xs={12} sm={3}>
+                                                                                    <Grid item xs={4}>
                                                                                         <TextField
                                                                                             fullWidth
                                                                                             label="Beds"
+                                                                                            placeholder='eg: 2'
                                                                                             variant="outlined"
                                                                                             margin="normal"
                                                                                             name={`beds_${index}`}
                                                                                         />
                                                                                     </Grid>
 
-                                                                                    <Grid item xs={12} sm={3}>
+                                                                                    <Grid item xs={4}>
                                                                                         <TextField
                                                                                             fullWidth
                                                                                             label="Bathrooms"
+                                                                                             placeholder='eg: 2'
                                                                                             variant="outlined"
                                                                                             margin="normal"
                                                                                             name={`bathrooms_${index}`}
                                                                                         />
                                                                                     </Grid>
 
-                                                                                    <Grid item xs={12} sm={3}>
+                                                                                    <Grid item xs={4}>
                                                                                         <TextField
                                                                                             fullWidth
                                                                                             label="Guests"
                                                                                             variant="outlined"
+                                                                                            placeholder='eg: 1 - 5'
                                                                                             margin="normal"
                                                                                             name={`guests_${index}`}
                                                                                         />
                                                                                     </Grid>
 
-                                                                                    <Grid item xs={12} sm={3}>
+                                                                                    <Grid item xs={4}>
                                                                                         <TextField
                                                                                             fullWidth
                                                                                             label="Room Price"
+                                                                                            placeholder='eg: $$$'
                                                                                             variant="outlined"
                                                                                             margin="normal"
                                                                                             name={`room_price_${index}`}

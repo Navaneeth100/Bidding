@@ -1,5 +1,6 @@
 import {
-  IconAperture, IconCopy, IconLayoutDashboard, IconLogin, IconMoodHappy, IconTypography, IconUserPlus, IconBuildingSkyscraper,IconSettings
+  IconAperture, IconCopy, IconLayoutDashboard, IconLogin, IconMoodHappy, IconTypography, IconUserPlus, IconBuildingSkyscraper,IconSettings,
+  IconList
 } from '@tabler/icons-react';
 
 import { uniqueId } from 'lodash';
@@ -39,6 +40,12 @@ const Menuitems = [
   {
     navlabel: true,
     subheader: 'My Settings',
+  },
+  {
+    id: uniqueId(),
+    title: 'Category',
+    icon: IconList,
+    href: '/category',
   },
   {
     id: uniqueId(),

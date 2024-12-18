@@ -20,6 +20,7 @@ const HotelView= Loadable(lazy(() => import('../pages/HotelView')));
 const HotelAdd= Loadable(lazy(() => import('../pages/AddHotel')));
 const Booking= Loadable(lazy(() => import('../pages/Bookings')));
 const Settings= Loadable(lazy(() => import('../pages/Settings')));
+const Category= Loadable(lazy(() => import('../pages/Category')));
 
 const Router = [
   {
@@ -34,6 +35,7 @@ const Router = [
       { path: '/hotels/:id', exact: true, element: <HotelView /> },
       { path: '/bookings', exact: true, element: <Booking /> },
       { path: '/settings', exact: true, element: <Settings /> },
+      { path: '/category', exact: true, element: <Category /> },
       // { path: '/icons', exact: true, element: <Icons /> },
       // { path: '/ui/typography', exact: true, element: <TypographyPage /> },
       // { path: '/ui/shadow', exact: true, element: <Shadow /> },
