@@ -15,12 +15,13 @@ const Shadow = Loadable(lazy(() => import('../views/utilities/Shadow')))
 const Error = Loadable(lazy(() => import('../views/authentication/Error')));
 const Register = Loadable(lazy(() => import('../views/authentication/Register')));
 const Login = Loadable(lazy(() => import('../views/authentication/Login')));
-const Hotels= Loadable(lazy(() => import('../pages/Hotels')));
-const HotelView= Loadable(lazy(() => import('../pages/HotelView')));
-const HotelAdd= Loadable(lazy(() => import('../pages/AddHotel')));
-const Booking= Loadable(lazy(() => import('../pages/Bookings')));
-const Settings= Loadable(lazy(() => import('../pages/Settings')));
-const Category= Loadable(lazy(() => import('../pages/Category')));
+const Hotels = Loadable(lazy(() => import('../pages/Hotels')));
+const HotelView = Loadable(lazy(() => import('../pages/HotelView')));
+const HotelAdd = Loadable(lazy(() => import('../pages/AddHotel')));
+const Booking = Loadable(lazy(() => import('../pages/Bookings')));
+const Settings = Loadable(lazy(() => import('../pages/Settings')));
+const Category = Loadable(lazy(() => import('../pages/Category')));
+const Facilities = Loadable(lazy(() => import('../pages/Facilities')));
 
 const Router = [
   {
@@ -36,6 +37,7 @@ const Router = [
       { path: '/bookings', exact: true, element: <Booking /> },
       { path: '/settings', exact: true, element: <Settings /> },
       { path: '/category', exact: true, element: <Category /> },
+      { path: '/facilities', exact: true, element: <Facilities /> },
       // { path: '/icons', exact: true, element: <Icons /> },
       // { path: '/ui/typography', exact: true, element: <TypographyPage /> },
       // { path: '/ui/shadow', exact: true, element: <Shadow /> },

@@ -5,14 +5,13 @@ import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
 import ProductPerformance from '../views/dashboard/components/ProductPerformance';
 import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton } from '@mui/material';
-import { IconStar, IconEye, IconEdit, IconTrash, IconAlertCircle } from '@tabler/icons-react';
+import { IconStar, IconEye, IconEdit, IconTrash, IconAlertCircleFilled } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { url } from '../../mainurl';
 import axios from 'axios';
-import { fontSize } from '@mui/system';
 
 
-const Category = () => {
+const Facilities = () => {
 
     const [modal, setModal] = useState({ add: false, view: false, edit: false, delete: false });
 
@@ -43,20 +42,20 @@ const Category = () => {
     let tokenStr = String(authTokens.access);
 
 
-    // get category
+    // get facilities
 
-    const [categoryList, setcategoryList] = useState([])
-    const [loading, setLoading] = useState(false);
+    const [facilitiesList, setfacilitiesList] = useState([])
+    const [loading, setLoading] = useState(false)
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [nextPage, setNextPage] = useState(null);
     const [prevPage, setPrevPage] = useState(null);
     const pageSize = 10;
 
-    const fetchCategory = (page = 1) => {
+    const fetchFacilities = (page = 1) => {
         setLoading(true);
         axios
-            .get(`${url}/hotel/room-categories/?page=${page}&page_size=${pageSize}`, {
+            .get(`${url}/hotel/facilities/?page=${page}&page_size=${pageSize}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -64,12 +63,12 @@ const Category = () => {
                 withCredentials: false,
             })
             .then((res) => {
-                setcategoryList(res.data.results);
+                setfacilitiesList(res.data.results);
                 setCurrentPage(page);
                 setTotalPages(Math.ceil(res.data.count / pageSize));
                 setNextPage(res.data.next);
                 setPrevPage(res.data.previous);
-                setLoading(false)
+                setLoading(false);
             })
             .catch((error) => {
                 let refresh = String(authTokens.refresh);
@@ -81,9 +80,11 @@ const Category = () => {
                         Authorization: `Bearer ${res.data.access}`,
                     };
                     axios
-                        .get(`${url}/hotel/room-categories/?page=${page}&page_size=${pageSize}`, { headers: new_headers })
+                        .get(`${url}/hotel/facilities/?page=${page}&page_size=${pageSize}`, {
+                            headers: new_headers,
+                        })
                         .then((res) => {
-                            setcategoryList(res.data.results);
+                            setfacilitiesList(res.data.results);
                             setCurrentPage(page);
                             setTotalPages(Math.ceil(res.data.count / pageSize));
                             setNextPage(res.data.next);
@@ -97,7 +98,7 @@ const Category = () => {
     // pagination
 
     useEffect(() => {
-        fetchCategory(currentPage);
+        fetchFacilities(currentPage);
     }, [currentPage]);
 
     // SN Handler
@@ -115,8 +116,7 @@ const Category = () => {
         }
     };
 
-
-    // Add Category 
+    // Add Facilities 
 
 
     const [formData, setFormData] = useState([])
@@ -124,12 +124,11 @@ const Category = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         let submitData = {
-            category_name: formData.category_name,
-            description: formData.description,
+            name: formData.name,
         }
 
         try {
-            const response = await axios.post(`${url}/hotel/room-categories/`, submitData, {
+            const response = await axios.post(`${url}/hotel/facilities/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -137,26 +136,25 @@ const Category = () => {
                 withCredentials: false,
             });
             toggleModal('add')
-            fetchCategory()
+            fetchFacilities()
         } catch (error) {
             console.error('Error:', error);
         } finally {
         }
     };
 
-    //  Edit Category
+    //  Edit Facilities
 
     const [editData, setEditData] = useState([])
 
     const handleEdit = async (event) => {
         event.preventDefault();
         let submitData = {
-            category_name: editData.category_name,
-            description: editData.description,
+            name: editData.name,
         };
 
         try {
-            const response = await axios.put(`${url}/hotel/room-categories/${editData.id}/`, submitData, {
+            const response = await axios.put(`${url}/hotel/facilities/${editData.id}/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -164,7 +162,7 @@ const Category = () => {
                 withCredentials: false,
             });
             toggleModal('edit');
-            fetchCategory();
+            fetchFacilities();
         } catch (error) {
             console.error('Error:', error);
         } finally {
@@ -172,13 +170,13 @@ const Category = () => {
     };
 
 
-    // Delete Category
+    // Delete Facilities
 
     const [deleteData, setDeleteData] = useState([])
 
     const handleDelete = async (id) => {
         try {
-            const response = await axios.delete(`${url}/hotel/room-categories/${id}/`, {
+            const response = await axios.delete(`${url}/hotel/facilities/${id}/`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -186,7 +184,7 @@ const Category = () => {
                 withCredentials: false,
             });
             toggleModal('delete')
-            fetchCategory();
+            fetchFacilities();
         } catch (error) {
             console.error('Error:', error);
         }
@@ -194,11 +192,11 @@ const Category = () => {
 
 
     return (
-        <PageContainer title="Category" description="Category">
+        <PageContainer title="Facilities" description="Facilities">
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }} gap={2} mb={2}>
                 {/* <Button size="small" variant={calendarvisible ? "contained" : "outlined"} color='primary' onClick={toggleCalenadar}>Calendar</Button> */}
                 {/* <Button size="small" variant={filtersVisible ? "contained" : "outlined"} color='primary' onClick={toggleFilters}>Filters</Button> */}
-                <Button size="small" variant="outlined" color='success' onClick={() => toggleModal('add')}>Add Category</Button>
+                <Button size="small" variant="outlined" color='success' onClick={() => toggleModal('add')}>Add Facilities</Button>
             </Box>
 
             {/* Filter Box */}
@@ -207,7 +205,7 @@ const Category = () => {
                 <Box sx={{ border: '1px solid #ddd', borderRadius: '8px', p: 2, bgcolor: 'background.paper', mb: 3 }}>
                     <Typography variant="h6" mb={2}>Filter By</Typography>
                     <Grid container spacing={3}>
-                        {/* Category Filter */}
+                        {/* Facilities Filter */}
                         <Grid item xs={12} sm={3}>
                             <FormControl fullWidth>
                                 <InputLabel>Category</InputLabel>
@@ -248,11 +246,11 @@ const Category = () => {
                             </FormControl>
                         </Grid>
 
-                        {/* Category Filter */}
+                        {/* Facilities Filter */}
                         <Grid item xs={12} sm={3}>
                             <FormControl fullWidth>
                                 <InputLabel>Facilities</InputLabel>
-                                <Select label="Category">
+                                <Select label="Facilities">
                                     <MenuItem value="Parking">Parking</MenuItem>
                                     <MenuItem value="Breakfast">Breakfast</MenuItem>
                                     <MenuItem value="Gym">Gym</MenuItem>
@@ -289,10 +287,10 @@ const Category = () => {
 
 
             <Grid container spacing={3}>
-                <Grid item sm={12} lg={12}>
-                    <DashboardCard title="Our Category">
+                <Grid item sm={12}>
+                    <DashboardCard title="Our Facilities">
 
-                        <Box sx={{ overflowY: 'auto', width: '100%', height: '630px' }}>
+                        <Box sx={{ overflowY: 'auto', width: '100%', height: '765px' }}>
                             <Table
                                 aria-label="simple table"
                                 sx={{
@@ -308,12 +306,7 @@ const Category = () => {
                                         </TableCell>
                                         <TableCell align='center'>
                                             <Typography variant="subtitle2" fontWeight={600}>
-                                                Category Name
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell align='center'>
-                                            <Typography variant="subtitle2" fontWeight={600}>
-                                                Description
+                                                Facilities
                                             </Typography>
                                         </TableCell>
                                         <TableCell align="center">
@@ -337,22 +330,17 @@ const Category = () => {
                                                 </Box>
                                             </TableCell>
                                         </TableRow>
-                                    ) : categoryList && categoryList.length > 0 ? (
-                                        categoryList.map((item, index) => (
+                                    ) : facilitiesList && facilitiesList.length > 0 ? (
+                                        facilitiesList.map((item, index) => (
                                             <TableRow key={item.id}>
                                                 <TableCell align='center'>
                                                     <Typography variant="subtitle2" fontWeight={600}>
-                                                        {index + 1}
+                                                        {calculateSN(index, currentPage, pageSize)}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     <Typography variant="subtitle2" fontWeight={600}>
-                                                        {item.category_name}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell align="center">
-                                                    <Typography variant="subtitle2" fontWeight={600}>
-                                                        {item.description}
+                                                        {item.name}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell align="center">
@@ -436,7 +424,7 @@ const Category = () => {
                 sx={{ padding: 4 }}
             >
                 <DialogTitle sx={{ m: 0, p: 2, position: 'relative' }} id="customized-dialog-title">
-                    Add Category
+                    Add Facilities
                     <IconButton aria-label="close" onClick={() => toggleModal('add')} sx={{ position: 'absolute', right: 8, top: 8 }}>x</IconButton>
                 </DialogTitle>
 
@@ -445,23 +433,12 @@ const Category = () => {
                         <Grid container spacing={3}>
                             <Grid item md={12} xs={12}>
                                 <TextField
-                                    label="Category Name"
+                                    label="Facilities"
                                     variant="outlined"
                                     fullWidth
-                                    placeholder="Enter Category Name"
+                                    placeholder="Enter Facilities"
                                     margin="normal"
-                                    onChange={(e) => { setFormData({ ...formData, category_name: e.target.value }) }}
-                                />
-                            </Grid>
-                            <Grid item md={12} xs={12}>
-                                <TextField
-                                    label="Description"
-                                    variant="outlined"
-                                    fullWidth
-                                    multiline
-                                    rows={3}
-                                    placeholder="Enter Description"
-                                    onChange={(e) => { setFormData({ ...formData, description: e.target.value }) }}
+                                    onChange={(e) => { setFormData({ ...formData, name: e.target.value }) }}
                                 />
                             </Grid>
                         </Grid>
@@ -489,7 +466,7 @@ const Category = () => {
                 sx={{ padding: 4 }}
             >
                 <DialogTitle sx={{ m: 0, p: 2, position: 'relative' }} id="customized-dialog-title">
-                    Edit Category
+                    Edit Facilities
                     <IconButton aria-label="close" onClick={() => toggleModal('edit')} sx={{ position: 'absolute', right: 8, top: 8 }}>x</IconButton>
                 </DialogTitle>
 
@@ -498,24 +475,13 @@ const Category = () => {
                         <Grid container spacing={3}>
                             <Grid item md={12} xs={12}>
                                 <TextField
-                                    label="Category Name"
+                                    label="Facilities"
                                     variant="outlined"
                                     fullWidth
-                                    placeholder="Enter Category Name"
-                                    defaultValue={editData.category_name}
+                                    placeholder="Enter Facilities"
+                                    defaultValue={editData.name}
                                     margin="normal"
-                                    onChange={(e) => { setEditData({ ...editData, category_name: e.target.value }) }}
-                                />
-                            </Grid>
-                            <Grid item md={12} xs={12}>
-                                <TextField
-                                    label="Description"
-                                    variant="outlined"
-                                    fullWidth
-                                    multiline
-                                    rows={3}
-                                    defaultValue={editData.description}
-                                    onChange={(e) => { setEditData({ ...editData, description: e.target.value }) }}
+                                    onChange={(e) => { setEditData({ ...editData, name: e.target.value }) }}
                                 />
                             </Grid>
                         </Grid>
@@ -540,10 +506,10 @@ const Category = () => {
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
                 PaperProps={{ style: { borderRadius: '15px', padding: '16px', maxWidth: '350px' } }}>
-                <DialogTitle id="alert-dialog-title" style={{ textAlign: 'center', paddingBottom: '8px' }}><IconAlertCircle /></DialogTitle>
+                <DialogTitle id="alert-dialog-title" style={{ fontSize: '1rem', fontWeight: 'bold', textAlign: 'center', paddingBottom: '8px' }}><IconAlertCircleFilled /></DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description" style={{ fontSize: '1rem', textAlign: 'center', color: '#333' }}>
-                        Are you sure you want to Cancel {deleteData.category_name}?
+                        Are you sure you want to Cancel {deleteData.name}?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions style={{ justifyContent: 'center', padding: '16px' }}>
@@ -556,8 +522,8 @@ const Category = () => {
                 </DialogActions>
             </Dialog>
 
-        </PageContainer>
+        </PageContainer >
     );
 };
 
-export default Category;
+export default Facilities;
