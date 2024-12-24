@@ -17,76 +17,19 @@ import { Card, CardMedia } from "@mui/material";
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepButton from '@mui/material/StepButton';
+import axios from 'axios';
+import { url } from '../../mainurl';
 
-const hotels = [
-    {
-        "id": 1,
-        "name": "The Oberoi Udaivilas",
-        "location": "Udaipur, Rajasthan",
-        "address": "Haridasji Ki Magri",
-        "rating": 4.9,
-        "contact": "+91 294 2433300",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipMuXeRSEy6AIfsfaADUJ0WavsP_oJVDRIvrFraH=s680-w680-h510"
-    },
-    {
-        "id": 2,
-        "name": "Taj Mahal Palace",
-        "location": "Mumbai, Maharashtra",
-        "address": "Apollo Bandar, Colaba",
-        "rating": 4.8,
-        "contact": "+91 22 6665 3366",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipPjR_st_vsnuJdZwzWkJ3P1ur1QdjRyNcq4VS--=s680-w680-h510"
-    },
-    {
-        "id": 3,
-        "name": "ITC Grand Chola",
-        "location": "Chennai, Tamil Nadu",
-        "address": "No 63, Mount Road, Guindy",
-        "rating": 4.7,
-        "contact": "+91 44 2220 0000",
-        "image": "https://lh3.googleusercontent.com/proxy/69Ilu49qMjZ042ky0BWyqGfwRT5z-GZ6gdYALkAKUM_-EJzPwMfnVS5npRXGpn_U7Lkz4zrpfIiOCVaJMIeUAxoRmOg8ajNhTcTQejBW_O2-GkowJ8e_NIrprA3GdorM07UqvCtcR7Kl40jM-VsGMPaRaxJdMg=s680-w680-h510"
-    },
-    {
-        "id": 4,
-        "name": "Leela Palace",
-        "location": "New Delhi, Delhi",
-        "address": "Diplomatic Enclave, Chanakyapuri",
-        "rating": 4.9,
-        "contact": "+91 11 3933 1234",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipMyFampnjTQttMvO8BTEgylpimVrAbXg5sAtBuO=s680-w680-h510"
-    },
-    {
-        "id": 5,
-        "name": "Radisson Blu",
-        "location": "Kochi, Kerala",
-        "address": "Sahodaran Ayyappan Road, Elamkulam",
-        "rating": 4.5,
-        "contact": "+91 484 4129999",
-        "image": "https://lh3.googleusercontent.com/p/AF1QipNsP26P4ImwPNap7CoHs_jUO-44JasvVB9w8Dir=w287-h192-n-k-rw-no-v1"
-    }
-]
+
 
 
 const AddHotel = () => {
-
-    const [modal, setModal] = useState({ add: false, view: false, edit: false });
-
-    // Function to toggle the modal state
-    const toggleModal = (type) => {
-        setModal((prev) => ({ ...prev, [type]: !prev[type] }));
-    };
-
-    const navigate = useNavigate();
-
-    const handleNavigateToViewHotel = (id) => {
-        navigate(`/hotels/${id}`);
-    }
 
     const [formData, setFormData] = useState({
         name: "",
         description: "",
         photos: [],
-        profilePic: null,
+        profilepicture: null,
         rating: "",
         category: [],
         facilities: [],
@@ -114,29 +57,16 @@ const AddHotel = () => {
         },
     });
 
-    const facilitiesList = ["Free WiFi", "Pool", "Gym", "Parking"];
-    const categoriesList = ["Luxury", "Budget", "Family", "Business"];
-    const starRatings = [1, 2, 3, 4, 5];
 
-    const handleChange = (field, value, nestedField) => {
-        if (nestedField) {
-            setFormData((prev) => ({
-                ...prev,
-                [nestedField]: { ...prev[nestedField], [field]: value },
-            }));
-        } else {
-            setFormData((prev) => ({ ...prev, [field]: value }));
-        }
-    };
-
-    const [imageSrc, setImageSrc] = useState('https://www.shutterstock.com/image-vector/image-icon-600nw-211642900.jpg')
+    const handleChange = (field, value) => { setFormData((prev) => ({ ...prev, [field]: value })) };
+    const [profilepicture, setprofilepicture] = useState('https://www.shutterstock.com/image-vector/image-icon-600nw-211642900.jpg')
 
     const handleFileChange = (event) => {
         const file = event.target.files[0]
         if (file) {
             const reader = new FileReader()
             reader.onloadend = () => {
-                setImageSrc(reader.result)
+                setprofilepicture(reader.result)
             }
             reader.readAsDataURL(file)
         }
@@ -194,7 +124,10 @@ const AddHotel = () => {
         return completedSteps() === totalSteps();
     };
 
-    const handleNext = () => {
+    const handleNext = (e) => {
+        if (activeStep == 0) {
+            handleSubmit(e)
+        }
         const newActiveStep =
             isLastStep() && !allStepsCompleted()
                 ?
@@ -207,19 +140,122 @@ const AddHotel = () => {
 
     const handleStep = (step) => () => { setActiveStep(step) };
 
-    const handleComplete = () => {
-        setCompleted({
-            ...completed,
-            [activeStep]: true,
-        });
-        handleNext();
-    };
 
     const handleReset = () => {
         setActiveStep(0);
         setCompleted({});
     };
 
+
+    const MenuProps = { PaperProps: { style: { maxHeight: 200, overflowY: 'auto' } } };
+
+
+    // get category
+
+    const [categoryList, setcategoryList] = useState([])
+
+    const fetchCategory = () => {
+        axios
+            .get(`${url}/hotel/room-categories/`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            })
+            .then((res) => {
+                setcategoryList(res.data.results);
+            })
+            .catch((error) => {
+                let refresh = String(authTokens.refresh);
+                axios.post(`${url}/api/token/refresh/`, { refresh: refresh }).then((res) => {
+                    localStorage.setItem("authTokens", JSON.stringify(res.data));
+                    //   setNewAuthTokens(JSON.stringify(res.data));
+
+                    const new_headers = {
+                        Authorization: `Bearer ${res.data.access}`,
+                    };
+                    axios
+                        .get(`${url}/hotel/room-categories/`, { headers: new_headers })
+                        .then((res) => {
+                            setcategoryList(res.data.results);
+                        });
+                });
+            });
+    };
+
+    // get category
+
+    const [facilitiesList, setfacilitiesList] = useState([])
+
+    const fetchFacilities = () => {
+        axios
+            .get(`${url}/hotel/facilities/`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            })
+            .then((res) => {
+                setfacilitiesList(res.data.results);
+            })
+            .catch((error) => {
+                let refresh = String(authTokens.refresh);
+                axios.post(`${url}/api/token/refresh/`, { refresh: refresh }).then((res) => {
+                    localStorage.setItem("authTokens", JSON.stringify(res.data));
+                    //   setNewAuthTokens(JSON.stringify(res.data));
+
+                    const new_headers = {
+                        Authorization: `Bearer ${res.data.access}`,
+                    };
+                    axios
+                        .get(`${url}/hotel/facilities/`, { headers: new_headers })
+                        .then((res) => {
+                            setfacilitiesList(res.data.results);
+                        });
+                });
+            });
+    };
+
+
+    // Add Hotel 
+
+    const authTokens = JSON.parse(localStorage.getItem('authTokens'));
+    let tokenStr = String(authTokens.access);
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        let submitData = {
+            name: formData.name,
+            description: formData.name,
+            profilepicture: profilepicture,
+            rating: `${formData.rating}-star hotel`,
+            locationName: formData.name,
+            location: formData.name,
+            hotel_room_categories: categories.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id)),
+            tags: tags,
+            facilities: facilities.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id)),
+            images: files,
+            owner_name:formData.name,
+            owner_contact_number:formData.name,
+            owner_email:"owner@gmail.com",
+        }
+
+        try {
+            const response = await axios.post(`${url}/hotel/createhotels/`, submitData, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            });
+            toggleModal('add')
+        } catch (error) {
+            console.error('Error:', error);
+        } finally {
+        }
+    };
 
 
     return (
@@ -260,7 +296,7 @@ const AddHotel = () => {
                                                     <Grid item xs={12} sm={3} className="relative aspect-video" sx={{ textAlign: 'center' }}>
                                                         <label htmlFor="file-upload" style={{ cursor: 'pointer', display: 'inline-block' }}>
                                                             <img
-                                                                src={imageSrc}
+                                                                src={profilepicture}
                                                                 width="100%"
                                                                 height="100%"
                                                                 alt="file"
@@ -280,7 +316,7 @@ const AddHotel = () => {
                                                             variant="outlined"
                                                             fullWidth
                                                             sx={{ mb: 2 }}
-                                                            onChange={(e) => handleChange('name', e.target.value)}
+                                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                                         />
                                                         <TextField
                                                             label="Description"
@@ -288,7 +324,7 @@ const AddHotel = () => {
                                                             fullWidth
                                                             multiline
                                                             rows={3}
-                                                            onChange={(e) => handleChange('description', e.target.value)}
+                                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                                         />
                                                         <Typography variant="body2" color="textSecondary" fontWeight="bold" className='mt-3'>
                                                             Rating :
@@ -296,9 +332,7 @@ const AddHotel = () => {
                                                         <Rating
                                                             className='m-2'
                                                             name="simple-uncontrolled"
-                                                            onChange={(event, newValue) => {
-                                                                console.log(newValue);
-                                                            }}
+                                                            onChange={(event, newValue) => { setFormData({ ...formData, rating: newValue }) }}
                                                             defaultValue={1}
                                                         />
                                                     </Grid>
@@ -406,12 +440,13 @@ const AddHotel = () => {
                                                                         multiple
                                                                         value={categories}
                                                                         onChange={(e) => { setCategories(e.target.value) }}
+                                                                        onClick={fetchCategory}
                                                                         renderValue={(selected) => selected.join(', ')}
-                                                                        label="Category">
-                                                                        <MenuItem value="Luxury">Luxury</MenuItem>
-                                                                        <MenuItem value="Budget">Budget</MenuItem>
-                                                                        <MenuItem value="Business">Business</MenuItem>
-                                                                        <MenuItem value="Resort">Resort</MenuItem>
+                                                                        label="Category"
+                                                                        MenuProps={MenuProps}>
+                                                                        {categoryList.map((item) => (
+                                                                            <MenuItem value={item.category_name}>{item.category_name}</MenuItem>
+                                                                        ))}
                                                                     </Select>
                                                                 </FormControl>
                                                             </Grid>
@@ -423,12 +458,13 @@ const AddHotel = () => {
                                                                         multiple
                                                                         value={facilities}
                                                                         onChange={(e) => { setfacilities(e.target.value) }}
+                                                                        onClick={fetchFacilities}
                                                                         renderValue={(selected) => selected.join(', ')}
-                                                                        label="Facilities">
-                                                                        <MenuItem value="Breakfast">Breakfast</MenuItem>
-                                                                        <MenuItem value="Parking">Parking</MenuItem>
-                                                                        <MenuItem value="Pool">Pool</MenuItem>
-                                                                        <MenuItem value="Spa">Spa</MenuItem>
+                                                                        label="Facilities"
+                                                                        MenuProps={MenuProps}>
+                                                                        {facilitiesList.map((item) => (
+                                                                            <MenuItem value={item.name}>{item.name}</MenuItem>
+                                                                        ))}
                                                                     </Select>
                                                                 </FormControl>
                                                             </Grid>
@@ -633,7 +669,7 @@ const AddHotel = () => {
                                                                                         <TextField
                                                                                             fullWidth
                                                                                             label="Bathrooms"
-                                                                                             placeholder='eg: 2'
+                                                                                            placeholder='eg: 2'
                                                                                             variant="outlined"
                                                                                             margin="normal"
                                                                                             name={`bathrooms_${index}`}
@@ -732,21 +768,9 @@ const AddHotel = () => {
                                                     Back
                                                 </Button>
                                                 <Box sx={{ flex: '1 1 auto' }} />
-                                                <Button onClick={handleNext} sx={{ mr: 1 }}>
+                                                <Button onClick={(e) => handleNext(e)} sx={{ mr: 1 }}>
                                                     Next
                                                 </Button>
-                                                {activeStep !== steps.length &&
-                                                    (completed[activeStep] ? (
-                                                        <Typography variant="caption" sx={{ display: 'inline-block' }}>
-                                                            Step {activeStep + 1} already completed
-                                                        </Typography>
-                                                    ) : (
-                                                        <Button onClick={handleComplete}>
-                                                            {completedSteps() === totalSteps() - 1
-                                                                ? 'Finish'
-                                                                : 'Complete Step'}
-                                                        </Button>
-                                                    ))}
                                             </Box>
                                         </React.Fragment>
                                     )}
