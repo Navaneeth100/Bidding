@@ -23,12 +23,13 @@ const Settings = Loadable(lazy(() => import('../pages/Settings')));
 const Category = Loadable(lazy(() => import('../pages/Category')));
 const Facilities = Loadable(lazy(() => import('../pages/Facilities')));
 
+const user = JSON.parse(localStorage.getItem('authTokens'));
 const Router = [
   {
     path: '/',
     element: <FullLayout />,
     children: [
-      { path: '/', element: <Navigate to="/dashboard" /> },
+      { path: '/', element: <Navigate to={user ? '/dashboard' : '/auth/login'} /> },
       { path: '/dashboard', exact: true, element: <Dashboard /> },
       // { path: '/sample-page', exact: true, element: <SamplePage /> },
       { path: '/hotels', exact: true, element: <Hotels /> },

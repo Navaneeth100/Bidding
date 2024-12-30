@@ -509,7 +509,7 @@ const Facilities = () => {
                 <DialogTitle id="alert-dialog-title" style={{ fontSize: '1rem', fontWeight: 'bold', textAlign: 'center', paddingBottom: '8px' }}><IconAlertCircleFilled /></DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description" style={{ fontSize: '1rem', textAlign: 'center', color: '#333' }}>
-                        Are you sure you want to Cancel {deleteData.name}?
+                        Are you sure you want to Delete {deleteData.name}?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions style={{ justifyContent: 'center', padding: '16px' }}>

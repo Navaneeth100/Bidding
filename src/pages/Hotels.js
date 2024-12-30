@@ -1,60 +1,15 @@
-import React, { useState } from 'react';
-import { Typography, Grid, CardContent } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Typography, Grid, CardContent, CircularProgress, DialogContentText } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
 import ProductPerformance from '../views/dashboard/components/ProductPerformance';
 import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton } from '@mui/material';
-import { IconStar, IconEye, IconEdit, IconTrash } from '@tabler/icons-react';
+import { IconStar, IconEye, IconEdit, IconTrash, IconAlertCircle } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
-
-const hotels = [
-    {
-        "id": 1,
-        "name": "TIME Moonstone Hotel Apartments",
-        "location": "Fujairah, United Arab Emirates",
-        "address": "Fujairah City Center",
-        "rating": 4.9,
-        "contact": "+971 9 203 0000",
-        "image": "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no"
-    },
-    {
-        "id": 2,
-        "name": "TIME Onyx Hotel Apartments",
-        "location": "Dubai, United Arab Emirates",
-        "address": "Al Qusais Industrial Area 5",
-        "rating": 4.8,
-        "contact": "+971 4 604 2999",
-        "image": "https://lh3.googleusercontent.com/proxy/fRmAhI1AexkpJd2S0xadJC1-LUAqp03Xn-iNTmWQ9F4-DbI2VWS7dguTHtp_2e8DGjFVbaYmFUzP3moJVp20mv9rYTmqLKjhI1PSxIs_Q-1LubN7LKhYp4EqpPxYaYKRo2X-82ETINajS5gUqHgDkYnVf14I-Bo=s680-w680-h510"
-    },
-    {
-        "id": 3,
-        "name": "TIME Moonstone Hotel Apartments",
-        "location": "Fujairah, United Arab Emirates",
-        "address": "Fujairah City Center",
-        "rating": 4.9,
-        "contact": "+971 9 203 0000",
-        "image": "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no"
-    },
-    {
-        "id": 4,
-        "name": "TIME Onyx Hotel Apartments",
-        "location": "Dubai, United Arab Emirates",
-        "address": "Al Qusais Industrial Area 5",
-        "rating": 4.8,
-        "contact": "+971 4 604 2999",
-        "image": "https://lh3.googleusercontent.com/proxy/fRmAhI1AexkpJd2S0xadJC1-LUAqp03Xn-iNTmWQ9F4-DbI2VWS7dguTHtp_2e8DGjFVbaYmFUzP3moJVp20mv9rYTmqLKjhI1PSxIs_Q-1LubN7LKhYp4EqpPxYaYKRo2X-82ETINajS5gUqHgDkYnVf14I-Bo=s680-w680-h510"
-    },
-    {
-        "id": 5,
-        "name": "TIME Moonstone Hotel Apartments",
-        "location": "Fujairah, United Arab Emirates",
-        "address": "Fujairah City Center",
-        "rating": 4.9,
-        "contact": "+971 9 203 0000",
-        "image": "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no"
-    }
-]
+import axios from 'axios';
+import { url } from '../../mainurl';
+import { toast } from 'react-toastify';
 
 
 const HotelPage = () => {
@@ -92,6 +47,114 @@ const HotelPage = () => {
         setCalendarvisible(!calendarvisible)
         setFiltersVisible(false)
     }
+
+
+    const authTokens = JSON.parse(localStorage.getItem('authTokens'));
+    let tokenStr = String(authTokens.access);
+
+
+    // get Hotels
+
+    const [HotelList, setHotelList] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [nextPage, setNextPage] = useState(null);
+    const [prevPage, setPrevPage] = useState(null);
+    const pageSize = 10;
+
+    const fetchHotels = (page = 1) => {
+        setLoading(true);
+        axios
+            .get(`${url}/hotel/createhotels/?page=${page}&page_size=${pageSize}`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            })
+            .then((res) => {
+                setHotelList(res.data.results);
+                setCurrentPage(page);
+                setTotalPages(Math.ceil(res.data.count / pageSize));
+                setNextPage(res.data.next);
+                setPrevPage(res.data.previous);
+                setLoading(false);
+            })
+            .catch((error) => {
+                let refresh = String(authTokens.refresh);
+                axios.post(`${url}/api/token/refresh/`, { refresh: refresh }).then((res) => {
+                    localStorage.setItem("authTokens", JSON.stringify(res.data));
+                    //   setNewAuthTokens(JSON.stringify(res.data));
+
+                    const new_headers = {
+                        Authorization: `Bearer ${res.data.access}`,
+                    };
+                    axios
+                        .get(`${url}/hotel/createhotels/?page=${page}&page_size=${pageSize}`, {
+                            headers: new_headers,
+                        })
+                        .then((res) => {
+                            setHotelList(res.data.results);
+                            setCurrentPage(page);
+                            setTotalPages(Math.ceil(res.data.count / pageSize));
+                            setNextPage(res.data.next);
+                            setPrevPage(res.data.previous);
+                            setLoading(false)
+                        });
+                });
+            });
+    };
+
+    // pagination
+
+    useEffect(() => {
+        fetchHotels(currentPage);
+    }, [currentPage]);
+
+    // SN Handler
+
+    const calculateSN = (index, page, pageSize) => {
+        return (page - 1) * pageSize + (index + 1);
+    };
+
+    //  page change
+
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+            fetchHotels(page);
+        }
+    };
+
+    // Delete Category
+
+    const [deleteData, setDeleteData] = useState([])
+
+    const handleDelete = async (id) => {
+        try {
+            const response = await axios.delete(`${url}/hotel/updatehotels/${id}/`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            });
+            toggleModal('delete')
+            toast.success("Hotel Deleted Successfully...", {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
+            fetchHotels();
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
 
     return (
         <PageContainer title="Hotels" description="Hotels">
@@ -192,7 +255,7 @@ const HotelPage = () => {
                 <Grid item sm={12} lg={12}>
                     <DashboardCard title="Our Hotels">
 
-                        <Box sx={{ overflow: 'auto', width: { xs: '300px', sm: 'auto' } }}>
+                        <Box sx={{ overflow: 'auto', width: { xs: '630px', sm: 'auto' } }}>
                             <Table
                                 aria-label="simple table"
                                 sx={{
@@ -201,34 +264,39 @@ const HotelPage = () => {
                             >
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>
+                                        <TableCell align="center">
                                             <Typography variant="subtitle2" fontWeight={600}>
                                                 SN
                                             </Typography>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell align="center">
                                             <Typography variant="subtitle2" fontWeight={600}>
                                                 Image
                                             </Typography>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell align="center">
                                             <Typography variant="subtitle2" fontWeight={600}>
                                                 Name
                                             </Typography>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell align="center">
                                             <Typography variant="subtitle2" fontWeight={600}>
                                                 Location
                                             </Typography>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell align="center">
                                             <Typography variant="subtitle2" fontWeight={600}>
                                                 Ratings
                                             </Typography>
                                         </TableCell>
-                                        <TableCell>
-                                            <Typography variant="subtitle2" fontWeight={600} align='center'>
-                                                Contact
+                                        <TableCell align="center">
+                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                Owner Name
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                Owner Contact
                                             </Typography>
                                         </TableCell>
                                         <TableCell align="center">
@@ -239,65 +307,140 @@ const HotelPage = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {hotels.map((hotels) => (
-                                        <TableRow key={hotels.id}>
-                                            <TableCell>
-                                                <Typography variant="subtitle2" fontWeight={600}>
-                                                    {hotels.id}
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Box component="img" src={hotels.image} alt="Hotel Image" width="100px" height="auto" onClick={() => { handleNavigateToViewHotel(hotels.id) }} />
-                                            </TableCell>
-                                            <TableCell>
-                                                <Typography variant="subtitle2" fontWeight={600}>
-                                                    {hotels.name}
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell>
+                                    {loading ? (
+                                        <TableRow>
+                                            <TableCell colSpan={4} align="center">
                                                 <Box
-                                                    sx={{
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                    }}
+                                                    display="flex"
+                                                    justifyContent="center"
+                                                    alignItems="center"
+                                                    sx={{ height: "540px" }}
                                                 >
-                                                    <Box>
-                                                        <Typography variant="subtitle2" fontWeight={600}>
-                                                            {hotels.address}
-                                                        </Typography>
-                                                        <Typography
-                                                            color="textSecondary"
-                                                            sx={{
-                                                                fontSize: "13px",
-                                                            }}
-                                                        >
-                                                            {hotels.location}
-                                                        </Typography>
-                                                    </Box>
-                                                </Box>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Box display="flex" alignItems="center">
-                                                    <IconStar width={15} style={{ marginRight: "5px" }} />
-                                                    <Typography variant="subtitle2" fontWeight={600} fontSize={18}>
-                                                        {hotels.rating}
-                                                    </Typography>
-                                                </Box>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Typography variant="h6">{hotels.contact}</Typography>
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                <Box display="flex" alignItems="center" justifyContent="flex-end">
-                                                    <IconEye width={20} style={{ marginRight: "15px" }} />
-                                                    <IconEdit width={20} style={{ marginRight: "15px" }} />
-                                                    <IconTrash width={20} />
+                                                    <CircularProgress color="primary" size={30} />
                                                 </Box>
                                             </TableCell>
                                         </TableRow>
-                                    ))}
+                                    ) : HotelList && HotelList.length > 0 ? (
+                                        HotelList.map((item, index) => (
+                                            <TableRow key={item.id}>
+                                                <TableCell align="center">
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        {calculateSN(index, currentPage, pageSize)}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Box component="img" src={`${url}${item?.hotelimgs[0]?.file}`} alt="Hotel Image" width="100px" height="auto" onClick={() => { handleNavigateToViewHotel(item.id) }} />
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        {item.name}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Box
+                                                        sx={{
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            justifyContent: "center"
+                                                        }}
+                                                    >
+                                                        <Box>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {item.location}
+                                                            </Typography>
+                                                            <Typography
+                                                                color="textSecondary"
+                                                                sx={{
+                                                                    fontSize: "13px",
+                                                                }}
+                                                            >
+                                                                {item.locationName}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Box>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Box display="flex" alignItems="center" justifyContent="center">
+                                                        {/* <IconStar width={15} style={{ marginRight: "5px" }} /> */}
+                                                        <Typography variant="subtitle2" fontWeight={600}>
+                                                            {item.rating} Star
+                                                        </Typography>
+                                                    </Box>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        {item.owner_name}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Typography variant="subtitle2" fontWeight={600}>{item.owner_contact_number}</Typography>
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    <Box display="flex" alignItems="center" justifyContent="center">
+                                                        {/* <IconEye width={20} style={{ marginRight: "15px" }} /> */}
+                                                        <Button
+                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
+                                                        </Button>
+                                                        <Button
+                                                            sx={{ border: '1px solid lightgrey' }} onClick={() => { toggleModal('delete'); setDeleteData(item); }}><IconTrash width={15} className='m-0 p-0' />
+                                                        </Button>
+                                                    </Box>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={4} align="center">
+                                                <Typography variant="subtitle2" fontWeight={600}>
+                                                    No Data to Display
+                                                </Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
                                 </TableBody>
                             </Table>
+                        </Box>
+                        <Box display="flex" justifyContent="start" mt={2}>
+                            <Button
+                                onClick={() => handlePageChange(1)}
+                                disabled={currentPage === 1 || !prevPage}
+                                variant="contained"
+                                color="primary"
+                                size='small'
+                                sx={{ marginRight: 1 }}
+                            >
+                                First
+                            </Button>
+                            <Button
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1 || !prevPage}
+                                variant="contained"
+                                color="primary"
+                                size='small'
+                                sx={{ marginRight: 1 }}
+                            >
+                                Previous
+                            </Button>
+                            <Button
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === totalPages || !nextPage}
+                                variant="contained"
+                                color="primary"
+                                size='small'
+                                sx={{ marginLeft: 1 }}
+                            >
+                                Next
+                            </Button>
+                            <Button
+                                onClick={() => handlePageChange(totalPages)}
+                                disabled={currentPage === totalPages || !nextPage}
+                                variant="contained"
+                                color="primary"
+                                size='small'
+                                sx={{ marginLeft: 1 }}
+                            >
+                                Last
+                            </Button>
                         </Box>
                     </DashboardCard>
                 </Grid>
@@ -395,6 +538,29 @@ const HotelPage = () => {
                 </DialogContent>
             </Dialog>
 
+            {/* delete confirmation */}
+
+            <Dialog
+                open={modal.delete}
+                onClose={() => toggleModal('delete')}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+                PaperProps={{ style: { borderRadius: '15px', padding: '16px', maxWidth: '350px' } }}>
+                <DialogTitle id="alert-dialog-title" style={{ textAlign: 'center', paddingBottom: '8px' }}><IconAlertCircle /></DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description" style={{ fontSize: '1rem', textAlign: 'center', color: '#333' }}>
+                        Are you sure you want to Delete {deleteData.name}?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions style={{ justifyContent: 'center', padding: '16px' }}>
+                    <Button onClick={() => handleDelete(deleteData.id)} style={{ backgroundColor: '#2ecc71', color: 'white', fontSize: '1rem', padding: '6px 24px', margin: '0 8px' }}>
+                        Yes
+                    </Button>
+                    <Button onClick={() => toggleModal('delete')} style={{ backgroundColor: '#e74c3c', color: 'white', fontSize: '1rem', padding: '6px 24px', margin: '0 8px' }}>
+                        No
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
         </PageContainer>
     );

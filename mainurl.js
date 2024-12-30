@@ -1,1 +1,1 @@
-export const url = "https://zimbabwe-reality-parallel-flashing.trycloudflare.com"
+export const url = "https://api.stay4hotels.com"

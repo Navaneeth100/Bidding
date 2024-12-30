@@ -19,7 +19,7 @@ import Step from '@mui/material/Step';
 import StepButton from '@mui/material/StepButton';
 import axios from 'axios';
 import { url } from '../../mainurl';
-
+import { toast } from 'react-toastify';
 
 
 
@@ -30,7 +30,7 @@ const AddHotel = () => {
         description: "",
         photos: [],
         profilepicture: null,
-        rating: "",
+        rating: "1",
         category: [],
         facilities: [],
         location: "",
@@ -38,23 +38,6 @@ const AddHotel = () => {
         bookingPrice: "",
         discount: "",
         availableRooms: "",
-        roomDetails: {
-            roomCategory: "",
-            roomSqFeet: "",
-            beds: "",
-            roomFacilities: [],
-            noOfRoomsAvailable: "",
-        },
-        owner: {
-            name: "",
-            contactNo: "",
-            image: null,
-            email: "",
-        },
-        support: {
-            contactNumber: "",
-            email: "",
-        },
     });
 
 
@@ -124,16 +107,24 @@ const AddHotel = () => {
         return completedSteps() === totalSteps();
     };
 
-    const handleNext = (e) => {
-        if (activeStep == 0) {
-            handleSubmit(e)
+    const handleNext = async (e) => {
+        let responseSuccess = false;
+        if (activeStep === 0) {
+            responseSuccess = await handleHotelSubmit(e);
+        } else if (activeStep === 1) {
+            responseSuccess = await handleRoomSubmit(e);
+        } else if (activeStep === 2) {
+            responseSuccess = await handleOwnerDetailSubmit(e);
         }
-        const newActiveStep =
-            isLastStep() && !allStepsCompleted()
-                ?
-                steps.findIndex((step, i) => !(i in completed))
-                : activeStep + 1;
-        setActiveStep(newActiveStep);
+
+        if (responseSuccess) {
+            const newActiveStep =
+                isLastStep() && !allStepsCompleted()
+                    ? steps.findIndex((step, i) => !(i in completed))
+                    : activeStep + 1;
+
+            setActiveStep(newActiveStep);
+        }
     };
 
     const handleBack = () => { setActiveStep((prevActiveStep) => prevActiveStep - 1) };
@@ -224,39 +215,186 @@ const AddHotel = () => {
     const authTokens = JSON.parse(localStorage.getItem('authTokens'));
     let tokenStr = String(authTokens.access);
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        let submitData = {
-            name: formData.name,
-            description: formData.name,
-            profilepicture: profilepicture,
-            rating: `${formData.rating}-star hotel`,
-            locationName: formData.name,
-            location: formData.name,
-            hotel_room_categories: categories.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id)),
-            tags: tags,
-            facilities: facilities.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id)),
-            images: files,
-            owner_name:formData.name,
-            owner_contact_number:formData.name,
-            owner_email:"owner@gmail.com",
-        }
+    const [roomId, setroomId] = useState(null)
 
-        try {
-            const response = await axios.post(`${url}/hotel/createhotels/`, submitData, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "application/json",
-                },
-                withCredentials: false,
+    const handleHotelSubmit = async (event) => {
+        if (formData.name && formData.description && formData.rating && formData.location) {
+            event.preventDefault();
+            let submitData = {
+                name: formData.name,
+                description: formData.description,
+                profilepicture: profilepicture,
+                rating: `${formData.rating}`,
+                locationName: formData.location,
+                location: formData.location,
+                hotel_room_categories: categories.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id)),
+                tags: tags,
+                facilities: facilities.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id)),
+                images: files,
+                owner_name: "null",
+                owner_contact_number: "null",
+                owner_email: "stayhotel@gmail.com",
+            }
+
+            try {
+                const response = await axios.post(`${url}/hotel/createhotels/`, submitData, {
+                    headers: {
+                        Authorization: `Bearer ${tokenStr}`,
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: false,
+                });
+                setroomId(response.data.id)
+                toast.success(`${response.data.message}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+                if (response.status === 201) {
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+            }
+        }
+        else {
+            toast.error('Please Fill the Fields Completely...', {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
             });
-            toggleModal('add')
-        } catch (error) {
-            console.error('Error:', error);
-        } finally {
         }
     };
 
+    // Add Rooms
+
+    const [roomData, setRoomData] = useState([{ room_category: '', area: '', floors: '', rooms: '', beds: '', bathrooms: '', guests: '', booking_price: '' }]);
+
+    const handleRoomChange = (index, field, value) => {
+        const updatedRoomData = [...roomData];
+        updatedRoomData[index][field] = value;
+        setRoomData(updatedRoomData);
+    };
+
+    const handleRoomSubmit = async (event) => {
+        const isRoomDataValid = roomData.every((room) => Object.values(room).every((value) => value.trim() !== ''));
+        if (roomId && isRoomDataValid) {
+            event.preventDefault();
+            const updatedRoomData = roomData.map((room) => ({ ...room, room_category: categoryList.find((category) => category.category_name === room.room_category)?.id }));
+            setRoomData(updatedRoomData);
+
+            try {
+                const response = await axios.post(`${url}/hotels/${roomId}/room-categories/`, updatedRoomData, {
+                    headers: {
+                        Authorization: `Bearer ${tokenStr}`,
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: false,
+                });
+                toast.success(`${response.data.message}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+                if (response.status === 200) {
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+            }
+        }
+        else {
+            toast.error('Please Fill the Fields Completely...', {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
+        }
+
+    };
+
+
+    //  Add Owner Details
+
+    const [ownerData, setOwnerData] = useState([])
+
+    const handleOwnerDataChange = (field, value) => { setOwnerData((prev) => ({ ...prev, [field]: value })) };
+
+    const handleOwnerDetailSubmit = async (event) => {
+        if (ownerData.ownername && ownerData.ownercontact && ownerData.owneremail) {
+            event.preventDefault();
+            let submitData = {
+                owner_name: ownerData.ownername,
+                owner_contact_number: ownerData.ownercontact,
+                owner_email: ownerData.owneremail,
+            }
+
+            try {
+                const response = await axios.put(`${url}/hotel/updatehotels/8/`, submitData, {
+                    headers: {
+                        Authorization: `Bearer ${tokenStr}`,
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: false,
+                });
+                toast.success(`${response.data.message}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+                if (response.status === 200) {
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+            }
+        }
+        else {
+            toast.error('Please Fill the Fields Completely...', {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
+        }
+
+    }
+
+    //  navigate to List
+
+    const navigate = useNavigate();
+
+    const handleNavigateToHotelList = () => {
+        setTimeout(() => {
+            navigate('/hotels/');
+        }, 2000);
+    }
 
     return (
         <PageContainer title="Hotels" description="Hotels">
@@ -415,7 +553,7 @@ const AddHotel = () => {
                                                                         variant="outlined"
                                                                         fullWidth
                                                                         onChange={(e) =>
-                                                                            handleChange(field.key, e.target.value, field.group || undefined)
+                                                                            handleChange(field.key, e.target.value)
                                                                         }
                                                                     />
                                                                 </Grid>
@@ -426,13 +564,12 @@ const AddHotel = () => {
 
                                                 {/* Category Details Form */}
 
-                                                <Box sx={{ mt: 4 }}>
+                                                {/* <Box sx={{ mt: 4 }}>
                                                     <form>
                                                         <Typography variant="h5" className='mb-3' gutterBottom>
                                                             Category and Facilities
                                                         </Typography>
                                                         <Grid container spacing={2}>
-                                                            {/* Dropdowns */}
                                                             <Grid item xs={12} sm={6}>
                                                                 <FormControl fullWidth>
                                                                     <InputLabel>Category</InputLabel>
@@ -488,7 +625,7 @@ const AddHotel = () => {
 
                                                         </Grid>
                                                     </form>
-                                                </Box>
+                                                </Box> */}
                                             </React.Fragment>)}
 
                                             {activeStep === 1 && (
@@ -504,7 +641,7 @@ const AddHotel = () => {
                                                                 <Button
                                                                     variant="contained"
                                                                     color="primary"
-                                                                    onClick={() => setRoomList([...roomList, {}])}
+                                                                    onClick={() => { setRoomList([...roomList, {}]), setRoomData([...roomData, { room_category: '', area: '', floor: '', rooms: '', beds: '', bathrooms: '', guests: '', booking_price: '' }]) }}
                                                                 >
                                                                     Add Rooms
                                                                 </Button>
@@ -525,15 +662,16 @@ const AddHotel = () => {
                                                                                         <FormControl fullWidth>
                                                                                             <InputLabel>Category</InputLabel>
                                                                                             <Select
-                                                                                                multiple
-                                                                                                value={categories}
-                                                                                                onChange={(e) => { setCategories(e.target.value) }}
-                                                                                                renderValue={(selected) => selected.join(', ')}
-                                                                                                label="Category">
-                                                                                                <MenuItem value="Luxury">Luxury</MenuItem>
-                                                                                                <MenuItem value="Budget">Budget</MenuItem>
-                                                                                                <MenuItem value="Business">Business</MenuItem>
-                                                                                                <MenuItem value="Resort">Resort</MenuItem>
+                                                                                                // multiple
+                                                                                                value={roomData[index].room_category || ""}
+                                                                                                onOpen={fetchCategory}
+                                                                                                onChange={(e) => handleRoomChange(index, 'room_category', e.target.value)}
+                                                                                                // renderValue={(selected) => selected.join(', ')}
+                                                                                                label="Category"
+                                                                                                MenuProps={MenuProps}>
+                                                                                                {categoryList.map((item) => (
+                                                                                                    <MenuItem value={item.category_name}>{item.category_name}</MenuItem>
+                                                                                                ))}
                                                                                             </Select>
                                                                                         </FormControl>
                                                                                     </Grid>
@@ -544,13 +682,14 @@ const AddHotel = () => {
                                                                                             <Select
                                                                                                 multiple
                                                                                                 value={facilities}
-                                                                                                onChange={(e) => { setfacilities(e.target.value) }}
+                                                                                                onOpen={fetchFacilities}
+                                                                                                onChange={(e) => handleRoomChange(index, 'facilities', e.target.value)}
                                                                                                 renderValue={(selected) => selected.join(', ')}
-                                                                                                label="Facilities">
-                                                                                                <MenuItem value="Breakfast">Breakfast</MenuItem>
-                                                                                                <MenuItem value="Parking">Parking</MenuItem>
-                                                                                                <MenuItem value="Pool">Pool</MenuItem>
-                                                                                                <MenuItem value="Spa">Spa</MenuItem>
+                                                                                                label="Facilities"
+                                                                                                MenuProps={MenuProps}>
+                                                                                                {facilitiesList.map((item) => (
+                                                                                                    <MenuItem value={item.name}>{item.name}</MenuItem>
+                                                                                                ))}
                                                                                             </Select>
                                                                                         </FormControl>
                                                                                     </Grid>
@@ -561,7 +700,7 @@ const AddHotel = () => {
                                                                                             <Select
                                                                                                 multiple
                                                                                                 value={tags}
-                                                                                                onChange={(e) => { settags(e.target.value) }}
+                                                                                                onChange={(e) => handleRoomChange(index, 'tags', e.target.value)}
                                                                                                 renderValue={(selected) => selected.join(', ')}
                                                                                                 label="Tags">
                                                                                                 <MenuItem value="">Breakfast</MenuItem>
@@ -629,6 +768,7 @@ const AddHotel = () => {
                                                                                             variant="outlined"
                                                                                             margin="normal"
                                                                                             name={`room_no_${index}`}
+                                                                                            onChange={(e) => handleRoomChange(index, 'room_no', e.target.value)}
                                                                                         />
                                                                                     </Grid>
 
@@ -640,6 +780,7 @@ const AddHotel = () => {
                                                                                             variant="outlined"
                                                                                             margin="normal"
                                                                                             name={`room_area_${index}`}
+                                                                                            onChange={(e) => handleRoomChange(index, 'area', e.target.value)}
                                                                                         />
                                                                                     </Grid>
 
@@ -651,6 +792,7 @@ const AddHotel = () => {
                                                                                             variant="outlined"
                                                                                             margin="normal"
                                                                                             name={`floor_${index}`}
+                                                                                            onChange={(e) => handleRoomChange(index, 'floors', e.target.value)}
                                                                                         />
                                                                                     </Grid>
 
@@ -662,6 +804,7 @@ const AddHotel = () => {
                                                                                             variant="outlined"
                                                                                             margin="normal"
                                                                                             name={`beds_${index}`}
+                                                                                            onChange={(e) => handleRoomChange(index, 'beds', e.target.value)}
                                                                                         />
                                                                                     </Grid>
 
@@ -673,6 +816,7 @@ const AddHotel = () => {
                                                                                             variant="outlined"
                                                                                             margin="normal"
                                                                                             name={`bathrooms_${index}`}
+                                                                                            onChange={(e) => handleRoomChange(index, 'bathrooms', e.target.value)}
                                                                                         />
                                                                                     </Grid>
 
@@ -684,6 +828,7 @@ const AddHotel = () => {
                                                                                             placeholder='eg: 1 - 5'
                                                                                             margin="normal"
                                                                                             name={`guests_${index}`}
+                                                                                            onChange={(e) => handleRoomChange(index, 'guests', e.target.value)}
                                                                                         />
                                                                                     </Grid>
 
@@ -695,6 +840,7 @@ const AddHotel = () => {
                                                                                             variant="outlined"
                                                                                             margin="normal"
                                                                                             name={`room_price_${index}`}
+                                                                                            onChange={(e) => handleRoomChange(index, 'booking_price', e.target.value)}
                                                                                         />
                                                                                     </Grid>
                                                                                 </Grid>
@@ -719,9 +865,9 @@ const AddHotel = () => {
                                                                 </Typography>
                                                                 <Grid container spacing={2}>
                                                                     {[
-                                                                        { label: 'Owner Name', key: 'name', group: 'owner' },
-                                                                        { label: 'Owner Contact', key: 'contactNo', group: 'owner' },
-                                                                        { label: 'Owner Email', key: 'email', group: 'owner' },
+                                                                        { label: 'Owner Name', key: 'ownername', group: 'owner' },
+                                                                        { label: 'Owner Contact', key: 'ownercontact', group: 'owner' },
+                                                                        { label: 'Owner Email', key: 'owneremail', group: 'owner' },
                                                                     ].map((field, index) => (
                                                                         <Grid item xs={12} sm={6} key={index}>
                                                                             <TextField
@@ -729,7 +875,7 @@ const AddHotel = () => {
                                                                                 variant="outlined"
                                                                                 fullWidth
                                                                                 onChange={(e) =>
-                                                                                    handleChange(field.key, e.target.value, field.group || undefined)
+                                                                                    handleOwnerDataChange(field.key, e.target.value)
                                                                                 }
                                                                             />
                                                                         </Grid>
@@ -737,8 +883,8 @@ const AddHotel = () => {
                                                                 </Grid>
                                                                 <Grid container spacing={2} className='mt-3'>
                                                                     {[
-                                                                        { label: 'Support Contact', key: 'contactNo', group: 'support' },
-                                                                        { label: 'Support Email', key: 'email', group: 'support' },
+                                                                        { label: 'Support Contact', key: 'supportcontac', group: 'support' },
+                                                                        { label: 'Support Email', key: 'supportemail', group: 'support' },
                                                                     ].map((field, index) => (
                                                                         <Grid item xs={12} sm={6} key={index}>
                                                                             <TextField
@@ -746,7 +892,7 @@ const AddHotel = () => {
                                                                                 variant="outlined"
                                                                                 fullWidth
                                                                                 onChange={(e) =>
-                                                                                    handleChange(field.key, e.target.value, field.group || undefined)
+                                                                                    handleOwnerDataChange(field.key, e.target.value)
                                                                                 }
                                                                             />
                                                                         </Grid>
@@ -768,8 +914,8 @@ const AddHotel = () => {
                                                     Back
                                                 </Button>
                                                 <Box sx={{ flex: '1 1 auto' }} />
-                                                <Button onClick={(e) => handleNext(e)} sx={{ mr: 1 }}>
-                                                    Next
+                                                <Button  onClick={(e) => (activeStep === 2 ? handleNavigateToHotelList() : handleNext(e))} sx={{ mr: 1 }}>
+                                                    {activeStep == 2 ? "Finish" : "Next"}
                                                 </Button>
                                             </Box>
                                         </React.Fragment>

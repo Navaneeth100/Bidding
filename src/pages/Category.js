@@ -342,7 +342,7 @@ const Category = () => {
                                             <TableRow key={item.id}>
                                                 <TableCell align='center'>
                                                     <Typography variant="subtitle2" fontWeight={600}>
-                                                        {index + 1}
+                                                        {calculateSN(index, currentPage, pageSize)}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell align="center">
@@ -543,7 +543,7 @@ const Category = () => {
                 <DialogTitle id="alert-dialog-title" style={{ textAlign: 'center', paddingBottom: '8px' }}><IconAlertCircle /></DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description" style={{ fontSize: '1rem', textAlign: 'center', color: '#333' }}>
-                        Are you sure you want to Cancel {deleteData.category_name}?
+                        Are you sure you want to Delete {deleteData.category_name}?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions style={{ justifyContent: 'center', padding: '16px' }}>

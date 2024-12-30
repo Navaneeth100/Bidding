@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Typography, Grid, CardContent, Rating } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
@@ -11,6 +11,9 @@ import { Badge, Card, CardBody, CardImg, CardText, CardTitle } from 'reactstrap'
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import { deepPurple } from '@mui/material/colors';
+import axios from 'axios';
+import { url } from '../../mainurl';
+
 
 const hotels = [
     {
@@ -161,6 +164,47 @@ const HotelPage = () => {
     // Find the hotel with the matching id
     const hotel = hotels.find(h => h.id === parseInt(id));
 
+    // get category
+
+    const [hotelDetails, sethotelDetails] = useState([])
+    const authTokens = JSON.parse(localStorage.getItem('authTokens'));
+    let tokenStr = String(authTokens.access);
+
+    const fetchHotelDetials = () => {
+        axios
+            .get(`${url}/hotel/updatehotels/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            })
+            .then((res) => {
+                sethotelDetails(res.data);
+            })
+            .catch((error) => {
+                let refresh = String(authTokens.refresh);
+                axios.post(`${url}/api/token/refresh/`, { refresh: refresh }).then((res) => {
+                    localStorage.setItem("authTokens", JSON.stringify(res.data));
+                    //   setNewAuthTokens(JSON.stringify(res.data));
+
+                    const new_headers = {
+                        Authorization: `Bearer ${res.data.access}`,
+                    };
+                    axios
+                        .get(`${url}/hotel/updatehotels/${id}`, { headers: new_headers })
+                        .then((res) => {
+                            sethotelDetails(res.data);
+                        });
+                });
+            });
+    };
+
+    useEffect(() => {
+        fetchHotelDetials()
+    }, [id])
+
+
     return (
         <PageContainer title="Hotels" description="Hotels">
             <Grid container spacing={3}>
@@ -182,20 +226,20 @@ const HotelPage = () => {
                                     }}
                                 >
                                     <Stack direction="row" spacing={2}>
-                                        <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" sx={{ width: 56, height: 56, bgcolor: deepPurple[500] }} >J</Avatar>
+                                        <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" sx={{ width: 56, height: 56, bgcolor: deepPurple[500] }} >{hotelDetails.owner_name?.charAt(0)?.toUpperCase()}</Avatar>
                                     </Stack>
                                     <Box sx={{ mt: 2 }}>
                                         <Typography variant="h4" sx={{ fontWeight: "bold", textAlign: "center" }}>
-                                            John Doe
+                                            {hotelDetails.owner_name}
                                         </Typography>
                                         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "start", mt: 2 }}>
                                             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
                                                 <IconMail fontSize="small" />
-                                                <Typography variant="h6">johndoe@gmail.com</Typography>
+                                                <Typography variant="h6">{hotelDetails.owner_email}</Typography>
                                             </Box>
                                             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                                                 <IconPhone fontSize="small" />
-                                                <Typography variant="h6">+0495 234567890</Typography>
+                                                <Typography variant="h6">{hotelDetails.owner_contact_number}</Typography>
                                             </Box>
                                         </Box>
                                     </Box>
@@ -217,13 +261,13 @@ const HotelPage = () => {
                                         /> */}
                                         <CardBody>
                                             <CardTitle tag="h5" className='fw-bold'>
-                                                {hotel.name}
+                                                {hotelDetails.name}
                                             </CardTitle>
                                             <CardText>
-                                                {hotel.location} &nbsp; | &nbsp; <span className='fw-bold'>{hotel.rating}</span>  ( 52,427 Ratings )
+                                                {hotelDetails.location} &nbsp; | &nbsp; <span className='fw-bold'>{hotelDetails.rating} Star</span>
                                             </CardText>
                                             <CardText>
-                                                A luxurious palace resort on the banks of Lake Pichola, offering breathtaking views, world-class service, and a blend of traditional Rajasthani architecture with modern amenities.
+                                                {hotelDetails.description}
                                             </CardText>
                                             <CardText>
                                                 {spec.map((item, index) => (
