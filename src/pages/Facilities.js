@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Grid, CardContent, CircularProgress } from '@mui/material';
+import { Typography, Grid, CardContent, CircularProgress, Avatar } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
@@ -9,6 +9,8 @@ import { IconStar, IconEye, IconEdit, IconTrash, IconAlertCircleFilled } from '@
 import { useNavigate } from 'react-router-dom';
 import { url } from '../../mainurl';
 import axios from 'axios';
+import { toast } from 'react-toastify';
+
 
 
 const Facilities = () => {
@@ -116,6 +118,23 @@ const Facilities = () => {
         }
     };
 
+
+    //  File Upload
+
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        setSelectedFile(file);
+        if (file && file.type.startsWith("image/")) {
+            const preview = URL.createObjectURL(file);
+            setPreviewUrl(preview);
+        } else {
+            setPreviewUrl(null);
+        }
+    };
+
     // Add Facilities 
 
 
@@ -124,6 +143,7 @@ const Facilities = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         let submitData = {
+            icon: selectedFile,
             name: formData.name,
         }
 
@@ -135,10 +155,29 @@ const Facilities = () => {
                 },
                 withCredentials: false,
             });
+            if (response.data.message) {
+                toast.success(`${response.data.message}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+            }
             toggleModal('add')
             fetchFacilities()
         } catch (error) {
-            console.error('Error:', error);
+            toast.error(`${error.response.data.error}`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
         } finally {
         }
     };
@@ -161,10 +200,29 @@ const Facilities = () => {
                 },
                 withCredentials: false,
             });
+            if (response.data.message) {
+                toast.success(`${response.data.message}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+            }
             toggleModal('edit');
             fetchFacilities();
         } catch (error) {
-            console.error('Error:', error);
+            toast.error(`${error.response.data.error}`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
         } finally {
         }
     };
@@ -183,10 +241,29 @@ const Facilities = () => {
                 },
                 withCredentials: false,
             });
+            if (response.data.message) {
+                toast.success(`${response.data.message}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+            }
             toggleModal('delete')
             fetchFacilities();
         } catch (error) {
-            console.error('Error:', error);
+            toast.error(`${error.response.data.error}`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
         }
     };
 
@@ -358,7 +435,7 @@ const Facilities = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={4} align="center">
+                                            <TableCell colSpan={4} align="center" sx={{ paddingTop: "200px" }}>
                                                 <Typography variant="subtitle2" fontWeight={600}>
                                                     No Data to Display
                                                 </Typography>
@@ -431,6 +508,39 @@ const Facilities = () => {
                 <DialogContent sx={{ padding: 3 }}>
                     <form className="row gy-4 mt-2" onSubmit={handleSubmit}>
                         <Grid container spacing={3}>
+                            <Grid item md={12} xs={12}>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    {previewUrl ? (
+                                        <Avatar
+                                            src={previewUrl}
+                                            alt="Preview"
+                                            variant="rounded"
+                                            sx={{ width: 100, height: 100, margin: "0 auto" }}
+                                        />
+                                    ) : (
+                                        <Avatar
+                                            src=""
+                                            alt="No Image"
+                                            variant="rounded"
+                                            sx={{ width: 100, height: 100, margin: "0 auto" }}
+                                        />
+                                    )}
+                                </Box>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    <input
+                                        accept="image/*"
+                                        id="file-upload"
+                                        type="file"
+                                        style={{ display: "none" }}
+                                        onChange={handleFileChange}
+                                    />
+                                    <label htmlFor="file-upload">
+                                        <Button variant="contained" component="span">
+                                            Choose File
+                                        </Button>
+                                    </label>
+                                </Box>
+                            </Grid>
                             <Grid item md={12} xs={12}>
                                 <TextField
                                     label="Facilities"

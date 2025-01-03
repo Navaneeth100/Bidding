@@ -6,7 +6,7 @@ import { Grid, Box, Card, Stack, Typography } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import Logo from 'src/layouts/full/shared/logo/Logo';
 import AuthLogin from './auth/AuthLogin';
-import logo from '../../assets/images/logos/stay.jpg'
+import logo from '../../assets/images/logos/stay.png'
 
 const Login2 = () => {
 

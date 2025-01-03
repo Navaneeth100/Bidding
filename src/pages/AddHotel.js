@@ -230,7 +230,7 @@ const AddHotel = () => {
                 hotel_room_categories: categories.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id)),
                 tags: tags,
                 facilities: facilities.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id)),
-                images: files,
+                hotelimgs: files,
                 owner_name: "null",
                 owner_contact_number: "null",
                 owner_email: "stayhotel@gmail.com",
@@ -277,7 +277,7 @@ const AddHotel = () => {
 
     // Add Rooms
 
-    const [roomData, setRoomData] = useState([{ room_category: '', area: '', floors: '', rooms: '', beds: '', bathrooms: '', guests: '', booking_price: '' }]);
+    const [roomData, setRoomData] = useState([{ room_category: '', area: '', floors: '', beds: '', bathrooms: '', guests: '', booking_price: '' }]);
 
     const handleRoomChange = (index, field, value) => {
         const updatedRoomData = [...roomData];
@@ -348,14 +348,27 @@ const AddHotel = () => {
             }
 
             try {
-                const response = await axios.put(`${url}/hotel/updatehotels/8/`, submitData, {
+                const response = await axios.put(`${url}/hotel/updatehotels/${roomId}/`, submitData, {
                     headers: {
                         Authorization: `Bearer ${tokenStr}`,
                         "Content-Type": "application/json",
                     },
                     withCredentials: false,
                 });
-                toast.success(`${response.data.message}`, {
+                if (response.data.message) {
+                    toast.success(`${response.data.message}`, {
+                        position: 'top-right',
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: 'colored',
+                    });
+                    handleNavigateToHotelList()
+                }
+            } catch (error) {
+                toast.error(`${error.response.data.error}`, {
                     position: 'top-right',
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -364,12 +377,8 @@ const AddHotel = () => {
                     draggable: true,
                     theme: 'colored',
                 });
-                if (response.status === 200) {
-                    return true;
-                }
-            } catch (error) {
-                console.error('Error:', error);
             } finally {
+                // handleNavigateToHotelList()
             }
         }
         else {
@@ -914,7 +923,7 @@ const AddHotel = () => {
                                                     Back
                                                 </Button>
                                                 <Box sx={{ flex: '1 1 auto' }} />
-                                                <Button  onClick={(e) => (activeStep === 2 ? handleNavigateToHotelList() : handleNext(e))} sx={{ mr: 1 }}>
+                                                <Button onClick={(e) => (handleNext(e))} sx={{ mr: 1 }}>
                                                     {activeStep == 2 ? "Finish" : "Next"}
                                                 </Button>
                                             </Box>

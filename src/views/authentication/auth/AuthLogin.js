@@ -12,6 +12,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { url } from '../../../../mainurl';
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const AuthLogin = ({ title, subtitle, subtext }) => {
 
@@ -36,12 +37,32 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
             });
             if (response.status === 200) {
                 const data = response.data;
-                alert('Login successful!');
+                toast.success('Login successful !', {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
                 localStorage.setItem('authTokens', JSON.stringify(data));
-                navigate("/dashboard")
             }
         } catch (err) {
-            alert(err.response.data.error);
+            toast.error(`${err.response.data.error}`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
+        }
+        finally {
+            setTimeout(() => {
+                navigate("/dashboard")
+            }, 2000);
         }
     };
 

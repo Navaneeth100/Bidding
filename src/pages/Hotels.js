@@ -127,7 +127,7 @@ const HotelPage = () => {
         }
     };
 
-    // Delete Category
+    // Delete Hotel
 
     const [deleteData, setDeleteData] = useState([])
 
@@ -152,7 +152,15 @@ const HotelPage = () => {
             });
             fetchHotels();
         } catch (error) {
-            console.error('Error:', error);
+            toast.error(`${error.response.data.error}`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
         }
     };
 
@@ -255,7 +263,7 @@ const HotelPage = () => {
                 <Grid item sm={12} lg={12}>
                     <DashboardCard title="Our Hotels">
 
-                        <Box sx={{ overflow: 'auto', width: { xs: '630px', sm: 'auto' } }}>
+                        <Box sx={{ overflowY: 'auto', width: '100%', height: '765px' }}>
                             <Table
                                 aria-label="simple table"
                                 sx={{
@@ -309,7 +317,7 @@ const HotelPage = () => {
                                 <TableBody>
                                     {loading ? (
                                         <TableRow>
-                                            <TableCell colSpan={4} align="center">
+                                            <TableCell colSpan={8} align="center">
                                                 <Box
                                                     display="flex"
                                                     justifyContent="center"
