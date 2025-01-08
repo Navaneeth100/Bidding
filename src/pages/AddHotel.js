@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
 import ProductPerformance from '../views/dashboard/components/ProductPerformance';
-import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton, Badge, Paper } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton, Badge, Paper, CircularProgress } from '@mui/material';
 import { IconStar, IconEye, IconEdit, IconTrash } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -86,17 +86,17 @@ const AddHotel = () => {
 
     // stepper
 
-    const steps = ['Hotel Details', 'Room Details', 'Owner and Support Details'];
+    const steps = ['Hotel Details', 'Room Details', 'Owner and Support Details', 'Hotel Details Preview'];
 
     const [activeStep, setActiveStep] = React.useState(0);
-    const [completed, setCompleted] = React.useState({});
+    const [completed, setCompleted] = useState(Array(steps.length).fill(false));
 
     const totalSteps = () => {
         return steps.length;
     };
 
     const completedSteps = () => {
-        return Object.keys(completed).length;
+        return completed.filter(Boolean).length;
     };
 
     const isLastStep = () => {
@@ -118,23 +118,30 @@ const AddHotel = () => {
         }
 
         if (responseSuccess) {
+            const newCompleted = [...completed];
+            newCompleted[activeStep] = true;
+            setCompleted(newCompleted);
+
             const newActiveStep =
                 isLastStep() && !allStepsCompleted()
-                    ? steps.findIndex((step, i) => !(i in completed))
+                    ? completed.findIndex((step, i) => !step)
                     : activeStep + 1;
 
             setActiveStep(newActiveStep);
         }
     };
 
-    const handleBack = () => { setActiveStep((prevActiveStep) => prevActiveStep - 1) };
+    const handleBack = () => {
+        setActiveStep((prevActiveStep) => Math.max(prevActiveStep - 1, 0));
+    };
 
-    const handleStep = (step) => () => { setActiveStep(step) };
-
+    const handleStep = (step) => () => {
+        setActiveStep(step);
+    };
 
     const handleReset = () => {
         setActiveStep(0);
-        setCompleted({});
+        setCompleted(Array(steps.length).fill(false));
     };
 
 
@@ -365,7 +372,7 @@ const AddHotel = () => {
                         draggable: true,
                         theme: 'colored',
                     });
-                    handleNavigateToHotelList()
+                    return true;
                 }
             } catch (error) {
                 toast.error(`${error.response.data.error}`, {
@@ -377,8 +384,6 @@ const AddHotel = () => {
                     draggable: true,
                     theme: 'colored',
                 });
-            } finally {
-                // handleNavigateToHotelList()
             }
         }
         else {
@@ -394,6 +399,51 @@ const AddHotel = () => {
         }
 
     }
+
+    // Hotel Preview
+
+    const [hotelPreview, sethotelPreview] = useState([])
+    const [isLoading, setisLoading] = useState(false)
+
+    const fetchHotelPreview = () => {
+        setisLoading(true)
+        axios
+            .get(`${url}/hotel/updatehotels/${roomId}`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            })
+            .then((res) => {
+                sethotelPreview(res.data);
+                setisLoading(false)
+            })
+            .catch((error) => {
+                let refresh = String(authTokens.refresh);
+                axios.post(`${url}/api/token/refresh/`, { refresh: refresh }).then((res) => {
+                    localStorage.setItem("authTokens", JSON.stringify(res.data));
+                    //   setNewAuthTokens(JSON.stringify(res.data));
+
+                    const new_headers = {
+                        Authorization: `Bearer ${res.data.access}`,
+                    };
+                    axios
+                        .get(`${url}/hotel/updatehotels/${roomId}`, { headers: new_headers })
+                        .then((res) => {
+                            sethotelPreview(res.data);
+                            setisLoading(false)
+                        });
+                });
+            });
+    };
+
+    useEffect(() => {
+        if (activeStep === 3) {
+            fetchHotelPreview()
+        }
+    }, [activeStep])
+
 
     //  navigate to List
 
@@ -913,6 +963,83 @@ const AddHotel = () => {
                                                 </React.Fragment>
                                             )}
 
+                                            {/* Fourth Step: Preview */}
+                                            {activeStep === 3 && (
+                                                <React.Fragment>
+                                                    <Grid container spacing={2} sx={{ p: 3 }}>
+                                                        {/* English */}
+                                                        <Grid item xs={12} sm={6}>
+                                                            <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', height: '100%' }}>
+                                                                {isLoading ? (<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><CircularProgress size={25} /> <Typography sx={{ ml: 2 }}>Fetching Details...</Typography> </Box>) : (
+                                                                    <Paper elevation={2} sx={{ p: 3 }}>
+                                                                        <Typography variant="h4" component="h2" sx={{ color: 'black', mb: 2 }}>
+                                                                            {hotelPreview.name}
+                                                                            <Typography variant="h4" component="span" sx={{ float: 'right', color: '#2196f3' }}>
+                                                                                {hotelPreview.id}
+                                                                            </Typography>
+                                                                        </Typography>
+                                                                        <Typography variant="h6" sx={{ color: 'text.secondary' }}>
+                                                                            {hotelPreview.location},{hotelPreview.locationName}
+                                                                        </Typography>
+
+                                                                        <Grid container spacing={2} sx={{ mt: 1, mb: 2 }}>
+                                                                            <Grid item xs={4}>
+                                                                                <Typography variant="body2">4 beds</Typography>
+                                                                            </Grid>
+                                                                            <Grid item xs={4}>
+                                                                                <Typography variant="body2">3 baths</Typography>
+                                                                            </Grid>
+                                                                            <Grid item xs={4}>
+                                                                                <Typography variant="body2">4,460 sq. ft.</Typography>
+                                                                            </Grid>
+                                                                        </Grid>
+
+                                                                        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Description</Typography>
+                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
+                                                                            {hotelPreview.description}
+                                                                        </Typography>
+                                                                    </Paper>)}
+                                                            </Box>
+                                                        </Grid>
+
+                                                        {/* Arabic */}
+                                                        <Grid item xs={12} sm={6}>
+                                                            <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', height: '100%' }}>
+                                                                {isLoading ? (<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><CircularProgress size={25} /> <Typography sx={{ ml: 2 }}>Fetching Details...</Typography> </Box>) : (
+                                                                    <Paper elevation={2} sx={{ p: 3 }}>
+                                                                        <Typography variant="h4" component="h2" sx={{ color: 'black', mb: 2 }}>
+                                                                            {hotelPreview.name}
+                                                                            <Typography variant="h4" component="span" sx={{ float: 'right', color: '#2196f3' }}>
+                                                                                {hotelPreview.id}
+                                                                            </Typography>
+                                                                        </Typography>
+                                                                        <Typography variant="h6" sx={{ color: 'text.secondary' }}>
+                                                                            {hotelPreview.location},{hotelPreview.locationName}
+                                                                        </Typography>
+
+                                                                        <Grid container spacing={2} sx={{ mt: 1, mb: 2 }}>
+                                                                            <Grid item xs={4}>
+                                                                                <Typography variant="body2">4 beds</Typography>
+                                                                            </Grid>
+                                                                            <Grid item xs={4}>
+                                                                                <Typography variant="body2">3 baths</Typography>
+                                                                            </Grid>
+                                                                            <Grid item xs={4}>
+                                                                                <Typography variant="body2">4,460 sq. ft.</Typography>
+                                                                            </Grid>
+                                                                        </Grid>
+
+                                                                        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Description</Typography>
+                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
+                                                                            {hotelPreview.description}
+                                                                        </Typography>
+                                                                    </Paper>)}
+                                                            </Box>
+                                                        </Grid>
+                                                    </Grid>
+                                                </React.Fragment>
+                                            )}
+
                                             <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
                                                 <Button
                                                     color="inherit"
@@ -923,8 +1050,9 @@ const AddHotel = () => {
                                                     Back
                                                 </Button>
                                                 <Box sx={{ flex: '1 1 auto' }} />
-                                                <Button onClick={(e) => (handleNext(e))} sx={{ mr: 1 }}>
-                                                    {activeStep == 2 ? "Finish" : "Next"}
+                                                <Button
+                                                    onClick={(e) => { if (activeStep === 3) { handleNavigateToHotelList() } else { handleNext(e) } }} sx={{ mr: 1 }}>
+                                                    {activeStep == 3 ? "Back To List" : "Next"}
                                                 </Button>
                                             </Box>
                                         </React.Fragment>
