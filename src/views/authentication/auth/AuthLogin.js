@@ -39,7 +39,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
                 const data = response.data;
                 toast.success('Login successful !', {
                     position: 'top-right',
-                    autoClose: 3000,
+                    autoClose: 1500,
                     hideProgressBar: false,
                     closeOnClick: true,
                     pauseOnHover: true,
@@ -51,7 +51,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
         } catch (err) {
             toast.error(`${err.response.data.error}`, {
                 position: 'top-right',
-                autoClose: 3000,
+                autoClose: 1500,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,

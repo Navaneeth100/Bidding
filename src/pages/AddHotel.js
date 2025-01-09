@@ -234,6 +234,9 @@ const AddHotel = () => {
                 rating: `${formData.rating}`,
                 locationName: formData.location,
                 location: formData.location,
+                booking_price: formData.bookingPrice,
+                discount: formData.discount,
+                available_rooms: formData.availableRooms,
                 hotel_room_categories: categories.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id)),
                 tags: tags,
                 facilities: facilities.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id)),
@@ -293,7 +296,7 @@ const AddHotel = () => {
     };
 
     const handleRoomSubmit = async (event) => {
-        const isRoomDataValid = roomData.every((room) => Object.values(room).every((value) => value.trim() !== ''));
+        const isRoomDataValid = roomData.every((room) => Object.values(room).every((value) => String(value).trim() !== ''));
         if (roomId && isRoomDataValid) {
             event.preventDefault();
             const updatedRoomData = roomData.map((room) => ({ ...room, room_category: categoryList.find((category) => category.category_name === room.room_category)?.id }));
@@ -455,6 +458,43 @@ const AddHotel = () => {
         }, 2000);
     }
 
+    // Google Location
+
+    const [locations, setLocations] = useState([]);
+    const [selectedLocation, setSelectedLocation] = useState(null);
+
+    const handleSearchLocation = async (location) => {
+        if (!location || location === "") {
+            setLocations([]);
+            setSelectedLocation(null);
+            return;
+        }
+
+        try {
+            const response = await axios.get(`https://maps.googleapis.com/maps/api/place/autocomplete/json`,
+                {
+                    params: {
+                        input: location,
+                        key: "AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY",
+                    }
+                }, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            setLocations(response.data || []);
+        } catch (error) {
+            console.error("Error fetching location suggestions:", error);
+            setLocations([]);
+        }
+    };
+
+    const handleSelectLocation = (location) => {
+        setSelectedLocation(location);
+        setLocations([]);
+    };
+
     return (
         <PageContainer title="Hotels" description="Hotels">
             <Grid container spacing={3}>
@@ -600,8 +640,33 @@ const AddHotel = () => {
                                                             Hotel Details
                                                         </Typography>
                                                         <Grid container spacing={2}>
+                                                            <Grid item xs={12} sm={12}>
+                                                                <TextField
+                                                                    label="Location"
+                                                                    variant="outlined"
+                                                                    fullWidth
+                                                                    sx={{ mb: 2 }}
+                                                                    onChange={(e) => {
+                                                                        const value = e.target.value;
+                                                                        handleSearchLocation(value);
+                                                                        setFormData({ ...formData, location: value })
+                                                                    }}
+                                                                />
+                                                                {locations.length > 0 && (
+                                                                    <div style={{ position: "relative", zIndex: 10 }}>
+                                                                        {locations.map((location, index) => (
+                                                                            <MenuItem
+                                                                                key={index}
+                                                                                onClick={() => handleSelectLocation(location)}
+                                                                                style={{ cursor: "pointer" }}
+                                                                            >
+                                                                                {location.description}
+                                                                            </MenuItem>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </Grid>
                                                             {[
-                                                                { label: 'Location', key: 'location' },
                                                                 { label: 'Booking Price', key: 'bookingPrice' },
                                                                 { label: 'Discount', key: 'discount' },
                                                                 { label: 'Available Rooms', key: 'availableRooms' },
@@ -623,7 +688,7 @@ const AddHotel = () => {
 
                                                 {/* Category Details Form */}
 
-                                                {/* <Box sx={{ mt: 4 }}>
+                                                <Box sx={{ mt: 4 }}>
                                                     <form>
                                                         <Typography variant="h5" className='mb-3' gutterBottom>
                                                             Category and Facilities
@@ -636,7 +701,7 @@ const AddHotel = () => {
                                                                         multiple
                                                                         value={categories}
                                                                         onChange={(e) => { setCategories(e.target.value) }}
-                                                                        onClick={fetchCategory}
+                                                                        onOpen={fetchCategory}
                                                                         renderValue={(selected) => selected.join(', ')}
                                                                         label="Category"
                                                                         MenuProps={MenuProps}>
@@ -654,7 +719,7 @@ const AddHotel = () => {
                                                                         multiple
                                                                         value={facilities}
                                                                         onChange={(e) => { setfacilities(e.target.value) }}
-                                                                        onClick={fetchFacilities}
+                                                                        onOpen={fetchFacilities}
                                                                         renderValue={(selected) => selected.join(', ')}
                                                                         label="Facilities"
                                                                         MenuProps={MenuProps}>
@@ -673,8 +738,9 @@ const AddHotel = () => {
                                                                         value={tags}
                                                                         onChange={(e) => { settags(e.target.value) }}
                                                                         renderValue={(selected) => selected.join(', ')}
-                                                                        label="Tags">
-                                                                        <MenuItem value="">Breakfast</MenuItem>
+                                                                        label="Tags"
+                                                                        MenuProps={MenuProps}>
+                                                                        <MenuItem value="Breakfast">Breakfast</MenuItem>
                                                                         <MenuItem value="Parking">Parking</MenuItem>
                                                                         <MenuItem value="Pool">Pool</MenuItem>
                                                                         <MenuItem value="Spa">Spa</MenuItem>
@@ -684,7 +750,7 @@ const AddHotel = () => {
 
                                                         </Grid>
                                                     </form>
-                                                </Box> */}
+                                                </Box>
                                             </React.Fragment>)}
 
                                             {activeStep === 1 && (
@@ -739,11 +805,11 @@ const AddHotel = () => {
                                                                                         <FormControl fullWidth>
                                                                                             <InputLabel>Facilities</InputLabel>
                                                                                             <Select
-                                                                                                multiple
-                                                                                                value={facilities}
+                                                                                                // multiple
+                                                                                                value={roomData[index].facilities || ""}
                                                                                                 onOpen={fetchFacilities}
                                                                                                 onChange={(e) => handleRoomChange(index, 'facilities', e.target.value)}
-                                                                                                renderValue={(selected) => selected.join(', ')}
+                                                                                                // renderValue={(selected) => selected.join(', ')}
                                                                                                 label="Facilities"
                                                                                                 MenuProps={MenuProps}>
                                                                                                 {facilitiesList.map((item) => (
@@ -753,14 +819,14 @@ const AddHotel = () => {
                                                                                         </FormControl>
                                                                                     </Grid>
 
-                                                                                    <Grid item xs={12} sm={12}>
+                                                                                    {/* <Grid item xs={12} sm={12}>
                                                                                         <FormControl fullWidth>
                                                                                             <InputLabel>Tags</InputLabel>
                                                                                             <Select
-                                                                                                multiple
-                                                                                                value={tags}
+                                                                                                // multiple
+                                                                                                value={roomData[index].tags || ""}
                                                                                                 onChange={(e) => handleRoomChange(index, 'tags', e.target.value)}
-                                                                                                renderValue={(selected) => selected.join(', ')}
+                                                                                                // renderValue={(selected) => selected.join(', ')}
                                                                                                 label="Tags">
                                                                                                 <MenuItem value="">Breakfast</MenuItem>
                                                                                                 <MenuItem value="Parking">Parking</MenuItem>
@@ -768,7 +834,7 @@ const AddHotel = () => {
                                                                                                 <MenuItem value="Spa">Spa</MenuItem>
                                                                                             </Select>
                                                                                         </FormControl>
-                                                                                    </Grid>
+                                                                                    </Grid> */}
                                                                                     <Grid item sm={12}>
                                                                                         {/* <Typography variant="h6" gutterBottom>
                                                                                             Room Images

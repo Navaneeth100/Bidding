@@ -367,7 +367,7 @@ const Facilities = () => {
                 <Grid item sm={12}>
                     <DashboardCard title="Our Facilities">
 
-                        <Box sx={{ overflowY: 'auto', width: '100%', height: '765px' }}>
+                        <Box sx={{ overflowY: 'auto', width: '100%', minHeight: '765px' }}>
                             <Table
                                 aria-label="simple table"
                                 sx={{

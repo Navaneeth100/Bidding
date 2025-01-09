@@ -369,7 +369,7 @@ const Category = () => {
                 <Grid item sm={12} lg={12}>
                     <DashboardCard title="Our Category">
 
-                        <Box sx={{ overflowY: 'auto', width: '100%', height: '630px' }}>
+                        <Box sx={{ overflowY: 'auto', width: '100%', minHeight: '630px' }}>
                             <Table
                                 aria-label="simple table"
                                 sx={{

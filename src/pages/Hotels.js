@@ -263,7 +263,7 @@ const HotelPage = () => {
                 <Grid item sm={12} lg={12}>
                     <DashboardCard title="Our Hotels">
 
-                        <Box sx={{ overflowY: 'auto', width: '100%', height: '765px' }}>
+                        <Box sx={{ overflowY: 'auto', width: '100%', minHeight: '820px' }}>
                             <Table
                                 aria-label="simple table"
                                 sx={{
