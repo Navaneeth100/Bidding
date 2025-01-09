@@ -270,9 +270,9 @@ const HotelPage = () => {
                                                 {hotelDetails.description}
                                             </CardText>
                                             <CardText>
-                                                {spec.map((item, index) => (
+                                                {hotelDetails?.tags?.map((item) => (
                                                     <Badge className='text-dark me-2' color="light" pill>
-                                                        {item.specs}
+                                                        {item}
                                                     </Badge>
                                                 ))}
                                             </CardText>

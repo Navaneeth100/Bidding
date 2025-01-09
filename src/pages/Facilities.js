@@ -135,6 +135,11 @@ const Facilities = () => {
         }
     };
 
+    const resetForm = () => {
+        setSelectedFile(null);
+        setPreviewUrl(null);
+    }
+
     // Add Facilities 
 
 
@@ -151,7 +156,7 @@ const Facilities = () => {
             const response = await axios.post(`${url}/hotel/facilities/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "application/json",
+                    "Content-Type": "multipart/form-data",
                 },
                 withCredentials: false,
             });
@@ -167,6 +172,7 @@ const Facilities = () => {
                 });
             }
             toggleModal('add')
+            resetForm()
             fetchFacilities()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
@@ -190,13 +196,14 @@ const Facilities = () => {
         event.preventDefault();
         let submitData = {
             name: editData.name,
+            icon: selectedFile || editData.icon
         };
 
         try {
             const response = await axios.put(`${url}/hotel/facilities/${editData.id}/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "application/json",
+                    "Content-Type": "multipart/form-data",
                 },
                 withCredentials: false,
             });
@@ -212,6 +219,7 @@ const Facilities = () => {
                 });
             }
             toggleModal('edit');
+            resetForm()
             fetchFacilities();
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
@@ -383,6 +391,11 @@ const Facilities = () => {
                                         </TableCell>
                                         <TableCell align='center'>
                                             <Typography variant="subtitle2" fontWeight={600}>
+                                                Icon
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align='center'>
+                                            <Typography variant="subtitle2" fontWeight={600}>
                                                 Facilities
                                             </Typography>
                                         </TableCell>
@@ -414,6 +427,21 @@ const Facilities = () => {
                                                     <Typography variant="subtitle2" fontWeight={600}>
                                                         {calculateSN(index, currentPage, pageSize)}
                                                     </Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Box
+                                                        display="flex"
+                                                        justifyContent="center"
+                                                        alignItems="center"
+                                                        height="100%"
+                                                    >
+                                                        <Avatar
+                                                            src={`${url}/hotel${item.icon}`}
+                                                            alt=""
+                                                            variant="rounded"
+                                                            sx={{ width: 50, height: 50 }}
+                                                        />
+                                                    </Box>
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     <Typography variant="subtitle2" fontWeight={600}>
@@ -510,21 +538,12 @@ const Facilities = () => {
                         <Grid container spacing={3}>
                             <Grid item md={12} xs={12}>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
-                                    {previewUrl ? (
                                         <Avatar
-                                            src={previewUrl}
-                                            alt="Preview"
+                                            src={previewUrl ? previewUrl : ""}
+                                            alt=""
                                             variant="rounded"
                                             sx={{ width: 100, height: 100, margin: "0 auto" }}
                                         />
-                                    ) : (
-                                        <Avatar
-                                            src=""
-                                            alt="No Image"
-                                            variant="rounded"
-                                            sx={{ width: 100, height: 100, margin: "0 auto" }}
-                                        />
-                                    )}
                                 </Box>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
                                     <input
@@ -583,6 +602,30 @@ const Facilities = () => {
                 <DialogContent sx={{ padding: 3 }}>
                     <form className="row gy-4 mt-2" onSubmit={handleEdit}>
                         <Grid container spacing={3}>
+                            <Grid item md={12} xs={12}>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                        <Avatar
+                                            src={previewUrl ? previewUrl : `${url}/hotel${editData.icon}`}
+                                            alt=""
+                                            variant="rounded"
+                                            sx={{ width: 100, height: 100, margin: "0 auto" }}
+                                        />
+                                </Box>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    <input
+                                        accept="image/*"
+                                        id="file-upload"
+                                        type="file"
+                                        style={{ display: "none" }}
+                                        onChange={handleFileChange}
+                                    />
+                                    <label htmlFor="file-upload">
+                                        <Button variant="contained" component="span">
+                                            Choose File
+                                        </Button>
+                                    </label>
+                                </Box>
+                            </Grid>
                             <Grid item md={12} xs={12}>
                                 <TextField
                                     label="Facilities"

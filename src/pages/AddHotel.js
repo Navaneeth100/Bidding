@@ -3,7 +3,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
 import ProductPerformance from '../views/dashboard/components/ProductPerformance';
-import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton, Badge, Paper, CircularProgress } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton, Badge, Paper, CircularProgress, List, ListItem, ListItemText, Chip } from '@mui/material';
 import { IconStar, IconEye, IconEdit, IconTrash } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -111,9 +111,11 @@ const AddHotel = () => {
         let responseSuccess = false;
         if (activeStep === 0) {
             responseSuccess = await handleHotelSubmit(e);
-        } else if (activeStep === 1) {
-            responseSuccess = await handleRoomSubmit(e);
-        } else if (activeStep === 2) {
+        }
+        // else if (activeStep === 1) {
+        //     responseSuccess = await handleRoomSubmit(e);
+        // }
+        else if (activeStep === 2) {
             responseSuccess = await handleOwnerDetailSubmit(e);
         }
 
@@ -230,20 +232,20 @@ const AddHotel = () => {
             let submitData = {
                 name: formData.name,
                 description: formData.description,
-                profilepicture: profilepicture,
+                pro_img: profilepicture,
                 rating: `${formData.rating}`,
                 locationName: formData.location,
                 location: formData.location,
                 booking_price: formData.bookingPrice,
                 discount: formData.discount,
                 available_rooms: formData.availableRooms,
-                hotel_room_categories: categories.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id)),
-                tags: tags,
-                facilities: facilities.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id)),
-                hotelimgs: files,
-                owner_name: "null",
-                owner_contact_number: "null",
-                owner_email: "stayhotel@gmail.com",
+                // hotel_room_categories: categories.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id)),
+                tags: tagsList,
+                // facilities: facilities.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id)),
+                images: files,
+                // owner_name: "null",
+                // owner_contact_number: "null",
+                // owner_email: "stayhotel@gmail.com",
             }
 
             try {
@@ -303,7 +305,7 @@ const AddHotel = () => {
             setRoomData(updatedRoomData);
 
             try {
-                const response = await axios.post(`${url}/hotels/${roomId}/room-categories/`, updatedRoomData, {
+                const response = await axios.post(`${url}/hotel/hotels/${roomId}/room-categories/`, updatedRoomData, {
                     headers: {
                         Authorization: `Bearer ${tokenStr}`,
                         "Content-Type": "application/json",
@@ -320,7 +322,7 @@ const AddHotel = () => {
                     theme: 'colored',
                 });
                 if (response.status === 200) {
-                    return true;
+                    // return true;
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -457,6 +459,31 @@ const AddHotel = () => {
             navigate('/hotels/');
         }, 2000);
     }
+
+    // Tag Adds
+
+    const [tagInput, settagInput] = useState("");
+    const [tagsList, setTagList] = useState([]);
+
+    const handleAddTag = () => {
+        if (tagInput.trim() !== "") {
+            setTagList((prevItems) => [...prevItems, tagInput]);
+            settagInput("");
+        }
+    };
+
+    const handleRemoveItem = (indexToRemove) => {
+        setTagList((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            handleAddTag();
+        }
+    };
+
+
 
     // Google Location
 
@@ -614,9 +641,6 @@ const AddHotel = () => {
                                                                             image={file.preview}
                                                                             alt={file.name}
                                                                         />
-                                                                        <Typography variant="body2" align="center" gutterBottom>
-                                                                            {file.name}
-                                                                        </Typography>
                                                                         <Button
                                                                             size="small"
                                                                             style={{ color: "red" }}
@@ -690,11 +714,11 @@ const AddHotel = () => {
 
                                                 <Box sx={{ mt: 4 }}>
                                                     <form>
-                                                        <Typography variant="h5" className='mb-3' gutterBottom>
+                                                        {/* <Typography variant="h5" className='mb-3' gutterBottom>
                                                             Category and Facilities
-                                                        </Typography>
+                                                        </Typography> */}
                                                         <Grid container spacing={2}>
-                                                            <Grid item xs={12} sm={6}>
+                                                            {/* <Grid item xs={12} sm={6}>
                                                                 <FormControl fullWidth>
                                                                     <InputLabel>Category</InputLabel>
                                                                     <Select
@@ -710,9 +734,9 @@ const AddHotel = () => {
                                                                         ))}
                                                                     </Select>
                                                                 </FormControl>
-                                                            </Grid>
+                                                            </Grid> */}
 
-                                                            <Grid item xs={12} sm={6}>
+                                                            {/* <Grid item xs={12} sm={6}>
                                                                 <FormControl fullWidth>
                                                                     <InputLabel>Facilities</InputLabel>
                                                                     <Select
@@ -728,24 +752,33 @@ const AddHotel = () => {
                                                                         ))}
                                                                     </Select>
                                                                 </FormControl>
-                                                            </Grid>
+                                                            </Grid> */}
 
-                                                            <Grid item xs={12} sm={6}>
-                                                                <FormControl fullWidth>
-                                                                    <InputLabel>Tags</InputLabel>
-                                                                    <Select
-                                                                        multiple
-                                                                        value={tags}
-                                                                        onChange={(e) => { settags(e.target.value) }}
-                                                                        renderValue={(selected) => selected.join(', ')}
-                                                                        label="Tags"
-                                                                        MenuProps={MenuProps}>
-                                                                        <MenuItem value="Breakfast">Breakfast</MenuItem>
-                                                                        <MenuItem value="Parking">Parking</MenuItem>
-                                                                        <MenuItem value="Pool">Pool</MenuItem>
-                                                                        <MenuItem value="Spa">Spa</MenuItem>
-                                                                    </Select>
-                                                                </FormControl>
+                                                            <Grid item xs={12} sm={12}>
+                                                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
+                                                                    <TextField
+                                                                        label="Enter Tags"
+                                                                        variant="outlined"
+                                                                        fullWidth
+                                                                        value={tagInput}
+                                                                        onChange={(e) => settagInput(e.target.value)}
+                                                                        onKeyDown={handleKeyDown}
+                                                                    />
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="primary"
+                                                                        onClick={handleAddTag}
+                                                                    >
+                                                                        Add
+                                                                    </Button>
+                                                                </Box>
+                                                                <Box>
+                                                                    {tagsList.map((item, index) => (
+                                                                        <span key={index}>
+                                                                            <Chip className='me-2 mb-2' label={item} variant="outlined" onDelete={() => handleRemoveItem(index)} />
+                                                                        </span>
+                                                                    ))}
+                                                                </Box>
                                                             </Grid>
 
                                                         </Grid>
@@ -870,9 +903,6 @@ const AddHotel = () => {
                                                                                                             image={file.preview}
                                                                                                             alt={file.name}
                                                                                                         />
-                                                                                                        <Typography variant="body2" align="center" gutterBottom>
-                                                                                                            {file.name}
-                                                                                                        </Typography>
                                                                                                         <Button
                                                                                                             size="small"
                                                                                                             style={{ color: "red" }}
@@ -967,6 +997,13 @@ const AddHotel = () => {
                                                                                             name={`room_price_${index}`}
                                                                                             onChange={(e) => handleRoomChange(index, 'booking_price', e.target.value)}
                                                                                         />
+                                                                                    </Grid>
+                                                                                    <Grid item xs={12}>
+                                                                                        <Button
+                                                                                            fullWidth
+                                                                                            variant="contained"
+                                                                                            onClick={(e) => handleRoomSubmit(e)}
+                                                                                        >Save</Button>
                                                                                     </Grid>
                                                                                 </Grid>
                                                                             </Box>
