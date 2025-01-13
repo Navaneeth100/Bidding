@@ -3,7 +3,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
 import ProductPerformance from '../views/dashboard/components/ProductPerformance';
-import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton, Badge, Paper, CircularProgress, List, ListItem, ListItemText, Chip } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton, Badge, Paper, CircularProgress, List, ListItem, ListItemText, Chip, ListItemButton } from '@mui/material';
 import { IconStar, IconEye, IconEdit, IconTrash } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -43,9 +43,11 @@ const AddHotel = () => {
 
     const handleChange = (field, value) => { setFormData((prev) => ({ ...prev, [field]: value })) };
     const [profilepicture, setprofilepicture] = useState('https://www.shutterstock.com/image-vector/image-icon-600nw-211642900.jpg')
+    const [selectedProimg, setselectedProimg] = useState(null)
 
     const handleFileChange = (event) => {
         const file = event.target.files[0]
+        setselectedProimg(file)
         if (file) {
             const reader = new FileReader()
             reader.onloadend = () => {
@@ -58,6 +60,7 @@ const AddHotel = () => {
     // multiple file uploads
 
     const [files, setFiles] = useState([]);
+    const [files1, setFiles1] = useState([]);
 
     const onDrop = (acceptedFiles) => {
         const updatedFiles = acceptedFiles.map((file) =>
@@ -227,25 +230,26 @@ const AddHotel = () => {
     const [roomId, setroomId] = useState(null)
 
     const handleHotelSubmit = async (event) => {
-        if (formData.name && formData.description && formData.rating && formData.location) {
+        if (formData.name && formData.description && formData.rating && selectedLocation) {
             event.preventDefault();
             let submitData = {
                 name: formData.name,
                 description: formData.description,
                 pro_img: profilepicture,
                 rating: `${formData.rating}`,
-                locationName: formData.location,
-                location: formData.location,
+                locationName: selectedLocation,
+                location: selectedLocation,
                 booking_price: formData.bookingPrice,
                 discount: formData.discount,
                 available_rooms: formData.availableRooms,
                 // hotel_room_categories: categories.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id)),
                 tags: tagsList,
-                // facilities: facilities.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id)),
+                facilities: facilities.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id)),
                 images: files,
                 // owner_name: "null",
                 // owner_contact_number: "null",
                 // owner_email: "stayhotel@gmail.com",
+                loc_gis: markerPosition,
             }
 
             try {
@@ -519,7 +523,7 @@ const AddHotel = () => {
     };
 
 
-    const [markerPosition, setMarkerPosition] = useState([]);
+    const [markerPosition, setMarkerPosition] = useState({ lat: 25.2048, lng: 55.2708 });
 
     useEffect(() => {
         const fetchLocation = async () => {
@@ -546,7 +550,7 @@ const AddHotel = () => {
         fetchLocation();
     }, [markerPosition]);
 
-    const [center, setCenter] = useState([]);
+    const [center, setCenter] = useState({ lat: 25.2048, lng: 55.2708 });
 
     const handleMarkerDragEnd = (e) => {
         setMarkerPosition({
@@ -698,7 +702,7 @@ const AddHotel = () => {
                                                         </Typography>
                                                         <Grid container spacing={2}>
                                                             <Grid item xs={12} sm={12}>
-                                                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
+                                                                <Box className="mt-3 mb-3" >
                                                                     <TextField
                                                                         label="Location"
                                                                         variant="outlined"
@@ -707,16 +711,35 @@ const AddHotel = () => {
                                                                         onChange={(e) => {
                                                                             const value = e.target.value;
                                                                             handleSearchLocation(value);
-                                                                            setFormData({ ...formData, location: value })
+                                                                            setFormData({ ...formData, locationName: value })
                                                                         }}
                                                                     />
-                                                                    <Button
-                                                                        variant="contained"
-                                                                        color="primary"
-                                                                        onClick={() => setlocationModal(true)}
-                                                                    >
-                                                                        Add
-                                                                    </Button>
+                                                                    {locations.length > 0 && (
+                                                                        <List>
+                                                                            {locations.map((location) => (
+                                                                                <ListItem key={location.place_id}>
+                                                                                    <ListItemButton onClick={() => handleSelectLocation(location)}>
+                                                                                        <Typography>{location.description}</Typography>
+                                                                                    </ListItemButton>
+                                                                                </ListItem>
+                                                                            ))}
+                                                                        </List>
+                                                                    )}
+                                                                    <Typography variant="h6" className='mb-3' gutterBottom>
+                                                                        Selected Location : {selectedLocation}
+                                                                    </Typography>
+                                                                    <LoadScript googleMapsApiKey="AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY" libraries={['places']}>
+                                                                        <GoogleMap
+                                                                            mapContainerStyle={{ height: '400px', width: '100%' }}
+                                                                            zoom={15}
+                                                                            center={center}
+                                                                        >
+                                                                            <Marker position={markerPosition}
+                                                                                draggable={true}
+                                                                                onDragEnd={handleMarkerDragEnd}
+                                                                            />
+                                                                        </GoogleMap>
+                                                                    </LoadScript>
                                                                 </Box>
                                                             </Grid>
                                                             {[
@@ -728,6 +751,7 @@ const AddHotel = () => {
                                                                     <TextField
                                                                         label={field.label}
                                                                         variant="outlined"
+                                                                        type="number"
                                                                         fullWidth
                                                                         onChange={(e) =>
                                                                             handleChange(field.key, e.target.value)
@@ -765,7 +789,7 @@ const AddHotel = () => {
                                                                 </FormControl>
                                                             </Grid> */}
 
-                                                            {/* <Grid item xs={12} sm={6}>
+                                                            <Grid item xs={12} sm={12}>
                                                                 <FormControl fullWidth>
                                                                     <InputLabel>Facilities</InputLabel>
                                                                     <Select
@@ -781,7 +805,7 @@ const AddHotel = () => {
                                                                         ))}
                                                                     </Select>
                                                                 </FormControl>
-                                                            </Grid> */}
+                                                            </Grid>
 
                                                             <Grid item xs={12} sm={12}>
                                                                 <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
@@ -922,7 +946,7 @@ const AddHotel = () => {
                                                                                             </Button>
                                                                                         </Box>
                                                                                         <Grid container spacing={2} style={{ marginTop: "15px", textAlign: "center" }}>
-                                                                                            {files.map((file, index) => (
+                                                                                            {files1.map((file, index) => (
                                                                                                 <Grid item key={index} xs={12} sm={3} md={3}>
                                                                                                     <Card>
                                                                                                         <CardMedia

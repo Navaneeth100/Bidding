@@ -4,13 +4,13 @@ import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
 import ProductPerformance from '../views/dashboard/components/ProductPerformance';
-import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton, List, ListItem, ListItemText, Chip, ListItemButton } from '@mui/material';
 import { IconStar, IconEye, IconEdit, IconTrash, IconAlertCircle } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { url } from '../../mainurl';
 import { toast } from 'react-toastify';
-
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 
 const HotelPage = () => {
 
@@ -126,6 +126,81 @@ const HotelPage = () => {
             fetchHotels(page);
         }
     };
+
+
+    // Google Location
+
+    const [locations, setLocations] = useState([]);
+    const [selectedLocation, setSelectedLocation] = useState(null);
+
+    const handleSearchLocation = (location) => {
+        const autocompleteService = new window.google.maps.places.AutocompleteService();
+        autocompleteService.getPlacePredictions({ input: location }, (predictions, status) => {
+            if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+                setLocations(predictions);
+            } else {
+                setLocations([]);
+            }
+        });
+    };
+
+    const handleSelectLocation = (location) => {
+        const service = new window.google.maps.places.PlacesService(document.createElement('div'));
+
+        service.getDetails({ placeId: location.place_id }, (place, status) => {
+            if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+                const { lat, lng } = place.geometry.location;
+                setMarkerPosition({ lat: lat(), lng: lng() });
+                setCenter({ lat: lat(), lng: lng() });
+                setLocations([]);
+            }
+            else {
+                console.error('Error fetching place details:', status);
+            }
+        });
+    };
+
+
+    const [markerPosition, setMarkerPosition] = useState({ lat: 25.2048, lng: 55.2708 });
+
+    useEffect(() => {
+        const fetchLocation = async () => {
+            if (markerPosition.lat && markerPosition.lng && !isNaN(markerPosition.lat) && !isNaN(markerPosition.lng)) {
+                try {
+                    const geocoderUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${markerPosition.lat},${markerPosition.lng}&key=AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY`; // Replace with your API key
+                    const response = await fetch(geocoderUrl);
+                    const data = await response.json();
+
+                    if (data.status === 'OK') {
+                        setSelectedLocation(data.results[0].formatted_address);
+                    } else {
+                        // console.error('Failed to get location from geocoder');
+                    }
+                } catch (err) {
+                    // console.error('Error fetching location:', err);
+                    // console.error(err.message);
+                }
+            } else {
+                // console.error('Geolocation is not supported by your browser');
+            }
+        };
+
+        fetchLocation();
+    }, [markerPosition]);
+
+    const [center, setCenter] = useState({ lat: 25.2048, lng: 55.2708 });
+
+    const handleMarkerDragEnd = (e) => {
+        setMarkerPosition({
+            lat: e.latLng.lat(),
+            lng: e.latLng.lng(),
+        });
+    };
+
+    // Edit Hotel
+
+    const [editData, setEditData] = useState([])
+
 
     // Delete Hotel
 
@@ -399,7 +474,7 @@ const HotelPage = () => {
                                     ) : (
                                         <TableRow>
                                             <TableCell colSpan={8} align="center">
-                                                <Typography variant="subtitle2" fontWeight={600} sx={{paddingTop:"300px"}}>
+                                                <Typography variant="subtitle2" fontWeight={600} sx={{ paddingTop: "300px" }}>
                                                     No Data to Display
                                                 </Typography>
                                             </TableCell>
@@ -454,84 +529,120 @@ const HotelPage = () => {
                 </Grid>
             </Grid>
 
-            {/* add modal */}
+            {/* edit modal */}
 
             <Dialog
-                open={modal.add}
-                onClose={() => toggleModal('add')}
+                open={modal.edit}
+                onClose={() => toggleModal('edit')}
                 maxWidth="lg"
                 fullWidth
                 sx={{ padding: 2 }}
             >
                 <DialogTitle sx={{ m: 0, p: 2, position: 'relative' }} id="customized-dialog-title">
-                    Modal title
+                    Edit Hotel
                     <IconButton
-                        onClick={() => toggleModal('add')} sx={{ position: 'absolute', right: 8, top: 8 }}>x</IconButton>
+                        onClick={() => toggleModal('edit')} sx={{ position: 'absolute', right: 8, top: 8 }}>x</IconButton>
                 </DialogTitle>
 
                 <DialogContent sx={{ padding: 3 }}>
-                    <form className="row gy-4">
+                    <form className="row gy-4 mt-2">
                         <Grid container spacing={3}>
-                            <Grid item md={6} xs={12}>
-                                <FormControl fullWidth>
-                                    <InputLabel>Account Header</InputLabel>
-                                    <Select
-                                        value=""
-                                        onChange={() => { }}
-                                        label="Account Header"
-                                    >
-                                        <MenuItem value={1}>Header 1</MenuItem>
-                                        <MenuItem value={2}>Header 2</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-
-                            <Grid item md={6} xs={12}>
-                                <FormControl fullWidth>
-                                    <InputLabel>Account Group</InputLabel>
-                                    <Select
-                                        value=""
-                                        onChange={() => { }}
-                                        label="Account Group"
-                                    >
-                                        <MenuItem value={1}>Group 1</MenuItem>
-                                        <MenuItem value={2}>Group 2</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-
-                            <Grid item md={6} xs={12}>
+                            <Grid item md={4} xs={12}>
                                 <TextField
-                                    label="Account Name"
+                                    label="Name"
                                     variant="outlined"
                                     fullWidth
-                                    placeholder="Enter Account Name"
+                                    defaultValue={editData.name}
+                                    sx={{ mb: 2 }}
+                                    onChange={(e) => {
+                                        setEditData({ ...editData, name: e.target.value })
+                                    }}
                                 />
                             </Grid>
 
-                            <Grid item md={6} xs={12}>
+                            <Grid item md={4} xs={12}>
                                 <TextField
-                                    label="Account ID"
+                                    label="Ratings"
                                     variant="outlined"
-                                    type="number"
+                                    defaultValue={editData.rating}
                                     fullWidth
-                                    placeholder="Enter Account ID"
+                                    sx={{ mb: 2 }}
+                                    onChange={(e) => {
+                                        setEditData({ ...editData, rating: e.target.value })
+                                    }}
                                 />
                             </Grid>
 
-                            <Grid item md={6} xs={12}>
-                                <FormControl fullWidth>
-                                    <InputLabel>User</InputLabel>
-                                    <Select
-                                        value=""
-                                        onChange={() => { }}
-                                        label="User"
-                                    >
-                                        <MenuItem value={1}>User 1</MenuItem>
-                                        <MenuItem value={2}>User 2</MenuItem>
-                                    </Select>
-                                </FormControl>
+                            <Grid item md={4} xs={12}>
+                                <TextField
+                                    label="Location"
+                                    variant="outlined"
+                                    fullWidth
+                                    defaultValue={editData.locationName}
+                                    sx={{ mb: 2 }}
+                                    onChange={(e) => {
+                                        setEditData({ ...editData, locationName: e.target.value })
+                                    }}
+                                />
                             </Grid>
+
+                            <Grid item md={12} xs={12}>
+                                <TextField
+                                    label="Description"
+                                    variant="outlined"
+                                    multiline
+                                    rows={3}
+                                    defaultValue={editData.description}
+                                    fullWidth
+                                    sx={{ mb: 2 }}
+                                    onChange={(e) => {
+                                        setEditData({ ...editData, description: e.target.value })
+                                    }}
+                                />
+                            </Grid>
+
+                            <Grid item md={12} xs={12}>
+                                <Box className="mt-3 mb-3" >
+                                    <TextField
+                                        label="Location"
+                                        variant="outlined"
+                                        fullWidth
+                                        sx={{ mb: 2 }}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            handleSearchLocation(value);
+                                            // setFormData({ ...formData, locationName: value })
+                                        }}
+                                    />
+                                    {locations.length > 0 && (
+                                        <List>
+                                            {locations.map((location) => (
+                                                <ListItem key={location.place_id}>
+                                                    <ListItemButton onClick={() => handleSelectLocation(location)}>
+                                                        <Typography>{location.description}</Typography>
+                                                    </ListItemButton>
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    )}
+                                    <Typography variant="h6" className='mb-3' gutterBottom>
+                                        Selected Location : {selectedLocation || editData.locationName}
+                                    </Typography>
+                                    <LoadScript googleMapsApiKey="AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY" libraries={['places']}>
+                                        <GoogleMap
+                                            mapContainerStyle={{ height: '400px', width: '100%' }}
+                                            zoom={15}
+                                            center={center}
+                                        >
+                                            <Marker position={markerPosition}
+                                                draggable={true}
+                                                onDragEnd={handleMarkerDragEnd}
+                                            />
+                                        </GoogleMap>
+                                    </LoadScript>
+                                </Box>
+                            </Grid>
+
                         </Grid>
 
                         <Button
