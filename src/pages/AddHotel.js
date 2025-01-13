@@ -20,7 +20,7 @@ import StepButton from '@mui/material/StepButton';
 import axios from 'axios';
 import { url } from '../../mainurl';
 import { toast } from 'react-toastify';
-
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 
 
 const AddHotel = () => {
@@ -487,39 +487,72 @@ const AddHotel = () => {
 
     // Google Location
 
+    const [locationModal, setlocationModal] = useState(false)
     const [locations, setLocations] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState(null);
 
-    const handleSearchLocation = async (location) => {
-        if (!location || location === "") {
-            setLocations([]);
-            setSelectedLocation(null);
-            return;
-        }
-
-        try {
-            const response = await axios.get(`https://maps.googleapis.com/maps/api/place/autocomplete/json`,
-                {
-                    params: {
-                        input: location,
-                        key: "AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY",
-                    }
-                }, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "application/json",
-                },
-            });
-            setLocations(response.data || []);
-        } catch (error) {
-            console.error("Error fetching location suggestions:", error);
-            setLocations([]);
-        }
+    const handleSearchLocation = (location) => {
+        const autocompleteService = new window.google.maps.places.AutocompleteService();
+        autocompleteService.getPlacePredictions({ input: location }, (predictions, status) => {
+            if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+                setLocations(predictions);
+            } else {
+                setLocations([]);
+            }
+        });
     };
 
     const handleSelectLocation = (location) => {
-        setSelectedLocation(location);
-        setLocations([]);
+        const service = new window.google.maps.places.PlacesService(document.createElement('div'));
+
+        service.getDetails({ placeId: location.place_id }, (place, status) => {
+            if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+                const { lat, lng } = place.geometry.location;
+                setMarkerPosition({ lat: lat(), lng: lng() });
+                setCenter({ lat: lat(), lng: lng() });
+                setLocations([]);
+            }
+            else {
+                console.error('Error fetching place details:', status);
+            }
+        });
+    };
+
+
+    const [markerPosition, setMarkerPosition] = useState([]);
+
+    useEffect(() => {
+        const fetchLocation = async () => {
+            if (markerPosition.lat && markerPosition.lng && !isNaN(markerPosition.lat) && !isNaN(markerPosition.lng)) {
+                try {
+                    const geocoderUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${markerPosition.lat},${markerPosition.lng}&key=AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY`; // Replace with your API key
+                    const response = await fetch(geocoderUrl);
+                    const data = await response.json();
+
+                    if (data.status === 'OK') {
+                        setSelectedLocation(data.results[0].formatted_address);
+                    } else {
+                        // console.error('Failed to get location from geocoder');
+                    }
+                } catch (err) {
+                    // console.error('Error fetching location:', err);
+                    // console.error(err.message);
+                }
+            } else {
+                // console.error('Geolocation is not supported by your browser');
+            }
+        };
+
+        fetchLocation();
+    }, [markerPosition]);
+
+    const [center, setCenter] = useState([]);
+
+    const handleMarkerDragEnd = (e) => {
+        setMarkerPosition({
+            lat: e.latLng.lat(),
+            lng: e.latLng.lng(),
+        });
     };
 
     return (
@@ -665,30 +698,26 @@ const AddHotel = () => {
                                                         </Typography>
                                                         <Grid container spacing={2}>
                                                             <Grid item xs={12} sm={12}>
-                                                                <TextField
-                                                                    label="Location"
-                                                                    variant="outlined"
-                                                                    fullWidth
-                                                                    sx={{ mb: 2 }}
-                                                                    onChange={(e) => {
-                                                                        const value = e.target.value;
-                                                                        handleSearchLocation(value);
-                                                                        setFormData({ ...formData, location: value })
-                                                                    }}
-                                                                />
-                                                                {locations.length > 0 && (
-                                                                    <div style={{ position: "relative", zIndex: 10 }}>
-                                                                        {locations.map((location, index) => (
-                                                                            <MenuItem
-                                                                                key={index}
-                                                                                onClick={() => handleSelectLocation(location)}
-                                                                                style={{ cursor: "pointer" }}
-                                                                            >
-                                                                                {location.description}
-                                                                            </MenuItem>
-                                                                        ))}
-                                                                    </div>
-                                                                )}
+                                                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
+                                                                    <TextField
+                                                                        label="Location"
+                                                                        variant="outlined"
+                                                                        fullWidth
+                                                                        sx={{ mb: 2 }}
+                                                                        onChange={(e) => {
+                                                                            const value = e.target.value;
+                                                                            handleSearchLocation(value);
+                                                                            setFormData({ ...formData, location: value })
+                                                                        }}
+                                                                    />
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="primary"
+                                                                        onClick={() => setlocationModal(true)}
+                                                                    >
+                                                                        Add
+                                                                    </Button>
+                                                                </Box>
                                                             </Grid>
                                                             {[
                                                                 { label: 'Booking Price', key: 'bookingPrice' },
@@ -1167,6 +1196,63 @@ const AddHotel = () => {
                     </DashboardCard>
                 </Grid>
             </Grid >
+
+            <Dialog
+                open={locationModal}
+                onClose={() => setlocationModal(false)}
+                maxWidth="sm"
+                fullWidth
+                sx={{ padding: 4 }}
+            >
+                <DialogTitle sx={{ m: 0, p: 2, position: 'relative' }} id="customized-dialog-title">
+                    Add Location
+                    <IconButton aria-label="close" onClick={() => toggleModal('add')} sx={{ position: 'absolute', right: 8, top: 8 }}>x</IconButton>
+                </DialogTitle>
+
+                <DialogContent sx={{ padding: 3 }}>
+                    <Grid container spacing={3}>
+                        <Grid item md={6} xs={6}>
+                            <Box className="mt-3 mb-3" >
+                                <TextField
+                                    label="Location"
+                                    variant="outlined"
+                                    fullWidth
+                                    sx={{ mb: 2 }}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        handleSearchLocation(value);
+                                        setFormData({ ...formData, locationName: value })
+                                    }}
+                                />
+                                <Typography variant="h6" className='mb-3' gutterBottom>
+                                    Selected Location : {selectedLocation}
+                                </Typography>
+                                <LoadScript googleMapsApiKey="AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY" libraries={['places']}>
+                                    <GoogleMap
+                                        mapContainerStyle={{ height: '400px', width: '100%' }}
+                                        zoom={15}
+                                        center={center}
+                                    >
+                                        <Marker position={markerPosition}
+                                            draggable={true}
+                                            onDragEnd={handleMarkerDragEnd}
+                                        />
+                                    </GoogleMap>
+                                </LoadScript>
+                            </Box>
+                        </Grid>
+
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            sx={{ marginTop: 4 }}
+                        >
+                            Submit
+                        </Button>
+                    </Grid>
+                </DialogContent>
+            </Dialog>
         </PageContainer >
 
     );

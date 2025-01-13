@@ -398,8 +398,8 @@ const HotelPage = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={4} align="center">
-                                                <Typography variant="subtitle2" fontWeight={600}>
+                                            <TableCell colSpan={8} align="center">
+                                                <Typography variant="subtitle2" fontWeight={600} sx={{paddingTop:"300px"}}>
                                                     No Data to Display
                                                 </Typography>
                                             </TableCell>

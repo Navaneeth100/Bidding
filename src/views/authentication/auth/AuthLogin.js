@@ -47,6 +47,9 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
                     theme: 'colored',
                 });
                 localStorage.setItem('authTokens', JSON.stringify(data));
+                setTimeout(() => {
+                    navigate("/dashboard")
+                }, 1500);
             }
         } catch (err) {
             toast.error(`${err.response.data.error}`, {
@@ -60,9 +63,9 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
             });
         }
         finally {
-            setTimeout(() => {
-                navigate("/dashboard")
-            }, 2000);
+            // setTimeout(() => {
+            //     navigate("/dashboard")
+            // }, 2000);
         }
     };
 

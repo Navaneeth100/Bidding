@@ -463,7 +463,7 @@ const Facilities = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={4} align="center" sx={{ paddingTop: "200px" }}>
+                                            <TableCell colSpan={4} align="center" sx={{ paddingTop: "300px" }}>
                                                 <Typography variant="subtitle2" fontWeight={600}>
                                                     No Data to Display
                                                 </Typography>

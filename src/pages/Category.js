@@ -434,12 +434,19 @@ const Category = () => {
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell align="center">
+                                                    <Box
+                                                        display="flex"
+                                                        justifyContent="center"
+                                                        alignItems="center"
+                                                        height="100%"
+                                                    >
                                                     <Avatar
                                                         src={`${url}/hotel${item.icon}`}
                                                         alt=""
                                                         variant="rounded"
                                                         sx={{ width: 50, height: 50 }}
                                                     />
+                                                    </Box>
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     <Typography variant="subtitle2" fontWeight={600}>
@@ -466,7 +473,7 @@ const Category = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={4} align="center" sx={{ paddingTop: "200px" }}>
+                                            <TableCell colSpan={5} align="center" sx={{ paddingTop: "300px" }}>
                                                 <Typography variant="subtitle2" fontWeight={600}>
                                                     No Data to Display
                                                 </Typography>
