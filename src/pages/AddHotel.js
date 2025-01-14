@@ -3,7 +3,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
 import ProductPerformance from '../views/dashboard/components/ProductPerformance';
-import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton, Badge, Paper, CircularProgress, List, ListItem, ListItemText, Chip, ListItemButton } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton, Badge, Paper, CircularProgress, List, ListItem, ListItemText, Chip, ListItemButton, Avatar } from '@mui/material';
 import { IconStar, IconEye, IconEdit, IconTrash } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -235,7 +235,7 @@ const AddHotel = () => {
             let submitData = {
                 name: formData.name,
                 description: formData.description,
-                pro_img: profilepicture,
+                // pro_img: profilepicture,
                 rating: `${formData.rating}`,
                 locationName: selectedLocation,
                 location: selectedLocation,
@@ -417,7 +417,7 @@ const AddHotel = () => {
     const fetchHotelPreview = () => {
         setisLoading(true)
         axios
-            .get(`${url}/hotel/updatehotels/${roomId}`, {
+            .get(`${url}/hotel/updatehotels/${roomId}/`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -438,7 +438,7 @@ const AddHotel = () => {
                         Authorization: `Bearer ${res.data.access}`,
                     };
                     axios
-                        .get(`${url}/hotel/updatehotels/${roomId}`, { headers: new_headers })
+                        .get(`${url}/hotel/updatehotels/${roomId}/`, { headers: new_headers })
                         .then((res) => {
                             sethotelPreview(res.data);
                             setisLoading(false)
@@ -452,6 +452,13 @@ const AddHotel = () => {
             fetchHotelPreview()
         }
     }, [activeStep])
+
+    useEffect(() => {
+        if (hotelPreview != {}) {
+            translateText()
+        }
+    }, [hotelPreview])
+
 
 
     //  navigate to List
@@ -559,6 +566,140 @@ const AddHotel = () => {
         });
     };
 
+    // Google Translation
+
+    const [translatedHotelPreview, setTranslatedHotelPreview] = useState([]);
+    const [translateLoading, settranslateLoading] = useState(false)
+
+    const apiKey = "AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g"; // Replace with your API key
+
+    const translateText = async () => {
+
+        const apiUrl = `https://translation.googleapis.com/language/translate/v2`;
+        settranslateLoading(true)
+        try {
+            // Collect all translatable fields (strings and string arrays)
+            const translatableTexts = [];
+            const keysMap = []; // To track keys and indices for rebuilding the structure
+
+            for (const [key, value] of Object.entries(hotelPreview)) {
+                if (typeof value === "string") {
+                    translatableTexts.push(value);
+                    keysMap.push({ key, type: "string" });
+                } else if (Array.isArray(value)) {
+                    value.forEach((item, index) => {
+                        if (typeof item === "string") {
+                            translatableTexts.push(item);
+                            keysMap.push({ key, type: "array", index });
+                        }
+                    });
+                }
+            }
+
+            // Make a single API call for all texts
+            const response = await axios.post(
+                apiUrl,
+                {},
+                {
+                    params: {
+                        key: apiKey,
+                        q: translatableTexts.join("|||"), // Use a delimiter
+                        target: "ar", // Arabic language code
+                        source: "en", // English language code
+                    },
+                }
+            );
+
+            // Split the translated response and rebuild the structure
+            const translatedTexts = response.data.data.translations[0].translatedText.split("|||");
+            const translations = { ...hotelPreview };
+
+            translatedTexts.forEach((translatedText, index) => {
+                const { key, type, idx } = keysMap[index];
+                if (type === "string") {
+                    translations[key] = translatedText;
+                } else if (type === "array") {
+                    translations[key][idx] = translatedText;
+                }
+            });
+
+            setTranslatedHotelPreview(translations);
+            settranslateLoading(false)
+        } catch (error) {
+            console.error("Error during translation:", error);
+        }
+    };
+
+    //  arabic data submit
+
+    const translateTags = async (tags) => {
+        try {
+            const requests = tags.map((tag) =>
+                axios.post(
+                    `https://translation.googleapis.com/language/translate/v2`,
+                    null,
+                    {
+                        params: {
+                            q: tag,
+                            target: "ar", // Arabic language code
+                            key: apiKey,
+                        },
+                    }
+                )
+            );
+            const responses = await Promise.all(requests);
+            const translatedTextArray = responses.map(
+                (response) => response.data.data.translations[0].translatedText
+            );
+            console.log(translatedTextArray);
+
+            return translatedTextArray;
+        } catch (error) {
+            console.error("Error translating:", error);
+            return "";
+        }
+    };
+
+    const handleArabicSubmit = async (event) => {
+        event.preventDefault();
+        let submitData = {
+            name_ar: translatedHotelPreview.name,
+            description_ar: translatedHotelPreview.description,
+            locationName_ar: translatedHotelPreview.locationName,
+            owner_name_ar: translatedHotelPreview.owner_name,
+            tags_ar: translateTags(translatedHotelPreview.tags)
+        };
+        try {
+            const response = await axios.put(`${url}/hotel/updatehotels/${roomId}/?data=ar`, submitData, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "multipart/form-data",
+                },
+                withCredentials: false,
+            });
+        } catch (error) {
+
+        } finally {
+            handleNavigateToHotelList()
+        }
+    };
+
+    // Dates
+
+    const [dates, setDates] = useState([]);
+    const [currentDate, setCurrentDate] = useState('');
+
+    const addDate = () => {
+        if (currentDate && !dates.includes(currentDate)) {
+            setDates([...dates, currentDate]);
+            setCurrentDate('');
+        }
+    };
+
+    const removeDate = (dateToRemove) => {
+        setDates(dates.filter((date) => date !== dateToRemove));
+    };
+
     return (
         <PageContainer title="Hotels" description="Hotels">
             <Grid container spacing={3}>
@@ -613,7 +754,6 @@ const AddHotel = () => {
                                                     <Grid item xs={12} sm={9}>
                                                         <TextField
                                                             label="Hotel Name"
-                                                            required
                                                             variant="outlined"
                                                             fullWidth
                                                             sx={{ mb: 2 }}
@@ -887,7 +1027,7 @@ const AddHotel = () => {
                                                                                         </FormControl>
                                                                                     </Grid>
 
-                                                                                    <Grid item xs={12} sm={12}>
+                                                                                    {/* <Grid item xs={12} sm={12}>
                                                                                         <FormControl fullWidth>
                                                                                             <InputLabel>Facilities</InputLabel>
                                                                                             <Select
@@ -903,7 +1043,7 @@ const AddHotel = () => {
                                                                                                 ))}
                                                                                             </Select>
                                                                                         </FormControl>
-                                                                                    </Grid>
+                                                                                    </Grid> */}
 
                                                                                     {/* <Grid item xs={12} sm={12}>
                                                                                         <FormControl fullWidth>
@@ -1052,6 +1192,34 @@ const AddHotel = () => {
                                                                                         />
                                                                                     </Grid>
                                                                                     <Grid item xs={12}>
+                                                                                        <Box>
+                                                                                            {/* Date input */}
+                                                                                            <Box display="flex" alignItems="center" gap={1} mb={2}>
+                                                                                                <TextField
+                                                                                                    type="date"
+                                                                                                    value={currentDate}
+                                                                                                    onChange={(e) => setCurrentDate(e.target.value)}
+                                                                                                    InputLabelProps={{ shrink: true }}
+                                                                                                />
+                                                                                                <Button variant="contained" onClick={addDate}>
+                                                                                                    Add
+                                                                                                </Button>
+                                                                                            </Box>
+
+                                                                                            {/* Display selected dates */}
+                                                                                            <Box display="flex" flexWrap="wrap" gap={1}>
+                                                                                                {dates.map((date, index) => (
+                                                                                                    <Chip
+                                                                                                        key={index}
+                                                                                                        label={date}
+                                                                                                        onDelete={() => removeDate(date)}
+                                                                                                        color="primary"
+                                                                                                    />
+                                                                                                ))}
+                                                                                            </Box>
+                                                                                        </Box>
+                                                                                    </Grid>
+                                                                                    <Grid item xs={12}>
                                                                                         <Button
                                                                                             fullWidth
                                                                                             variant="contained"
@@ -1125,34 +1293,44 @@ const AddHotel = () => {
                                                     <Grid container spacing={2} sx={{ p: 3 }}>
                                                         {/* English */}
                                                         <Grid item xs={12} sm={6}>
-                                                            <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', height: '100%' }}>
+                                                            <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', height: '100%', minHeight: "500px" }}>
                                                                 {isLoading ? (<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><CircularProgress size={25} /> <Typography sx={{ ml: 2 }}>Fetching Details...</Typography> </Box>) : (
                                                                     <Paper elevation={2} sx={{ p: 3 }}>
-                                                                        <Typography variant="h4" component="h2" sx={{ color: 'black', mb: 2 }}>
+                                                                        <Typography variant="h4" component="h2" sx={{ color: 'black', mb: 1 }}>
                                                                             {hotelPreview.name}
                                                                             <Typography variant="h4" component="span" sx={{ float: 'right', color: '#2196f3' }}>
                                                                                 {hotelPreview.id}
                                                                             </Typography>
                                                                         </Typography>
+                                                                        <Typography className='mb-2'>
+                                                                            <Rating name="read-only" value={hotelPreview.rating} readOnly />
+                                                                        </Typography>
                                                                         <Typography variant="h6" sx={{ color: 'text.secondary' }}>
                                                                             {hotelPreview.location},{hotelPreview.locationName}
                                                                         </Typography>
 
-                                                                        <Grid container spacing={2} sx={{ mt: 1, mb: 2 }}>
-                                                                            <Grid item xs={4}>
-                                                                                <Typography variant="body2">4 beds</Typography>
-                                                                            </Grid>
-                                                                            <Grid item xs={4}>
-                                                                                <Typography variant="body2">3 baths</Typography>
-                                                                            </Grid>
-                                                                            <Grid item xs={4}>
-                                                                                <Typography variant="body2">4,460 sq. ft.</Typography>
-                                                                            </Grid>
+                                                                        <Grid container spacing={2} sx={{ mt: 1, mb: 3 }}>
+                                                                            {hotelPreview.facilities?.map((facilities, index) => (
+                                                                                <Grid item xs={4} key={index}>
+                                                                                    <Chip
+                                                                                        avatar={<Avatar alt="" src={`${url}/hotel/media/${facilities[1]}`} />}
+                                                                                        label={facilities[0]}
+                                                                                        variant="outlined"
+                                                                                    />
+                                                                                </Grid>
+                                                                            ))}
                                                                         </Grid>
 
                                                                         <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Description</Typography>
-                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
+                                                                        <Typography variant="body2" sx={{ mb: 2 }}>
                                                                             {hotelPreview.description}
+                                                                        </Typography>
+
+                                                                        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Owner Details</Typography>
+                                                                        <Typography variant="body2" sx={{ mb: 2 }}>
+                                                                            {hotelPreview.owner_name}<br />
+                                                                            {hotelPreview.owner_email}<br />
+                                                                            {hotelPreview.owner_contact_number}
                                                                         </Typography>
                                                                     </Paper>)}
                                                             </Box>
@@ -1160,34 +1338,44 @@ const AddHotel = () => {
 
                                                         {/* Arabic */}
                                                         <Grid item xs={12} sm={6}>
-                                                            <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', height: '100%' }}>
-                                                                {isLoading ? (<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><CircularProgress size={25} /> <Typography sx={{ ml: 2 }}>Fetching Details...</Typography> </Box>) : (
+                                                            <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', height: '100%', minHeight: "500px" }}>
+                                                                {translateLoading ? (<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><CircularProgress size={25} /> <Typography sx={{ ml: 2 }}>Fetching Details...</Typography> </Box>) : (
                                                                     <Paper elevation={2} sx={{ p: 3 }}>
-                                                                        <Typography variant="h4" component="h2" sx={{ color: 'black', mb: 2 }}>
-                                                                            {hotelPreview.name}
+                                                                        <Typography variant="h4" component="h2" sx={{ color: 'black', mb: 1 }}>
+                                                                            {translatedHotelPreview.name}
                                                                             <Typography variant="h4" component="span" sx={{ float: 'right', color: '#2196f3' }}>
-                                                                                {hotelPreview.id}
+                                                                                {translatedHotelPreview.id}
                                                                             </Typography>
                                                                         </Typography>
+                                                                        <Typography className='mb-2'>
+                                                                            <Rating name="read-only" value={translatedHotelPreview.rating} readOnly />
+                                                                        </Typography>
                                                                         <Typography variant="h6" sx={{ color: 'text.secondary' }}>
-                                                                            {hotelPreview.location},{hotelPreview.locationName}
+                                                                            {translatedHotelPreview.location},{translatedHotelPreview.locationName}
                                                                         </Typography>
 
-                                                                        <Grid container spacing={2} sx={{ mt: 1, mb: 2 }}>
-                                                                            <Grid item xs={4}>
-                                                                                <Typography variant="body2">4 beds</Typography>
-                                                                            </Grid>
-                                                                            <Grid item xs={4}>
-                                                                                <Typography variant="body2">3 baths</Typography>
-                                                                            </Grid>
-                                                                            <Grid item xs={4}>
-                                                                                <Typography variant="body2">4,460 sq. ft.</Typography>
-                                                                            </Grid>
+                                                                        <Grid container spacing={2} sx={{ mt: 1, mb: 3 }}>
+                                                                            {translatedHotelPreview.facilities?.map((facilities, index) => (
+                                                                                <Grid item xs={4} key={index}>
+                                                                                    <Chip
+                                                                                        avatar={<Avatar alt="" src={`${url}/hotel/media/${facilities[1]}`} />}
+                                                                                        label={facilities[0]}
+                                                                                        variant="outlined"
+                                                                                    />
+                                                                                </Grid>
+                                                                            ))}
                                                                         </Grid>
 
                                                                         <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Description</Typography>
-                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                            {hotelPreview.description}
+                                                                        <Typography variant="body2" sx={{ mb: 2 }}>
+                                                                            {translatedHotelPreview.description}
+                                                                        </Typography>
+
+                                                                        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Owner Details</Typography>
+                                                                        <Typography variant="body2" sx={{ mb: 2 }}>
+                                                                            {translatedHotelPreview.owner_name}<br />
+                                                                            {translatedHotelPreview.owner_email}<br />
+                                                                            {translatedHotelPreview.owner_contact_number}
                                                                         </Typography>
                                                                     </Paper>)}
                                                             </Box>
@@ -1199,7 +1387,7 @@ const AddHotel = () => {
                                             <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
                                                 <Button
                                                     color="inherit"
-                                                    disabled={activeStep === 0}
+                                                    disabled={activeStep === 0 || activeStep === 3}
                                                     onClick={handleBack}
                                                     sx={{ mr: 1 }}
                                                 >
@@ -1207,8 +1395,8 @@ const AddHotel = () => {
                                                 </Button>
                                                 <Box sx={{ flex: '1 1 auto' }} />
                                                 <Button
-                                                    onClick={(e) => { if (activeStep === 3) { handleNavigateToHotelList() } else { handleNext(e) } }} sx={{ mr: 1 }}>
-                                                    {activeStep == 3 ? "Back To List" : "Next"}
+                                                    onClick={(e) => { if (activeStep === 3) { handleArabicSubmit(e) } else { handleNext(e) } }} sx={{ mr: 1 }}>
+                                                    {activeStep == 3 ? "Finish" : "Next"}
                                                 </Button>
                                             </Box>
                                         </React.Fragment>
