@@ -1,0 +1,22 @@
+.react-calendar__tile--active {
+    background-color: transparent !important; /* Remove the blue background */
+    color: inherit !important; /* Maintain the default text color */
+  }
+  
+  /* Remove the hover effect for selected dates */
+  .react-calendar__tile--active:hover {
+    background-color: transparent !important; /* Ensure no hover styling */
+  }
+  
+  /* Style your selected dates explicitly */
+  .selected-date {
+    background-color: white !important;
+    color: red !important;
+    border-radius: '50%';
+    width: '20px';
+    height: '20px';
+    text-align: 'center';
+    line-height: '20px';
+    margin: 'auto';
+  }
+  

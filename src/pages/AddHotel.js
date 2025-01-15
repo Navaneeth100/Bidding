@@ -21,7 +21,9 @@ import axios from 'axios';
 import { url } from '../../mainurl';
 import { toast } from 'react-toastify';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css'
+import '../App.css'
 
 const AddHotel = () => {
 
@@ -122,7 +124,7 @@ const AddHotel = () => {
             responseSuccess = await handleOwnerDetailSubmit(e);
         }
 
-        if (responseSuccess) {
+        if (responseSuccess || activeStep === 1) {
             const newCompleted = [...completed];
             newCompleted[activeStep] = true;
             setCompleted(newCompleted);
@@ -302,14 +304,31 @@ const AddHotel = () => {
     };
 
     const handleRoomSubmit = async (event) => {
-        const isRoomDataValid = roomData.every((room) => Object.values(room).every((value) => String(value).trim() !== ''));
-        if (roomId && isRoomDataValid) {
+        // const isRoomDataValid = roomData.every((room) => Object.values(room).every((value) => String(value).trim() !== ''));
+        if (roomId) {
             event.preventDefault();
-            const updatedRoomData = roomData.map((room) => ({ ...room, room_category: categoryList.find((category) => category.category_name === room.room_category)?.id }));
-            setRoomData(updatedRoomData);
+            // const updatedRoomData = roomData.map((room) => ({
+            //     ...room,
+            //     room_category: categoryList.find((category) => category.category_name === room.room_category)?.id,
+            //     excluded_days: formattedDates,
+            // }));
+            // setRoomData(updatedRoomData);
+
+            let submitData = {
+                room_category: categoryList.find((category) => category.category_name === roomData[0].room_category)?.id,
+                area: roomData[0].area,
+                floors: roomData[0].floors,
+                beds: roomData[0].beds,
+                bathrooms: roomData[0].bathrooms,
+                guests: roomData[0].guests,
+                booking_price: roomData[0].booking_price,
+                rooms: roomData[0].room_no,
+                available_rooms:roomData[0].room_no,
+                excluded_days:formattedDates
+            }
 
             try {
-                const response = await axios.post(`${url}/hotel/hotels/${roomId}/room-categories/`, updatedRoomData, {
+                const response = await axios.post(`${url}/hotel/hotels/${roomId}/room-categories/`, submitData, {
                     headers: {
                         Authorization: `Bearer ${tokenStr}`,
                         "Content-Type": "application/json",
@@ -686,19 +705,28 @@ const AddHotel = () => {
 
     // Dates
 
-    const [dates, setDates] = useState([]);
-    const [currentDate, setCurrentDate] = useState('');
+    const [selectedDates, setSelectedDates] = useState([]);
 
-    const addDate = () => {
-        if (currentDate && !dates.includes(currentDate)) {
-            setDates([...dates, currentDate]);
-            setCurrentDate('');
+    const handleDateChange = (date) => {
+        // If the clicked date is already selected, remove it
+        if (selectedDates.some((d) => d.getTime() === date.getTime())) {
+            setSelectedDates(selectedDates.filter((d) => d.getTime() !== date.getTime()));
+        } else {
+            // Otherwise, add it to the selected dates array
+            setSelectedDates([...selectedDates, date]);
         }
     };
 
-    const removeDate = (dateToRemove) => {
-        setDates(dates.filter((date) => date !== dateToRemove));
+    const formatDate = (date) => {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${year}-${month}-${day}`;
     };
+
+    // Create an array of formatted dates
+    const formattedDates = selectedDates.map((date) => formatDate(date));
+    
 
     return (
         <PageContainer title="Hotels" description="Hotels">
@@ -992,7 +1020,7 @@ const AddHotel = () => {
                                                                 <Button
                                                                     variant="contained"
                                                                     color="primary"
-                                                                    onClick={() => { setRoomList([...roomList, {}]), setRoomData([...roomData, { room_category: '', area: '', floor: '', rooms: '', beds: '', bathrooms: '', guests: '', booking_price: '' }]) }}
+                                                                    onClick={() => { setRoomList([...roomList, {}]), setRoomData([]) , setSelectedDates([]) }}
                                                                 >
                                                                     Add Rooms
                                                                 </Button>
@@ -1192,32 +1220,42 @@ const AddHotel = () => {
                                                                                         />
                                                                                     </Grid>
                                                                                     <Grid item xs={12}>
-                                                                                        <Box>
-                                                                                            {/* Date input */}
-                                                                                            <Box display="flex" alignItems="center" gap={1} mb={2}>
-                                                                                                <TextField
-                                                                                                    type="date"
-                                                                                                    value={currentDate}
-                                                                                                    onChange={(e) => setCurrentDate(e.target.value)}
-                                                                                                    InputLabelProps={{ shrink: true }}
-                                                                                                />
-                                                                                                <Button variant="contained" onClick={addDate}>
-                                                                                                    Add
-                                                                                                </Button>
-                                                                                            </Box>
-
-                                                                                            {/* Display selected dates */}
-                                                                                            <Box display="flex" flexWrap="wrap" gap={1}>
-                                                                                                {dates.map((date, index) => (
-                                                                                                    <Chip
-                                                                                                        key={index}
-                                                                                                        label={date}
-                                                                                                        onDelete={() => removeDate(date)}
-                                                                                                        color="primary"
-                                                                                                    />
-                                                                                                ))}
-                                                                                            </Box>
-                                                                                        </Box>
+                                                                                        <Calendar
+                                                                                            onChange={handleDateChange}
+                                                                                            value={selectedDates}
+                                                                                            selectRange={false}
+                                                                                            tileClassName={({ date, view }) => {
+                                                                                                // Add inline styles to the selected dates
+                                                                                                if (selectedDates.some((d) => d.getTime() === date.getTime())) {
+                                                                                                    return 'selected-date';  // Use a class to apply inline styles later
+                                                                                                }
+                                                                                                return '';
+                                                                                            }}
+                                                                                            tileContent={({ date, view }) => {
+                                                                                                if (selectedDates.some((d) => d.getTime() === date.getTime())) {
+                                                                                                    return (
+                                                                                                        <div
+                                                                                                            style={{
+                                                                                                                backgroundColor: 'red',
+                                                                                                                color: 'white',
+                                                                                                                borderRadius: '50%',
+                                                                                                                width: '20px',
+                                                                                                                height: '20px',
+                                                                                                                textAlign: 'center',
+                                                                                                                lineHeight: '20px',
+                                                                                                                margin: 'auto',
+                                                                                                            }}
+                                                                                                        >
+                                                                                                           X
+                                                                                                        </div>
+                                                                                                    );
+                                                                                                }
+                                                                                                return '';
+                                                                                            }}
+                                                                                        />
+                                                                                        {/* {selectedDates.map((date, index) => (
+                                                                                            <li key={index}>{date.toDateString()}</li>
+                                                                                        ))} */}
                                                                                     </Grid>
                                                                                     <Grid item xs={12}>
                                                                                         <Button

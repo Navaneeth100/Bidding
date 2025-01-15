@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Grid, CardContent, CircularProgress, DialogContentText } from '@mui/material';
+import { Typography, Grid, CardContent, CircularProgress, DialogContentText, Avatar } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
@@ -412,7 +412,20 @@ const HotelPage = () => {
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    <Box component="img" src={`${url}${item?.hotelimgs[0]?.file}`} alt="Hotel Image" width="100px" height="auto" onClick={() => { handleNavigateToViewHotel(item.id) }} />
+                                                    {/* <Box component="img" src={`${url}${item?.hotelimgs[0]?.file}`} alt="Hotel Image" width="100px" height="auto" onClick={() => { handleNavigateToViewHotel(item.id) }} /> */}
+                                                    <Box
+                                                        display="flex"
+                                                        justifyContent="center"
+                                                        alignItems="center"
+                                                        height="100%"
+                                                    >
+                                                    <Avatar
+                                                        src={`${url}/hotel${item.hotelimgs[0]?.file}` || ""}
+                                                        alt=""
+                                                        variant="rounded"
+                                                        sx={{ width: 50, height: 50 }}
+                                                    />
+                                                    </Box>
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     <Typography variant="subtitle2" fontWeight={600}>
