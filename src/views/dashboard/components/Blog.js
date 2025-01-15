@@ -44,15 +44,15 @@ const ecoCard = [
     },
 ];
 
-const Blog = () => {
+const Blog = ({value}) => {
     return (
-        <Box> <Typography className='mb-3 mt-2' variant="h4">Stay Choices</Typography>
+        <Box> <Typography className='mb-3 mt-2' variant="h4">Top Impression Hotels</Typography>
         <Grid container spacing={3}>
-            {ecoCard.map((product, index) => (
+            {value?.map((product, index) => (
                 <Grid item sm={12} md={4} lg={3} key={index}>
                     <BlankCard>
                         <Typography component={Link} to="/">
-                            <img src={product.photo} alt="img" width="100%" height="200"/>
+                            <img src="https://the-gaur-sarovar-portico-noida.goldentulip.com/static/images/room.jpg" alt="img" width="100%" height="200"/>
                         </Typography>
                         {/* <Tooltip title="Add To Cart">
                             <Fab
@@ -63,15 +63,15 @@ const Blog = () => {
                                 <IconBasket size="16" />
                             </Fab>
                         </Tooltip> */}
-                        <CardContent sx={{ p: 3, pt: 2 }}>
-                            <Typography variant="h6">{product.title}</Typography>
+                        <CardContent sx={{ p: 3, pt: 2 ,minHeight:"120px"}}>
+                            <Typography variant="h6">{product.hotel_name}</Typography>
                             <Stack direction="row" alignItems="center" justifyContent="space-between" mt={1}>
-                                {/* <Stack direction="row" alignItems="center">
-                                    <Typography variant="h6">${product.price}</Typography>
-                                    <Typography color="textSecondary" ml={1} sx={{ textDecoration: 'line-through' }}>
-                                        ${product.salesPrice}
+                                <Stack direction="row" alignItems="center">
+                                    {/* <Typography variant="h6">${product.price}</Typography> */}
+                                    <Typography color="textSecondary">
+                                        Booked : {product.total_impressions}
                                     </Typography>
-                                </Stack> */}
+                                </Stack>
                                 <Rating name="read-only" size="small" value={product.rating} readOnly />
                             </Stack>
                         </CardContent>

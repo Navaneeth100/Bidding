@@ -15,6 +15,7 @@
     "@mui/lab": "5.0.0-alpha.133",
     "@mui/material": "^5.13.4",
     "@mui/system": "^5.14.11",
+    "@mui/x-charts": "^7.23.6",
     "@react-google-maps/api": "^2.20.5",
     "@svgr/rollup": "^8.1.0",
     "@tabler/icons-react": "^2.35.0",

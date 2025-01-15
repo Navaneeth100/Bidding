@@ -5,7 +5,7 @@ import { Stack, Typography, Avatar, Fab } from '@mui/material';
 import { IconArrowDownRight, IconCurrencyDollar, IconArrowUpLeft } from '@tabler/icons-react';
 import DashboardCard from '../../../components/shared/DashboardCard';
 
-const MonthlyEarnings = () => {
+const MonthlyEarnings = ({value}) => {
   // chart color
   const theme = useTheme();
   const secondary = theme.palette.secondary.main;
@@ -54,7 +54,7 @@ const MonthlyEarnings = () => {
 
   return (
     <DashboardCard
-      title="Monthly Bookings"
+      title="Monthly Impressions"
       action={
         <Fab color="secondary" size="medium" sx={{color: '#ffffff'}}>
           <IconCurrencyDollar width={24} />
@@ -66,7 +66,7 @@ const MonthlyEarnings = () => {
     >
       <>
         <Typography variant="h3" fontWeight="700" mt="-20px">
-          72
+          {value}
         </Typography>
         <Stack direction="row" spacing={1} my={1} alignItems="center">
           <Avatar sx={{ bgcolor: successlight, width: 27, height: 27 }}>

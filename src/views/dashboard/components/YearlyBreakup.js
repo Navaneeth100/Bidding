@@ -6,7 +6,7 @@ import { IconArrowUpLeft } from '@tabler/icons-react';
 
 import DashboardCard from '../../../components/shared/DashboardCard';
 
-const YearlyBreakup = () => {
+const YearlyBreakup = ({value}) => {
   // chart color
   const theme = useTheme();
   const primary = theme.palette.primary.main;
@@ -67,7 +67,7 @@ const YearlyBreakup = () => {
         {/* column */}
         <Grid item xs={7} sm={7}>
           <Typography variant="h3" fontWeight="700">
-            365
+          {value}
           </Typography>
           <Stack direction="row" spacing={1} mt={1} alignItems="center">
             <Avatar sx={{ bgcolor: successlight, width: 27, height: 27 }}>

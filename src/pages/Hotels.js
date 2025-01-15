@@ -62,11 +62,17 @@ const HotelPage = () => {
     const [nextPage, setNextPage] = useState(null);
     const [prevPage, setPrevPage] = useState(null);
     const pageSize = 10;
+    const [categoryfilter, setcategoryfilter] = useState([])
+    const [facilitesfilter, setfacilitesfilter] = useState([])
+    const [ratingfilter, setratingfilter] = useState([])
+    const [locationfilter, setlocationfilter] = useState([])
+
+    const MenuProps = { PaperProps: { style: { maxHeight: 200, overflowY: 'auto' } } };
 
     const fetchHotels = (page = 1) => {
         setLoading(true);
         axios
-            .get(`${url}/hotel/createhotels/?page=${page}&page_size=${pageSize}`, {
+            .get(`${url}/hotel/createhotels/?category_id_search=${categoryfilter}&rating_search=${ratingfilter}&facility_id_search=${facilitesfilter}&emirates_search=${locationfilter}&page=${page}&page_size=${pageSize}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -91,7 +97,7 @@ const HotelPage = () => {
                         Authorization: `Bearer ${res.data.access}`,
                     };
                     axios
-                        .get(`${url}/hotel/createhotels/?page=${page}&page_size=${pageSize}`, {
+                        .get(`${url}/hotel/createhotels/?category_id_search=${categoryfilter}&rating_search=${ratingfilter}&facility_id_search=${facilitesfilter}&emirates_search=${locationfilter}&page=${page}&page_size=${pageSize}`, {
                             headers: new_headers,
                         })
                         .then((res) => {
@@ -110,7 +116,7 @@ const HotelPage = () => {
 
     useEffect(() => {
         fetchHotels(currentPage);
-    }, [currentPage]);
+    }, [currentPage,categoryfilter,facilitesfilter,ratingfilter,locationfilter]);
 
     // SN Handler
 
@@ -239,10 +245,80 @@ const HotelPage = () => {
         }
     };
 
+
+    // get category
+
+    const [categoryList, setcategoryList] = useState([])
+
+    const fetchCategory = () => {
+        axios
+            .get(`${url}/hotel/room-categories/`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            })
+            .then((res) => {
+                setcategoryList(res.data.results);
+            })
+            .catch((error) => {
+                let refresh = String(authTokens.refresh);
+                axios.post(`${url}/api/token/refresh/`, { refresh: refresh }).then((res) => {
+                    localStorage.setItem("authTokens", JSON.stringify(res.data));
+                    //   setNewAuthTokens(JSON.stringify(res.data));
+
+                    const new_headers = {
+                        Authorization: `Bearer ${res.data.access}`,
+                    };
+                    axios
+                        .get(`${url}/hotel/room-categories/`, { headers: new_headers })
+                        .then((res) => {
+                            setcategoryList(res.data.results);
+                        });
+                });
+            });
+    };
+
+    // get facilites
+
+    const [facilitiesList, setfacilitiesList] = useState([])
+
+    const fetchFacilities = () => {
+        axios
+            .get(`${url}/hotel/facilities/`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            })
+            .then((res) => {
+                setfacilitiesList(res.data.results);
+            })
+            .catch((error) => {
+                let refresh = String(authTokens.refresh);
+                axios.post(`${url}/api/token/refresh/`, { refresh: refresh }).then((res) => {
+                    localStorage.setItem("authTokens", JSON.stringify(res.data));
+                    //   setNewAuthTokens(JSON.stringify(res.data));
+
+                    const new_headers = {
+                        Authorization: `Bearer ${res.data.access}`,
+                    };
+                    axios
+                        .get(`${url}/hotel/facilities/`, { headers: new_headers })
+                        .then((res) => {
+                            setfacilitiesList(res.data.results);
+                        });
+                });
+            });
+    };
+
+
     return (
         <PageContainer title="Hotels" description="Hotels">
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }} gap={2} mb={2}>
-                <Button size="small" variant={calendarvisible ? "contained" : "outlined"} color='primary' onClick={toggleCalenadar}>Calendar</Button>
+                {/* <Button size="small" variant={calendarvisible ? "contained" : "outlined"} color='primary' onClick={toggleCalenadar}>Calendar</Button> */}
                 <Button size="small" variant={filtersVisible ? "contained" : "outlined"} color='primary' onClick={toggleFilters}>Filters</Button>
                 <Button size="small" variant="outlined" color='success' onClick={() => addHotel()}>Add Hotel</Button>
             </Box>
@@ -257,11 +333,17 @@ const HotelPage = () => {
                         <Grid item xs={12} sm={3}>
                             <FormControl fullWidth>
                                 <InputLabel>Category</InputLabel>
-                                <Select label="Category">
-                                    <MenuItem value="Luxury">Luxury</MenuItem>
-                                    <MenuItem value="Budget">Budget</MenuItem>
-                                    <MenuItem value="Business">Business</MenuItem>
-                                    <MenuItem value="Resort">Resort</MenuItem>
+                                <Select
+                                    multiple
+                                    value={categoryfilter}
+                                    onChange={(e) => { setcategoryfilter(e.target.value) }}
+                                    onOpen={fetchCategory}
+                                    renderValue={(selected) => selected.join(', ')}
+                                    label="Category"
+                                    MenuProps={MenuProps}>
+                                    {categoryList.map((item) => (
+                                        <MenuItem value={item.category_name}>{item.category_name}</MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -270,26 +352,14 @@ const HotelPage = () => {
                         <Grid item xs={12} sm={3}>
                             <FormControl fullWidth>
                                 <InputLabel>Rating</InputLabel>
-                                <Select label="Rating">
+                                <Select
+                                    value={ratingfilter}
+                                    onChange={(e) => { setratingfilter(e.target.value) }}
+                                    MenuProps={MenuProps}
+                                    label="Rating">
                                     {[...Array(5)].map((_, index) => (
                                         <MenuItem key={index + 1} value={index + 1}>{index + 1}</MenuItem>
                                     ))}
-                                </Select>
-                            </FormControl>
-                        </Grid>
-
-                        {/* Location Filter */}
-                        <Grid item xs={12} sm={3}>
-                            <FormControl fullWidth>
-                                <InputLabel>Location</InputLabel>
-                                <Select label="Location">
-                                    <MenuItem value="Abu Dhabi">Abu Dhabi</MenuItem>
-                                    <MenuItem value="Dubai">Dubai</MenuItem>
-                                    <MenuItem value="Sharjah">Sharjah</MenuItem>
-                                    <MenuItem value="Fujairah">Fujairah</MenuItem>
-                                    <MenuItem value="Ajman">Ajman</MenuItem>
-                                    <MenuItem value="Umm Al Quwain">Umm Al Quwain</MenuItem>
-                                    <MenuItem value="Ras Al Khaimah">Ras Al Khaimah</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -298,15 +368,34 @@ const HotelPage = () => {
                         <Grid item xs={12} sm={3}>
                             <FormControl fullWidth>
                                 <InputLabel>Facilities</InputLabel>
-                                <Select label="Category">
-                                    <MenuItem value="Parking">Parking</MenuItem>
-                                    <MenuItem value="Breakfast">Breakfast</MenuItem>
-                                    <MenuItem value="Gym">Gym</MenuItem>
-                                    <MenuItem value="Breakfast">Breakfast</MenuItem>
+                                <Select
+                                    multiple
+                                    value={facilitesfilter}
+                                    onChange={(e) => { setfacilitesfilter(e.target.value);console.log(e) }}
+                                    onOpen={fetchFacilities}
+                                    renderValue={(selected) => selected.join(', ')}
+                                    label="Facilities"
+                                    MenuProps={MenuProps}>
+                                    {facilitiesList.map((item) => (
+                                        <MenuItem value={item.name}>{item.name}</MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         </Grid>
+                        <Grid item xs={12} sm={3}>
+                            <TextField
+                                label="Location"
+                                variant="outlined"
+                                fullWidth
+                                sx={{ mb: 2 }}
+                                onChange={(e) => setlocationfilter(e.target.value)}
+                            />
+                        </Grid>
                     </Grid>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 2 }}>
+                        <Button variant="contained" color="primary" sx={{ mr: 2 }} onClick={() => fetchHotels(currentPage)}>Submit</Button>
+                        <Button variant="outlined" color="secondary" onClick={() => { setcategoryfilter([]); setratingfilter(''); setfacilitesfilter([]); setlocationfilter(''); fetchHotels(1) }}>Clear</Button>
+                    </Box>
                 </Box>
             )}
 
@@ -419,12 +508,12 @@ const HotelPage = () => {
                                                         alignItems="center"
                                                         height="100%"
                                                     >
-                                                    <Avatar
-                                                        src={`${url}/hotel${item.hotelimgs[0]?.file}` || ""}
-                                                        alt=""
-                                                        variant="rounded"
-                                                        sx={{ width: 50, height: 50 }}
-                                                    />
+                                                        <Avatar
+                                                            src={`${url}/hotel${item.hotelimgs[0]?.file}` || ""}
+                                                            alt=""
+                                                            variant="rounded"
+                                                            sx={{ width: 50, height: 50 }}
+                                                        />
                                                     </Box>
                                                 </TableCell>
                                                 <TableCell align="center">

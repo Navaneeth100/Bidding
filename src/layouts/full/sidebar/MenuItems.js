@@ -27,16 +27,16 @@ const Menuitems = [
     icon: IconBuildingSkyscraper,
     href: '/hotels',
   },
-  {
-    navlabel: true,
-    subheader: 'Our Bookings',
-  },
-  {
-    id: uniqueId(),
-    title: 'Bookings',
-    icon: IconCopy,
-    href: '/bookings',
-  },
+  // {
+  //   navlabel: true,
+  //   subheader: 'Our Bookings',
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Bookings',
+  //   icon: IconCopy,
+  //   href: '/bookings',
+  // },
   {
     navlabel: true,
     subheader: 'My Settings',

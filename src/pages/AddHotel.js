@@ -189,7 +189,7 @@ const AddHotel = () => {
             });
     };
 
-    // get category
+    // get facilites
 
     const [facilitiesList, setfacilitiesList] = useState([])
 
@@ -1217,6 +1217,17 @@ const AddHotel = () => {
                                                                                             margin="normal"
                                                                                             name={`room_price_${index}`}
                                                                                             onChange={(e) => handleRoomChange(index, 'booking_price', e.target.value)}
+                                                                                        />
+                                                                                    </Grid>
+                                                                                    <Grid item xs={4}>
+                                                                                        <TextField
+                                                                                            fullWidth
+                                                                                            label="With Breakfast"
+                                                                                            variant="outlined"
+                                                                                            placeholder='eg: 1 - 5'
+                                                                                            margin="normal"
+                                                                                            name={`withbreakfast_${index}`}
+                                                                                            onChange={(e) => handleRoomChange(index, 'withbreakfast', e.target.value)}
                                                                                         />
                                                                                     </Grid>
                                                                                     <Grid item xs={12}>
