@@ -21,8 +21,6 @@ import axios from 'axios';
 import { url } from '../../mainurl';
 import { toast } from 'react-toastify';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css'
 
 
 const AddHotel = () => {
@@ -688,16 +686,18 @@ const AddHotel = () => {
 
     // Dates
 
-    const [selectedDates, setSelectedDates] = useState([]);
+    const [dates, setDates] = useState([]);
+    const [currentDate, setCurrentDate] = useState('');
 
-    const handleDateChange = (date) => {
-        // If the clicked date is already selected, remove it
-        if (selectedDates.some((d) => d.getTime() === date.getTime())) {
-            setSelectedDates(selectedDates.filter((d) => d.getTime() !== date.getTime()));
-        } else {
-            // Otherwise, add it to the selected dates array
-            setSelectedDates([...selectedDates, date]);
+    const addDate = () => {
+        if (currentDate && !dates.includes(currentDate)) {
+            setDates([...dates, currentDate]);
+            setCurrentDate('');
         }
+    };
+
+    const removeDate = (dateToRemove) => {
+        setDates(dates.filter((date) => date !== dateToRemove));
     };
 
     return (
@@ -1192,20 +1192,32 @@ const AddHotel = () => {
                                                                                         />
                                                                                     </Grid>
                                                                                     <Grid item xs={12}>
-                                                                                        <Calendar
-                                                                                            onChange={handleDateChange}
-                                                                                            value={selectedDates}
-                                                                                            selectRange={false}
-                                                                                            tileClassName={({ date, view }) => {
-                                                                                                if (selectedDates.some((d) => d.getTime() === date.getTime())) {
-                                                                                                    return 'selected-date';
-                                                                                                }
-                                                                                                return '';
-                                                                                            }}
-                                                                                        />
-                                                                                        {/* {selectedDates.map((date, index) => (
-                                                                                            <li key={index}>{date.toDateString()}</li>
-                                                                                        ))} */}
+                                                                                        <Box>
+                                                                                            {/* Date input */}
+                                                                                            <Box display="flex" alignItems="center" gap={1} mb={2}>
+                                                                                                <TextField
+                                                                                                    type="date"
+                                                                                                    value={currentDate}
+                                                                                                    onChange={(e) => setCurrentDate(e.target.value)}
+                                                                                                    InputLabelProps={{ shrink: true }}
+                                                                                                />
+                                                                                                <Button variant="contained" onClick={addDate}>
+                                                                                                    Add
+                                                                                                </Button>
+                                                                                            </Box>
+
+                                                                                            {/* Display selected dates */}
+                                                                                            <Box display="flex" flexWrap="wrap" gap={1}>
+                                                                                                {dates.map((date, index) => (
+                                                                                                    <Chip
+                                                                                                        key={index}
+                                                                                                        label={date}
+                                                                                                        onDelete={() => removeDate(date)}
+                                                                                                        color="primary"
+                                                                                                    />
+                                                                                                ))}
+                                                                                            </Box>
+                                                                                        </Box>
                                                                                     </Grid>
                                                                                     <Grid item xs={12}>
                                                                                         <Button
