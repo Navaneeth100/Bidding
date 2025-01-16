@@ -13,10 +13,13 @@ import { url } from '../../../../mainurl';
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { IconEye } from '@tabler/icons-react';
+import { IconEyeClosed } from '@tabler/icons-react';
 
 const AuthLogin = ({ title, subtitle, subtext }) => {
 
     const [formData, setFormData] = useState({ email: '', password: '' });
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -88,7 +91,15 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
                 <Box mt="25px">
                     <Typography variant="subtitle1"
                         fontWeight={600} component="label" htmlFor='password' mb="5px">Password</Typography>
-                    <CustomTextField id="password" name="password" type="password" variant="outlined" fullWidth onChange={(e) => { handleChange(e) }} />
+                    <CustomTextField id="password" name="password" type={showPassword ? 'text' : 'password'} variant="outlined" fullWidth
+                        InputProps={{
+                            endAdornment: (
+                                <Button className='ms-2' onClick={() => setShowPassword(!showPassword)}>
+                                    {showPassword ? <IconEyeClosed /> : <IconEye />}
+                                </Button>
+                            ),
+                        }}
+                        onChange={(e) => { handleChange(e) }} />
                 </Box>
                 <Stack justifyContent="space-between" direction="row" alignItems="center" my={2}>
                     <FormGroup>

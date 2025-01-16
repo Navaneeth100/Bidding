@@ -86,7 +86,7 @@ const YearlyBreakup = ({value}) => {
                 sx={{ width: 9, height: 9, bgcolor: primary, svg: { display: 'none' } }}
               ></Avatar>
               <Typography variant="subtitle2" color="textSecondary">
-                2024
+                2025
               </Typography>
             </Stack>
             <Stack direction="row" spacing={1} alignItems="center">
@@ -94,7 +94,7 @@ const YearlyBreakup = ({value}) => {
                 sx={{ width: 9, height: 9, bgcolor: primarylight, svg: { display: 'none' } }}
               ></Avatar>
               <Typography variant="subtitle2" color="textSecondary">
-                2023
+                2024
               </Typography>
             </Stack>
           </Stack>
@@ -105,7 +105,7 @@ const YearlyBreakup = ({value}) => {
             options={optionscolumnchart}
             series={seriescolumnchart}
             type="donut"
-            height="150px"
+            height="140px"
           />
         </Grid>
       </Grid>

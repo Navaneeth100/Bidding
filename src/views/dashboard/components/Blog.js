@@ -6,43 +6,11 @@ import img2 from 'src/assets/images/products/s5.jpg';
 import img3 from 'src/assets/images/products/s7.jpg';
 import img4 from 'src/assets/images/products/s11.jpg';
 import { Box, Stack } from '@mui/system';
-import { IconBasket } from '@tabler/icons-react';
+import { IconBasket, IconCircleCheck } from '@tabler/icons-react';
 import BlankCard from '../../../components/shared/BlankCard';
+import defaulthotel from 'src/assets/images/profile/DefaultHotel.jpg';
+import { url } from '../../../../mainurl';
 
-const ecoCard = [
-    {
-        title: 'TIME Moonstone Hotel Apartments',
-        subheader: 'September 14, 2023',
-        photo: "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no",
-        salesPrice: 2799,
-        price: 3500,
-        rating: 4,
-    },
-    {
-        title: 'TIME Moonstone Hotel Apartments',
-        subheader: 'September 14, 2023',
-        photo: "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no",
-        salesPrice: 2799,
-        price: 3500,
-        rating: 4,
-    },
-    {
-        title: 'TIME Moonstone Hotel Apartments',
-        subheader: 'September 14, 2023',
-        photo: "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no",
-        salesPrice: 2799,
-        price: 3500,
-        rating: 4,
-    },
-    {
-        title: 'TIME Moonstone Hotel Apartments',
-        subheader: 'September 14, 2023',
-        photo: "https://lh5.googleusercontent.com/p/AF1QipO-lrkTfA84I-9wAch-6shsZN_ya_pWVwdCBwbM=w255-h174-n-k-no",
-        salesPrice: 2799,
-        price: 3500,
-        rating: 4,
-    },
-];
 
 const Blog = ({value}) => {
     return (
@@ -52,25 +20,26 @@ const Blog = ({value}) => {
                 <Grid item sm={12} md={4} lg={3} key={index}>
                     <BlankCard>
                         <Typography component={Link} to="/">
-                            <img src="https://the-gaur-sarovar-portico-noida.goldentulip.com/static/images/room.jpg" alt="img" width="100%" height="200"/>
+                            <img src={product.image ? `${url}/hotel${product.image}`: defaulthotel} alt="img" width="100%" height="200"/>
                         </Typography>
-                        {/* <Tooltip title="Add To Cart">
+                        <Tooltip title="Impression">
                             <Fab
                                 size="small"
                                 color="primary"
-                                sx={{ bottom: '75px', right: '15px', position: 'absolute' }}
+                                variant='extended'
+                                sx={{ bottom: '75px', right: '15px', position: 'absolute' ,background: "limegreen", color: "white","&:hover": {background: "white", color: "limegreen" },}}
                             >
-                                <IconBasket size="16" />
+                                <IconCircleCheck className='me-1' size="18" /> {product.total_impressions}
                             </Fab>
-                        </Tooltip> */}
-                        <CardContent sx={{ p: 3, pt: 2 ,minHeight:"120px"}}>
-                            <Typography variant="h6">{product.hotel_name}</Typography>
+                        </Tooltip>
+                        <CardContent sx={{ p: 3, pt: 2 }}>
+                            <Typography variant="h6">{product.hotel_name.length > 22 ? `${product.hotel_name.slice(0, 22)}...` : product.hotel_name}</Typography>
                             <Stack direction="row" alignItems="center" justifyContent="space-between" mt={1}>
                                 <Stack direction="row" alignItems="center">
                                     {/* <Typography variant="h6">${product.price}</Typography> */}
-                                    <Typography color="textSecondary">
+                                    {/* <Typography color="textSecondary">
                                         Booked : {product.total_impressions}
-                                    </Typography>
+                                    </Typography> */}
                                 </Stack>
                                 <Rating name="read-only" size="small" value={product.rating} readOnly />
                             </Stack>

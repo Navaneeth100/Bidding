@@ -86,6 +86,8 @@ const AddHotel = () => {
 
     const [categories, setCategories] = useState([]);
     const [facilities, setfacilities] = useState([]);
+    const [propertytype, setpropertytype] = useState([])
+    const [emirates, setemirates] = useState([])
     const [tags, settags] = useState([])
     const [roomList, setRoomList] = useState([{}])
 
@@ -240,12 +242,14 @@ const AddHotel = () => {
                 // pro_img: profilepicture,
                 rating: `${formData.rating}`,
                 locationName: selectedLocation,
-                location: selectedLocation,
+                location: `${markerPosition.lat} , ${markerPosition.lng}`,
                 booking_price: formData.bookingPrice,
                 discount: formData.discount,
                 available_rooms: formData.availableRooms,
                 // hotel_room_categories: categories.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id)),
                 tags: tagsList,
+                propertytype: propertytype,
+                emirates: emirates,
                 facilities: facilities.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id)),
                 images: files,
                 // owner_name: "null",
@@ -297,11 +301,10 @@ const AddHotel = () => {
 
     const [roomData, setRoomData] = useState([{ room_category: '', area: '', floors: '', beds: '', bathrooms: '', guests: '', booking_price: '' }]);
 
-    const handleRoomChange = (index, field, value) => {
-        const updatedRoomData = [...roomData];
-        updatedRoomData[index][field] = value;
-        setRoomData(updatedRoomData);
-    };
+    const handleRoomChange = (field, value) => { setRoomData((prev) => ({ ...prev, [field]: value })) };
+
+    const [addedRoom, setaddedRoom] = useState([])
+
 
     const handleRoomSubmit = async (event) => {
         // const isRoomDataValid = roomData.every((room) => Object.values(room).every((value) => String(value).trim() !== ''));
@@ -316,15 +319,16 @@ const AddHotel = () => {
 
             let submitData = {
                 room_category: categoryList.find((category) => category.category_name === roomData[0].room_category)?.id,
-                area: roomData[0].area,
-                floors: roomData[0].floors,
-                beds: roomData[0].beds,
-                bathrooms: roomData[0].bathrooms,
-                guests: roomData[0].guests,
-                booking_price: roomData[0].booking_price,
-                rooms: roomData[0].room_no,
-                available_rooms:roomData[0].room_no,
-                excluded_days:formattedDates
+                area: roomData.area,
+                floors: roomData.floors,
+                beds: roomData.beds,
+                bathrooms: roomData.bathrooms,
+                guests: roomData.guests,
+                booking_price: roomData.booking_price,
+                rooms: roomData.room_no,
+                available_rooms: roomData.room_no,
+                excluded_days: formattedDates,
+                wf: roomData.withbreakfast
             }
 
             try {
@@ -380,6 +384,8 @@ const AddHotel = () => {
                 owner_name: ownerData.ownername,
                 owner_contact_number: ownerData.ownercontact,
                 owner_email: ownerData.owneremail,
+                support_email: ownerData.supportemail,
+                support_contact_number: ownerData.supportcontact,
             }
 
             try {
@@ -726,7 +732,7 @@ const AddHotel = () => {
 
     // Create an array of formatted dates
     const formattedDates = selectedDates.map((date) => formatDate(date));
-    
+
 
     return (
         <PageContainer title="Hotels" description="Hotels">
@@ -762,8 +768,8 @@ const AddHotel = () => {
 
                                                 {/* Hotel Image Upload Section */}
 
-                                                <Grid container spacing={2} sx={{ p: 3 }}>
-                                                    <Grid item xs={12} sm={3} className="relative aspect-video" sx={{ textAlign: 'center' }}>
+                                                <Grid container spacing={2} sx={{ p: 3, mt: 1 }}>
+                                                    {/* <Grid item xs={12} sm={3} className="relative aspect-video" sx={{ textAlign: 'center' }}>
                                                         <label htmlFor="file-upload" style={{ cursor: 'pointer', display: 'inline-block' }}>
                                                             <img
                                                                 src={profilepicture}
@@ -774,12 +780,12 @@ const AddHotel = () => {
                                                             />
                                                         </label>
                                                         <input id="file-upload" type="file" onChange={handleFileChange} hidden />
-                                                    </Grid>
+                                                    </Grid> */}
 
 
                                                     {/* Hotel Name and Description Section */}
 
-                                                    <Grid item xs={12} sm={9}>
+                                                    <Grid item xs={12} sm={12}>
                                                         <TextField
                                                             label="Hotel Name"
                                                             variant="outlined"
@@ -803,6 +809,7 @@ const AddHotel = () => {
                                                             name="simple-uncontrolled"
                                                             onChange={(event, newValue) => { setFormData({ ...formData, rating: newValue }) }}
                                                             defaultValue={1}
+                                                            size='large'
                                                         />
                                                     </Grid>
                                                 </Grid>
@@ -915,7 +922,7 @@ const AddHotel = () => {
                                                                 { label: 'Discount', key: 'discount' },
                                                                 { label: 'Available Rooms', key: 'availableRooms' },
                                                             ].map((field, index) => (
-                                                                <Grid item xs={12} sm={6} key={index}>
+                                                                <Grid item xs={6} sm={6} key={index}>
                                                                     <TextField
                                                                         label={field.label}
                                                                         variant="outlined"
@@ -927,6 +934,43 @@ const AddHotel = () => {
                                                                     />
                                                                 </Grid>
                                                             ))}
+                                                            <Grid item xs={6}>
+                                                                <FormControl fullWidth>
+                                                                    <InputLabel>Property Type</InputLabel>
+                                                                    <Select
+                                                                        value={propertytype}
+                                                                        onChange={(e) => { setpropertytype(e.target.value) }}
+                                                                        // renderValue={(selected) => selected.join(', ')}
+                                                                        label="Property Type"
+                                                                        MenuProps={MenuProps}>
+                                                                        <MenuItem value="Hotels">Hotels</MenuItem>
+                                                                        <MenuItem value="Apartments">Apartments</MenuItem>
+                                                                        <MenuItem value="Resorts">Resorts</MenuItem>
+                                                                        <MenuItem value="Villas">Villas</MenuItem>
+                                                                        <MenuItem value="Others">Others</MenuItem>
+                                                                    </Select>
+                                                                </FormControl>
+                                                            </Grid>
+                                                            <Grid item xs={6}>
+                                                                <FormControl fullWidth>
+                                                                    <InputLabel>Emirates</InputLabel>
+                                                                    <Select
+                                                                        value={emirates}
+                                                                        onChange={(e) => { setemirates(e.target.value) }}
+                                                                        // renderValue={(selected) => selected.join(', ')}
+                                                                        label="Emirates"
+                                                                        MenuProps={MenuProps}>
+                                                                        <MenuItem value="Dubai">Dubai</MenuItem>
+                                                                        <MenuItem value="Abu Dhabi">Abu Dhabi</MenuItem>
+                                                                        <MenuItem value="Sharjah">Sharjah</MenuItem>
+                                                                        <MenuItem value="Ajman">Ajman</MenuItem>
+                                                                        <MenuItem value="Fujeirah">Fujeirah</MenuItem>
+                                                                        <MenuItem value="RAK">RAK</MenuItem>
+                                                                        <MenuItem value="UAQ">UAQ</MenuItem>
+                                                                        <MenuItem value="Al Ain">Al Ain</MenuItem>
+                                                                    </Select>
+                                                                </FormControl>
+                                                            </Grid>
                                                         </Grid>
                                                     </form>
                                                 </Box>
@@ -1009,7 +1053,7 @@ const AddHotel = () => {
 
                                             {activeStep === 1 && (
                                                 <React.Fragment>
-                                                    <Grid container spacing={2} sx={{ p: 3 }}>
+                                                    <Grid container spacing={2} sx={{ p: 3, mt: 1 }}>
                                                         {/* Add Room Form */}
 
                                                         <Box sx={{ mt: 4 }}>
@@ -1017,45 +1061,44 @@ const AddHotel = () => {
                                                                 <Typography variant="h5" gutterBottom>
                                                                     Room Details
                                                                 </Typography>
-                                                                <Button
+                                                                {/* <Button
                                                                     variant="contained"
                                                                     color="primary"
-                                                                    onClick={() => { setRoomList([...roomList, {}]), setRoomData([]) , setSelectedDates([]) }}
+                                                                    onClick={() => { setRoomList([...roomList, {}]), setRoomData([]), setSelectedDates([]) }}
                                                                 >
                                                                     Add Rooms
-                                                                </Button>
+                                                                </Button> */}
                                                             </Grid>
 
                                                             <Paper elevation={2} sx={{ p: 2 }}>
                                                                 <Grid container spacing={2}>
-                                                                    {roomList.map((_, index) => (
-                                                                        <Grid key={index} item xs={12} sm={6} md={4}>
-                                                                            {/* Room Details Card */}
-                                                                            <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: '8px' }}>
-                                                                                <Typography variant="subtitle1" className='mb-3' gutterBottom>
-                                                                                    Room {index + 1}
-                                                                                </Typography>
+                                                                    <Grid item sm={6} >
+                                                                        {/* Room Details Card */}
+                                                                        <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: '8px' }}>
+                                                                            <Typography variant="subtitle1" className='mb-3' gutterBottom>
+                                                                                Add Room Details
+                                                                            </Typography>
 
-                                                                                <Grid container spacing={2}>
-                                                                                    <Grid item xs={12} sm={12}>
-                                                                                        <FormControl fullWidth>
-                                                                                            <InputLabel>Category</InputLabel>
-                                                                                            <Select
-                                                                                                // multiple
-                                                                                                value={roomData[index].room_category || ""}
-                                                                                                onOpen={fetchCategory}
-                                                                                                onChange={(e) => handleRoomChange(index, 'room_category', e.target.value)}
-                                                                                                // renderValue={(selected) => selected.join(', ')}
-                                                                                                label="Category"
-                                                                                                MenuProps={MenuProps}>
-                                                                                                {categoryList.map((item) => (
-                                                                                                    <MenuItem value={item.category_name}>{item.category_name}</MenuItem>
-                                                                                                ))}
-                                                                                            </Select>
-                                                                                        </FormControl>
-                                                                                    </Grid>
+                                                                            <Grid container spacing={2}>
+                                                                                <Grid item xs={12} sm={12}>
+                                                                                    <FormControl fullWidth>
+                                                                                        <InputLabel>Category</InputLabel>
+                                                                                        <Select
+                                                                                            // multiple
+                                                                                            value={roomData.room_category || ""}
+                                                                                            onOpen={fetchCategory}
+                                                                                            onChange={(e) => handleRoomChange('room_category', e.target.value)}
+                                                                                            // renderValue={(selected) => selected.join(', ')}
+                                                                                            label="Category"
+                                                                                            MenuProps={MenuProps}>
+                                                                                            {categoryList.map((item) => (
+                                                                                                <MenuItem value={item.category_name}>{item.category_name}</MenuItem>
+                                                                                            ))}
+                                                                                        </Select>
+                                                                                    </FormControl>
+                                                                                </Grid>
 
-                                                                                    {/* <Grid item xs={12} sm={12}>
+                                                                                {/* <Grid item xs={12} sm={12}>
                                                                                         <FormControl fullWidth>
                                                                                             <InputLabel>Facilities</InputLabel>
                                                                                             <Select
@@ -1073,7 +1116,7 @@ const AddHotel = () => {
                                                                                         </FormControl>
                                                                                     </Grid> */}
 
-                                                                                    {/* <Grid item xs={12} sm={12}>
+                                                                                {/* <Grid item xs={12} sm={12}>
                                                                                         <FormControl fullWidth>
                                                                                             <InputLabel>Tags</InputLabel>
                                                                                             <Select
@@ -1089,196 +1132,216 @@ const AddHotel = () => {
                                                                                             </Select>
                                                                                         </FormControl>
                                                                                     </Grid> */}
-                                                                                    <Grid item sm={12}>
-                                                                                        {/* <Typography variant="h6" gutterBottom>
+                                                                                <Grid item sm={12}>
+                                                                                    {/* <Typography variant="h6" gutterBottom>
                                                                                             Room Images
                                                                                         </Typography> */}
-                                                                                        <Box
-                                                                                            {...getRootProps()}
-                                                                                            sx={{
-                                                                                                border: "2px dashed #ccc",
-                                                                                                borderRadius: "4px",
-                                                                                                padding: "20px",
-                                                                                                textAlign: "center",
-                                                                                                cursor: "pointer",
-                                                                                                backgroundColor: isDragActive ? "#f0f0f0" : "transparent",
-                                                                                                marginTop: "10px"
-                                                                                            }}
-                                                                                        >
-                                                                                            <input {...getInputProps()} />
-                                                                                            <Typography variant="body1" color="textSecondary">
-                                                                                                {isDragActive ? "Drop files here..." : "Drag and drop files here or click to upload"}
-                                                                                            </Typography>
-                                                                                            <Button variant="contained" sx={{ mt: 2 }}>
-                                                                                                Select Files
-                                                                                            </Button>
-                                                                                        </Box>
-                                                                                        <Grid container spacing={2} style={{ marginTop: "15px", textAlign: "center" }}>
-                                                                                            {files1.map((file, index) => (
-                                                                                                <Grid item key={index} xs={12} sm={3} md={3}>
-                                                                                                    <Card>
-                                                                                                        <CardMedia
-                                                                                                            component="img"
-                                                                                                            width="100%"
-                                                                                                            height="100"
-                                                                                                            image={file.preview}
-                                                                                                            alt={file.name}
-                                                                                                        />
-                                                                                                        <Button
-                                                                                                            size="small"
-                                                                                                            style={{ color: "red" }}
-                                                                                                            onClick={() => handleRemoveFile(file)}
-                                                                                                        >
-                                                                                                            Remove
-                                                                                                        </Button>
-                                                                                                    </Card>
-                                                                                                </Grid>
-                                                                                            ))}
-                                                                                        </Grid>
-                                                                                    </Grid>
-                                                                                    <Grid item xs={4}>
-                                                                                        <TextField
-                                                                                            fullWidth
-                                                                                            label="Room No"
-                                                                                            placeholder='eg: 123'
-                                                                                            variant="outlined"
-                                                                                            margin="normal"
-                                                                                            name={`room_no_${index}`}
-                                                                                            onChange={(e) => handleRoomChange(index, 'room_no', e.target.value)}
-                                                                                        />
-                                                                                    </Grid>
-
-                                                                                    <Grid item xs={4}>
-                                                                                        <TextField
-                                                                                            fullWidth
-                                                                                            label="Room Area"
-                                                                                            placeholder='eg: in sq ft'
-                                                                                            variant="outlined"
-                                                                                            margin="normal"
-                                                                                            name={`room_area_${index}`}
-                                                                                            onChange={(e) => handleRoomChange(index, 'area', e.target.value)}
-                                                                                        />
-                                                                                    </Grid>
-
-                                                                                    <Grid item xs={4}>
-                                                                                        <TextField
-                                                                                            fullWidth
-                                                                                            label="Floor"
-                                                                                            placeholder='eg: 1'
-                                                                                            variant="outlined"
-                                                                                            margin="normal"
-                                                                                            name={`floor_${index}`}
-                                                                                            onChange={(e) => handleRoomChange(index, 'floors', e.target.value)}
-                                                                                        />
-                                                                                    </Grid>
-
-                                                                                    <Grid item xs={4}>
-                                                                                        <TextField
-                                                                                            fullWidth
-                                                                                            label="Beds"
-                                                                                            placeholder='eg: 2'
-                                                                                            variant="outlined"
-                                                                                            margin="normal"
-                                                                                            name={`beds_${index}`}
-                                                                                            onChange={(e) => handleRoomChange(index, 'beds', e.target.value)}
-                                                                                        />
-                                                                                    </Grid>
-
-                                                                                    <Grid item xs={4}>
-                                                                                        <TextField
-                                                                                            fullWidth
-                                                                                            label="Bathrooms"
-                                                                                            placeholder='eg: 2'
-                                                                                            variant="outlined"
-                                                                                            margin="normal"
-                                                                                            name={`bathrooms_${index}`}
-                                                                                            onChange={(e) => handleRoomChange(index, 'bathrooms', e.target.value)}
-                                                                                        />
-                                                                                    </Grid>
-
-                                                                                    <Grid item xs={4}>
-                                                                                        <TextField
-                                                                                            fullWidth
-                                                                                            label="Guests"
-                                                                                            variant="outlined"
-                                                                                            placeholder='eg: 1 - 5'
-                                                                                            margin="normal"
-                                                                                            name={`guests_${index}`}
-                                                                                            onChange={(e) => handleRoomChange(index, 'guests', e.target.value)}
-                                                                                        />
-                                                                                    </Grid>
-
-                                                                                    <Grid item xs={4}>
-                                                                                        <TextField
-                                                                                            fullWidth
-                                                                                            label="Room Price"
-                                                                                            placeholder='eg: $$$'
-                                                                                            variant="outlined"
-                                                                                            margin="normal"
-                                                                                            name={`room_price_${index}`}
-                                                                                            onChange={(e) => handleRoomChange(index, 'booking_price', e.target.value)}
-                                                                                        />
-                                                                                    </Grid>
-                                                                                    <Grid item xs={4}>
-                                                                                        <TextField
-                                                                                            fullWidth
-                                                                                            label="With Breakfast"
-                                                                                            variant="outlined"
-                                                                                            placeholder='eg: 1 - 5'
-                                                                                            margin="normal"
-                                                                                            name={`withbreakfast_${index}`}
-                                                                                            onChange={(e) => handleRoomChange(index, 'withbreakfast', e.target.value)}
-                                                                                        />
-                                                                                    </Grid>
-                                                                                    <Grid item xs={12}>
-                                                                                        <Calendar
-                                                                                            onChange={handleDateChange}
-                                                                                            value={selectedDates}
-                                                                                            selectRange={false}
-                                                                                            tileClassName={({ date, view }) => {
-                                                                                                // Add inline styles to the selected dates
-                                                                                                if (selectedDates.some((d) => d.getTime() === date.getTime())) {
-                                                                                                    return 'selected-date';  // Use a class to apply inline styles later
-                                                                                                }
-                                                                                                return '';
-                                                                                            }}
-                                                                                            tileContent={({ date, view }) => {
-                                                                                                if (selectedDates.some((d) => d.getTime() === date.getTime())) {
-                                                                                                    return (
-                                                                                                        <div
-                                                                                                            style={{
-                                                                                                                backgroundColor: 'red',
-                                                                                                                color: 'white',
-                                                                                                                borderRadius: '50%',
-                                                                                                                width: '20px',
-                                                                                                                height: '20px',
-                                                                                                                textAlign: 'center',
-                                                                                                                lineHeight: '20px',
-                                                                                                                margin: 'auto',
-                                                                                                            }}
-                                                                                                        >
-                                                                                                           X
-                                                                                                        </div>
-                                                                                                    );
-                                                                                                }
-                                                                                                return '';
-                                                                                            }}
-                                                                                        />
-                                                                                        {/* {selectedDates.map((date, index) => (
-                                                                                            <li key={index}>{date.toDateString()}</li>
-                                                                                        ))} */}
-                                                                                    </Grid>
-                                                                                    <Grid item xs={12}>
-                                                                                        <Button
-                                                                                            fullWidth
-                                                                                            variant="contained"
-                                                                                            onClick={(e) => handleRoomSubmit(e)}
-                                                                                        >Save</Button>
+                                                                                    <Box
+                                                                                        {...getRootProps()}
+                                                                                        sx={{
+                                                                                            border: "2px dashed #ccc",
+                                                                                            borderRadius: "4px",
+                                                                                            padding: "20px",
+                                                                                            textAlign: "center",
+                                                                                            cursor: "pointer",
+                                                                                            backgroundColor: isDragActive ? "#f0f0f0" : "transparent",
+                                                                                            marginTop: "10px"
+                                                                                        }}
+                                                                                    >
+                                                                                        <input {...getInputProps()} />
+                                                                                        <Typography variant="body1" color="textSecondary">
+                                                                                            {isDragActive ? "Drop files here..." : "Drag and drop files here or click to upload"}
+                                                                                        </Typography>
+                                                                                        <Button variant="contained" sx={{ mt: 2 }}>
+                                                                                            Select Files
+                                                                                        </Button>
+                                                                                    </Box>
+                                                                                    <Grid container spacing={2} style={{ marginTop: "15px", textAlign: "center" }}>
+                                                                                        {files1.map((file, index) => (
+                                                                                            <Grid item key={index} xs={12} sm={3} md={3}>
+                                                                                                <Card>
+                                                                                                    <CardMedia
+                                                                                                        component="img"
+                                                                                                        width="100%"
+                                                                                                        height="100"
+                                                                                                        image={file.preview}
+                                                                                                        alt={file.name}
+                                                                                                    />
+                                                                                                    <Button
+                                                                                                        size="small"
+                                                                                                        style={{ color: "red" }}
+                                                                                                        onClick={() => handleRemoveFile(file)}
+                                                                                                    >
+                                                                                                        Remove
+                                                                                                    </Button>
+                                                                                                </Card>
+                                                                                            </Grid>
+                                                                                        ))}
                                                                                     </Grid>
                                                                                 </Grid>
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Room No"
+                                                                                        placeholder='eg: 123'
+                                                                                        variant="outlined"
+                                                                                        margin="normal"
+                                                                                        name="room_no"
+                                                                                        onChange={(e) => handleRoomChange('room_no', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
+
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Room Area"
+                                                                                        placeholder='eg: in sq ft'
+                                                                                        variant="outlined"
+                                                                                        margin="normal"
+                                                                                        name="room_area"
+                                                                                        onChange={(e) => handleRoomChange('area', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
+
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Floor"
+                                                                                        placeholder='eg: 1'
+                                                                                        variant="outlined"
+                                                                                        margin="normal"
+                                                                                        name="floor"
+                                                                                        onChange={(e) => handleRoomChange('floors', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
+
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Beds"
+                                                                                        placeholder='eg: 2'
+                                                                                        variant="outlined"
+                                                                                        margin="normal"
+                                                                                        name="beds"
+                                                                                        onChange={(e) => handleRoomChange('beds', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
+
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Bathrooms"
+                                                                                        placeholder='eg: 2'
+                                                                                        variant="outlined"
+                                                                                        margin="normal"
+                                                                                        name="bathrooms"
+                                                                                        onChange={(e) => handleRoomChange('bathrooms', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
+
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Guests"
+                                                                                        variant="outlined"
+                                                                                        placeholder='eg: 1 - 5'
+                                                                                        margin="normal"
+                                                                                        name="guests"
+                                                                                        onChange={(e) => handleRoomChange('guests', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
+
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Room Price"
+                                                                                        placeholder='eg: $$$'
+                                                                                        variant="outlined"
+                                                                                        margin="normal"
+                                                                                        name="room_price"
+                                                                                        onChange={(e) => handleRoomChange('booking_price', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="With Breakfast"
+                                                                                        variant="outlined"
+                                                                                        placeholder='eg: 1 - 5'
+                                                                                        margin="normal"
+                                                                                        name="withbreakfast"
+                                                                                        onChange={(e) => handleRoomChange('withbreakfast', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
+                                                                                <Grid item xs={12}>
+                                                                                    <Calendar
+                                                                                        onChange={handleDateChange}
+                                                                                        value={selectedDates}
+                                                                                        selectRange={false}
+                                                                                        tileClassName={({ date, view }) => {
+                                                                                            // Add inline styles to the selected dates
+                                                                                            if (selectedDates.some((d) => d.getTime() === date.getTime())) {
+                                                                                                return 'selected-date';  // Use a class to apply inline styles later
+                                                                                            }
+                                                                                            return '';
+                                                                                        }}
+                                                                                        tileContent={({ date, view }) => {
+                                                                                            if (selectedDates.some((d) => d.getTime() === date.getTime())) {
+                                                                                                return (
+                                                                                                    <div
+                                                                                                        style={{
+                                                                                                            backgroundColor: 'red',
+                                                                                                            color: 'white',
+                                                                                                            borderRadius: '50%',
+                                                                                                            width: '20px',
+                                                                                                            height: '20px',
+                                                                                                            textAlign: 'center',
+                                                                                                            lineHeight: '20px',
+                                                                                                            margin: 'auto',
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        X
+                                                                                                    </div>
+                                                                                                );
+                                                                                            }
+                                                                                            return '';
+                                                                                        }}
+                                                                                    />
+                                                                                    {/* {selectedDates.map((date, index) => (
+                                                                                            <li key={index}>{date.toDateString()}</li>
+                                                                                        ))} */}
+                                                                                </Grid>
+                                                                                <Grid item xs={12}>
+                                                                                    <Button
+                                                                                        fullWidth
+                                                                                        variant="contained"
+                                                                                        onClick={(e) => handleRoomSubmit(e)}
+                                                                                    >Save</Button>
+                                                                                </Grid>
+                                                                            </Grid>
+                                                                        </Box>
+                                                                    </Grid>
+                                                                    <Grid item sm={6}>
+                                                                        <Grid item xs={12} sm={12}>
+                                                                            <Box sx={{ display: 'flex', flexDirection: 'column', overflowY: 'auto', minHeight: '100%', maxHeight: '100%', border: '1px solid #ccc', borderRadius: '8px', padding: 2 }}>
+                                                                                {addedRoom.length > 0 ? (
+                                                                                    addedRoom.map((detail, index) => (
+                                                                                        <Paper elevation={3} key={index} sx={{ padding: 2 }}>
+                                                                                            <Typography variant="h6">Room No: {detail.roomNo}</Typography>
+                                                                                            <Typography variant="body1">Booking Price: {detail.bookingPrice}</Typography>
+                                                                                            <Typography variant="body1">Area: {detail.area}</Typography>
+                                                                                        </Paper>
+                                                                                    ))
+                                                                                ) : (
+                                                                                    <Paper elevation={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', minHeight: 200, }}>
+                                                                                        <Typography variant="h6" color="textSecondary">
+                                                                                            No Rooms Added
+                                                                                        </Typography>
+                                                                                    </Paper>
+                                                                                )}
                                                                             </Box>
                                                                         </Grid>
-                                                                    ))}
+                                                                    </Grid>
                                                                 </Grid>
                                                             </Paper>
                                                         </Box>
@@ -1289,7 +1352,7 @@ const AddHotel = () => {
                                             {/* Third Step: Completed */}
                                             {activeStep === 2 && (
                                                 <React.Fragment>
-                                                    <Grid container spacing={2} sx={{ p: 3 }}>
+                                                    <Grid container spacing={2} sx={{ p: 3, mt: 1 }}>
                                                         <Box sx={{ mt: 4, width: '100%' }}>
                                                             <form>
                                                                 <Typography variant="h5" className='mb-3' gutterBottom>
@@ -1297,13 +1360,14 @@ const AddHotel = () => {
                                                                 </Typography>
                                                                 <Grid container spacing={2}>
                                                                     {[
-                                                                        { label: 'Owner Name', key: 'ownername', group: 'owner' },
-                                                                        { label: 'Owner Contact', key: 'ownercontact', group: 'owner' },
-                                                                        { label: 'Owner Email', key: 'owneremail', group: 'owner' },
+                                                                        { label: 'Owner Name', key: 'ownername', group: 'owner', type: "text" },
+                                                                        { label: 'Owner Contact No.', key: 'ownercontact', group: 'owner', type: "text" },
+                                                                        { label: 'Owner Email', key: 'owneremail', group: 'owner', type: "email" },
                                                                     ].map((field, index) => (
                                                                         <Grid item xs={12} sm={6} key={index}>
                                                                             <TextField
                                                                                 label={field.label}
+                                                                                type={field.type}
                                                                                 variant="outlined"
                                                                                 fullWidth
                                                                                 onChange={(e) =>
@@ -1315,12 +1379,13 @@ const AddHotel = () => {
                                                                 </Grid>
                                                                 <Grid container spacing={2} className='mt-3'>
                                                                     {[
-                                                                        { label: 'Support Contact', key: 'supportcontac', group: 'support' },
-                                                                        { label: 'Support Email', key: 'supportemail', group: 'support' },
+                                                                        { label: 'Support Contact', key: 'supportcontact', group: 'support', type: 'text' },
+                                                                        { label: 'Support Email', key: 'supportemail', group: 'support', type: 'email' },
                                                                     ].map((field, index) => (
                                                                         <Grid item xs={12} sm={6} key={index}>
                                                                             <TextField
                                                                                 label={field.label}
+                                                                                type={field.type}
                                                                                 variant="outlined"
                                                                                 fullWidth
                                                                                 onChange={(e) =>
@@ -1339,7 +1404,7 @@ const AddHotel = () => {
                                             {/* Fourth Step: Preview */}
                                             {activeStep === 3 && (
                                                 <React.Fragment>
-                                                    <Grid container spacing={2} sx={{ p: 3 }}>
+                                                    <Grid container spacing={2} sx={{ p: 3, mt: 1 }}>
                                                         {/* English */}
                                                         <Grid item xs={12} sm={6}>
                                                             <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', height: '100%', minHeight: "500px" }}>
@@ -1457,63 +1522,6 @@ const AddHotel = () => {
                     </DashboardCard>
                 </Grid>
             </Grid >
-
-            <Dialog
-                open={locationModal}
-                onClose={() => setlocationModal(false)}
-                maxWidth="sm"
-                fullWidth
-                sx={{ padding: 4 }}
-            >
-                <DialogTitle sx={{ m: 0, p: 2, position: 'relative' }} id="customized-dialog-title">
-                    Add Location
-                    <IconButton aria-label="close" onClick={() => toggleModal('add')} sx={{ position: 'absolute', right: 8, top: 8 }}>x</IconButton>
-                </DialogTitle>
-
-                <DialogContent sx={{ padding: 3 }}>
-                    <Grid container spacing={3}>
-                        <Grid item md={6} xs={6}>
-                            <Box className="mt-3 mb-3" >
-                                <TextField
-                                    label="Location"
-                                    variant="outlined"
-                                    fullWidth
-                                    sx={{ mb: 2 }}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        handleSearchLocation(value);
-                                        setFormData({ ...formData, locationName: value })
-                                    }}
-                                />
-                                <Typography variant="h6" className='mb-3' gutterBottom>
-                                    Selected Location : {selectedLocation}
-                                </Typography>
-                                <LoadScript googleMapsApiKey="AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY" libraries={['places']}>
-                                    <GoogleMap
-                                        mapContainerStyle={{ height: '400px', width: '100%' }}
-                                        zoom={15}
-                                        center={center}
-                                    >
-                                        <Marker position={markerPosition}
-                                            draggable={true}
-                                            onDragEnd={handleMarkerDragEnd}
-                                        />
-                                    </GoogleMap>
-                                </LoadScript>
-                            </Box>
-                        </Grid>
-
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            sx={{ marginTop: 4 }}
-                        >
-                            Submit
-                        </Button>
-                    </Grid>
-                </DialogContent>
-            </Dialog>
         </PageContainer >
 
     );

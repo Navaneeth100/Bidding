@@ -12,6 +12,7 @@ import { Typography } from '@mui/material';
 import DashboardCard from '../../components/shared/DashboardCard';
 import axios from 'axios';
 import { url } from '../../../mainurl';
+import Blog2 from './components/Blog2';
 
 
 const Dashboard = () => {
@@ -66,7 +67,7 @@ const Dashboard = () => {
   useEffect(() => {
     fetchDashboard()
   }, [])
-  
+
 
   return (
     <PageContainer title="Dashboard" description="this is Dashboard">
@@ -83,7 +84,7 @@ const Dashboard = () => {
                     valueFormatter,
                   },
                 ]}
-                height={300}
+                height={350}
                 legend={{
                   position: 'right',
                   spacing: 10,
@@ -116,15 +117,21 @@ const Dashboard = () => {
                 <YearlyBreakup value={dashboardData.impressions_current_year} />
               </Grid>
               <Grid item xs={12}>
-                <MonthlyEarnings  value={dashboardData.impressions_current_month}/>
+                <MonthlyEarnings value={dashboardData.impressions_current_month} />
               </Grid>
             </Grid>
           </Grid>
           {/* <Grid item xs={12} lg={12}>
             <ProductPerformance value={dashboardData.top_impression_hotels}/>
           </Grid> */}
+          {/* <Grid item xs={12}>
+            <Blog value={dashboardData.top_impression_hotels} />
+          </Grid> */}
           <Grid item xs={12}>
-            <Blog value={dashboardData.top_impression_hotels}/>
+            <Blog2 value={dashboardData.most_favorite_hotels} />
+          </Grid>
+          <Grid item xs={12}>
+            <Blog value={dashboardData.top_impression_hotels} />
           </Grid>
         </Grid>
       </Box>

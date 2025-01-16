@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Grid, CardContent, CircularProgress, DialogContentText, Avatar } from '@mui/material';
+import { Typography, Grid, CardContent, CircularProgress, DialogContentText, Avatar, Rating } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
@@ -71,8 +71,10 @@ const HotelPage = () => {
 
     const fetchHotels = (page = 1) => {
         setLoading(true);
+        const formattedcategoryfilter = categoryfilter.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id));
+        const formattedfacilitiesfilter = facilitesfilter.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id));
         axios
-            .get(`${url}/hotel/createhotels/?category_id_search=${categoryfilter}&rating_search=${ratingfilter}&facility_id_search=${facilitesfilter}&emirates_search=${locationfilter}&page=${page}&page_size=${pageSize}`, {
+            .get(`${url}/hotel/createhotels/?category_id_search=${formattedcategoryfilter}&rating_search=${ratingfilter}&facility_id_search=${formattedfacilitiesfilter}&emirates_search=${locationfilter}&page=${page}&page_size=${pageSize}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -97,7 +99,7 @@ const HotelPage = () => {
                         Authorization: `Bearer ${res.data.access}`,
                     };
                     axios
-                        .get(`${url}/hotel/createhotels/?category_id_search=${categoryfilter}&rating_search=${ratingfilter}&facility_id_search=${facilitesfilter}&emirates_search=${locationfilter}&page=${page}&page_size=${pageSize}`, {
+                        .get(`${url}/hotel/createhotels/?category_id_search=${formattedcategoryfilter}&rating_search=${ratingfilter}&facility_id_search=${formattedfacilitiesfilter}&emirates_search=${locationfilter}&page=${page}&page_size=${pageSize}`, {
                             headers: new_headers,
                         })
                         .then((res) => {
@@ -116,7 +118,7 @@ const HotelPage = () => {
 
     useEffect(() => {
         fetchHotels(currentPage);
-    }, [currentPage,categoryfilter,facilitesfilter,ratingfilter,locationfilter]);
+    }, [currentPage, categoryfilter, facilitesfilter, ratingfilter, locationfilter]);
 
     // SN Handler
 
@@ -206,6 +208,84 @@ const HotelPage = () => {
     // Edit Hotel
 
     const [editData, setEditData] = useState([])
+    const [editfacilities, seteditfacilities] = useState([])
+    const [edittags, setedittags] = useState([])
+
+    // Tag Adds
+
+    const [tagInput, settagInput] = useState("");
+
+    const handleAddTag = () => {
+        if (tagInput.trim() !== "") {
+            setedittags((prevItems) => [...prevItems, tagInput]);
+            settagInput("");
+        }
+    };
+
+    const handleRemoveItem = (indexToRemove) => {
+        setedittags((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            handleAddTag();
+        }
+    };
+
+    const handleEdit = async (event) => {
+        event.preventDefault();
+        let submitData = {
+            name: editData.name,
+            description: editData.description,
+            rating: editData.rating,
+            location: selectedLocation || editData.location,
+            locationName: `${markerPosition.lat} , ${markerPosition.lng}`,
+            owner_name: editData.owner_name,
+            owner_email: editData.owner_email,
+            owner_contact_number: editData.owner_contact_number,
+            support_contact_number: editData.support_contact_number,
+            support_email: editData.support_email,
+            propertytype: editData.propertytype,
+            emirates: editData.emirates,
+            facilites: editfacilities,
+            tags: edittags
+        };
+
+        try {
+            const response = await axios.put(`${url}/hotel/updatehotels/${editData.id}/`, submitData, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "multipart/form-data",
+                },
+                withCredentials: false,
+            });
+            if (response.data.message) {
+                toast.success(`${response.data.message}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+            }
+            toggleModal('edit');
+            fetchHotels(currentPage);
+        } catch (error) {
+            toast.error(`${error.response.data.error}`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
+        } finally {
+        }
+    };
 
 
     // Delete Hotel
@@ -231,7 +311,7 @@ const HotelPage = () => {
                 draggable: true,
                 theme: 'colored',
             });
-            fetchHotels();
+            fetchHotels(currentPage);
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -371,7 +451,7 @@ const HotelPage = () => {
                                 <Select
                                     multiple
                                     value={facilitesfilter}
-                                    onChange={(e) => { setfacilitesfilter(e.target.value);console.log(e) }}
+                                    onChange={(e) => { setfacilitesfilter(e.target.value); }}
                                     onOpen={fetchFacilities}
                                     renderValue={(selected) => selected.join(', ')}
                                     label="Facilities"
@@ -394,7 +474,7 @@ const HotelPage = () => {
                     </Grid>
                     <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 2 }}>
                         <Button variant="contained" color="primary" sx={{ mr: 2 }} onClick={() => fetchHotels(currentPage)}>Submit</Button>
-                        <Button variant="outlined" color="secondary" onClick={() => { setcategoryfilter([]); setratingfilter(''); setfacilitesfilter([]); setlocationfilter(''); fetchHotels(1) }}>Clear</Button>
+                        <Button variant="outlined" color="primary" onClick={() => { setcategoryfilter([]); setratingfilter(''); setfacilitesfilter([]); setlocationfilter(''); fetchHotels(1) }}>Clear</Button>
                     </Box>
                 </Box>
             )}
@@ -564,7 +644,7 @@ const HotelPage = () => {
                                                     <Box display="flex" alignItems="center" justifyContent="center">
                                                         {/* <IconEye width={20} style={{ marginRight: "15px" }} /> */}
                                                         <Button
-                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
+                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); setedittags(item.tags); }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
                                                         </Button>
                                                         <Button
                                                             sx={{ border: '1px solid lightgrey' }} onClick={() => { toggleModal('delete'); setDeleteData(item); }}><IconTrash width={15} className='m-0 p-0' />
@@ -640,16 +720,16 @@ const HotelPage = () => {
                 fullWidth
                 sx={{ padding: 2 }}
             >
-                <DialogTitle sx={{ m: 0, p: 2, position: 'relative' }} id="customized-dialog-title">
+                <DialogTitle sx={{ m: 2, p: 2, position: 'relative' }} id="customized-dialog-title">
                     Edit Hotel
                     <IconButton
                         onClick={() => toggleModal('edit')} sx={{ position: 'absolute', right: 8, top: 8 }}>x</IconButton>
                 </DialogTitle>
 
                 <DialogContent sx={{ padding: 3 }}>
-                    <form className="row gy-4 mt-2">
+                    <form className="row gy-4 mt-2" onSubmit={handleEdit}>
                         <Grid container spacing={3}>
-                            <Grid item md={4} xs={12}>
+                            <Grid item md={12} xs={12}>
                                 <TextField
                                     label="Name"
                                     variant="outlined"
@@ -660,35 +740,6 @@ const HotelPage = () => {
                                         setEditData({ ...editData, name: e.target.value })
                                     }}
                                 />
-                            </Grid>
-
-                            <Grid item md={4} xs={12}>
-                                <TextField
-                                    label="Ratings"
-                                    variant="outlined"
-                                    defaultValue={editData.rating}
-                                    fullWidth
-                                    sx={{ mb: 2 }}
-                                    onChange={(e) => {
-                                        setEditData({ ...editData, rating: e.target.value })
-                                    }}
-                                />
-                            </Grid>
-
-                            <Grid item md={4} xs={12}>
-                                <TextField
-                                    label="Location"
-                                    variant="outlined"
-                                    fullWidth
-                                    defaultValue={editData.locationName}
-                                    sx={{ mb: 2 }}
-                                    onChange={(e) => {
-                                        setEditData({ ...editData, locationName: e.target.value })
-                                    }}
-                                />
-                            </Grid>
-
-                            <Grid item md={12} xs={12}>
                                 <TextField
                                     label="Description"
                                     variant="outlined"
@@ -700,6 +751,16 @@ const HotelPage = () => {
                                     onChange={(e) => {
                                         setEditData({ ...editData, description: e.target.value })
                                     }}
+                                />
+                                <Typography variant="body2" color="textSecondary" fontWeight="bold" className='mt-3'>
+                                    Rating :
+                                </Typography>
+                                <Rating
+                                    className='m-2'
+                                    name="simple-uncontrolled"
+                                    onChange={(event, newValue) => { setEditData({ ...editData, rating: newValue }) }}
+                                    defaultValue={editData.rating}
+                                    size='large'
                                 />
                             </Grid>
 
@@ -744,6 +805,145 @@ const HotelPage = () => {
                                     </LoadScript>
                                 </Box>
                             </Grid>
+                            <Grid item xs={6}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Property Type</InputLabel>
+                                    <Select
+                                        defaultValue={editData.propertytype}
+                                        onChange={(e) => { setEditData((prevData) => ({ ...prevData, propertytype: e.target.value })) }}
+                                        // renderValue={(selected) => selected.join(', ')}
+                                        label="Property Type"
+                                        MenuProps={MenuProps}>
+                                        <MenuItem value="Hotels">Hotels</MenuItem>
+                                        <MenuItem value="Apartments">Apartments</MenuItem>
+                                        <MenuItem value="Resorts">Resorts</MenuItem>
+                                        <MenuItem value="Villas">Villas</MenuItem>
+                                        <MenuItem value="Others">Others</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Emirates</InputLabel>
+                                    <Select
+                                        defaultValue={editData.emirates}
+                                        onChange={(e) => { setEditData((prevData) => ({ ...prevData, emirates: e.target.value })) }}
+                                        // renderValue={(selected) => selected.join(', ')}
+                                        label="Emirates"
+                                        MenuProps={MenuProps}>
+                                        <MenuItem value="Dubai">Dubai</MenuItem>
+                                        <MenuItem value="Abu Dhabi">Abu Dhabi</MenuItem>
+                                        <MenuItem value="Sharjah">Sharjah</MenuItem>
+                                        <MenuItem value="Ajman">Ajman</MenuItem>
+                                        <MenuItem value="Fujeirah">Fujeirah</MenuItem>
+                                        <MenuItem value="RAK">RAK</MenuItem>
+                                        <MenuItem value="UAQ">UAQ</MenuItem>
+                                        <MenuItem value="Al Ain">Al Ain</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Facilites</InputLabel>
+                                    <Select
+                                        multiple
+                                        value={editfacilities}
+                                        onChange={(e) => { seteditfacilities(e.target.value) }}
+                                        renderValue={(selected) => selected.join(', ')}
+                                        label="Property Type"
+                                        MenuProps={MenuProps}>
+                                        {facilitiesList.map((item) => (
+                                            <MenuItem value={item.name}>{item.name}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={12} sm={12}>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
+                                    <TextField
+                                        label="Enter Tags"
+                                        variant="outlined"
+                                        fullWidth
+                                        value={tagInput}
+                                        onChange={(e) => settagInput(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                    />
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleAddTag}
+                                    >
+                                        Add
+                                    </Button>
+                                </Box>
+                                <Box>
+                                    {edittags.map((item, index) => (
+                                        <span key={index}>
+                                            <Chip className='me-2 mb-2' label={item} variant="outlined" onDelete={() => handleRemoveItem(index)} />
+                                        </span>
+                                    ))}
+                                </Box>
+                            </Grid>
+                            <Grid item md={4} xs={12}>
+                                <TextField
+                                    label="Owner Name"
+                                    variant="outlined"
+                                    fullWidth
+                                    defaultValue={editData.owner_name}
+                                    sx={{ mb: 2 }}
+                                    onChange={(e) => {
+                                        setEditData({ ...editData, owner_name: e.target.value })
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item md={4} xs={12}>
+                                <TextField
+                                    label="Owner Email"
+                                    variant="outlined"
+                                    fullWidth
+                                    defaultValue={editData.owner_email}
+                                    sx={{ mb: 2 }}
+                                    onChange={(e) => {
+                                        setEditData({ ...editData, owner_email: e.target.value })
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item md={4} xs={12}>
+                                <TextField
+                                    label="Owner Contact No."
+                                    variant="outlined"
+                                    fullWidth
+                                    defaultValue={editData.owner_contact_number}
+                                    sx={{ mb: 2 }}
+                                    onChange={(e) => {
+                                        setEditData({ ...editData, owner_contact_number: e.target.value })
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item md={4} xs={12}>
+                                <TextField
+                                    label="support Email"
+                                    variant="outlined"
+                                    fullWidth
+                                    defaultValue={editData.support_email}
+                                    sx={{ mb: 2 }}
+                                    onChange={(e) => {
+                                        setEditData({ ...editData, support_email: e.target.value })
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item md={4} xs={12}>
+                                <TextField
+                                    label="support Contact No."
+                                    variant="outlined"
+                                    fullWidth
+                                    defaultValue={editData.support_contact_number}
+                                    sx={{ mb: 2 }}
+                                    onChange={(e) => {
+                                        setEditData({ ...editData, support_contact_number: e.target.value })
+                                    }}
+                                />
+                            </Grid>
 
                         </Grid>
 
@@ -751,7 +951,7 @@ const HotelPage = () => {
                             type="submit"
                             variant="contained"
                             color="primary"
-                            sx={{ marginTop: 2 }}
+                            sx={{ marginTop: 2, marginBottom: 2 }}
                         >
                             Submit
                         </Button>
