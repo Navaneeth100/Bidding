@@ -242,7 +242,7 @@ const AddHotel = () => {
                 // pro_img: profilepicture,
                 rating: `${formData.rating}`,
                 locationName: selectedLocation,
-                location: `${markerPosition.lat} , ${markerPosition.lng}`,
+                location: `${markerPosition.lat},${markerPosition.lng}`,
                 booking_price: formData.bookingPrice,
                 discount: formData.discount,
                 available_rooms: formData.availableRooms,
@@ -299,26 +299,50 @@ const AddHotel = () => {
 
     // Add Rooms
 
-    const [roomData, setRoomData] = useState([{ room_category: '', area: '', floors: '', beds: '', bathrooms: '', guests: '', booking_price: '' }]);
+    const [roomData, setRoomData] = useState([]);
 
     const handleRoomChange = (field, value) => { setRoomData((prev) => ({ ...prev, [field]: value })) };
 
     const [addedRoom, setaddedRoom] = useState([])
+
+    const fetchAddedRooms = (id) => {
+        axios
+            .get(`${url}/hotel/hotels/${id}/room-categories/`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            })
+            .then((res) => {
+                setaddedRoom(res.data.results);
+            })
+            .catch((error) => {
+                let refresh = String(authTokens.refresh);
+                axios.post(`${url}/api/token/refresh/`, { refresh: refresh }).then((res) => {
+                    localStorage.setItem("authTokens", JSON.stringify(res.data));
+                    //   setNewAuthTokens(JSON.stringify(res.data));
+
+                    const new_headers = {
+                        Authorization: `Bearer ${res.data.access}`,
+                    };
+                    axios
+                        .get(`${url}/hotel/hotels/${id}/room-categories/`, { headers: new_headers })
+                        .then((res) => {
+                            setaddedRoom(res.data.results);
+                        });
+                });
+            });
+    };
+
 
 
     const handleRoomSubmit = async (event) => {
         // const isRoomDataValid = roomData.every((room) => Object.values(room).every((value) => String(value).trim() !== ''));
         if (roomId) {
             event.preventDefault();
-            // const updatedRoomData = roomData.map((room) => ({
-            //     ...room,
-            //     room_category: categoryList.find((category) => category.category_name === room.room_category)?.id,
-            //     excluded_days: formattedDates,
-            // }));
-            // setRoomData(updatedRoomData);
-
             let submitData = {
-                room_category: categoryList.find((category) => category.category_name === roomData[0].room_category)?.id,
+                room_category: categoryList.find((category) => category.category_name === roomData.room_category)?.id,
                 area: roomData.area,
                 floors: roomData.floors,
                 beds: roomData.beds,
@@ -328,7 +352,7 @@ const AddHotel = () => {
                 rooms: roomData.room_no,
                 available_rooms: roomData.room_no,
                 excluded_days: formattedDates,
-                wf: roomData.withbreakfast
+                bf: roomData.withbreakfast
             }
 
             try {
@@ -348,6 +372,9 @@ const AddHotel = () => {
                     draggable: true,
                     theme: 'colored',
                 });
+                setRoomData([])
+                setSelectedDates([])
+                fetchAddedRooms(roomId)
                 if (response.status === 200) {
                     // return true;
                 }
@@ -1185,6 +1212,7 @@ const AddHotel = () => {
                                                                                         label="Room No"
                                                                                         placeholder='eg: 123'
                                                                                         variant="outlined"
+                                                                                        type='text'
                                                                                         margin="normal"
                                                                                         name="room_no"
                                                                                         onChange={(e) => handleRoomChange('room_no', e.target.value)}
@@ -1197,6 +1225,7 @@ const AddHotel = () => {
                                                                                         label="Room Area"
                                                                                         placeholder='eg: in sq ft'
                                                                                         variant="outlined"
+                                                                                        type='number'
                                                                                         margin="normal"
                                                                                         name="room_area"
                                                                                         onChange={(e) => handleRoomChange('area', e.target.value)}
@@ -1209,6 +1238,7 @@ const AddHotel = () => {
                                                                                         label="Floor"
                                                                                         placeholder='eg: 1'
                                                                                         variant="outlined"
+                                                                                        type='number'
                                                                                         margin="normal"
                                                                                         name="floor"
                                                                                         onChange={(e) => handleRoomChange('floors', e.target.value)}
@@ -1221,6 +1251,7 @@ const AddHotel = () => {
                                                                                         label="Beds"
                                                                                         placeholder='eg: 2'
                                                                                         variant="outlined"
+                                                                                        type='number'
                                                                                         margin="normal"
                                                                                         name="beds"
                                                                                         onChange={(e) => handleRoomChange('beds', e.target.value)}
@@ -1233,6 +1264,7 @@ const AddHotel = () => {
                                                                                         label="Bathrooms"
                                                                                         placeholder='eg: 2'
                                                                                         variant="outlined"
+                                                                                        type='number'
                                                                                         margin="normal"
                                                                                         name="bathrooms"
                                                                                         onChange={(e) => handleRoomChange('bathrooms', e.target.value)}
@@ -1246,6 +1278,7 @@ const AddHotel = () => {
                                                                                         variant="outlined"
                                                                                         placeholder='eg: 1 - 5'
                                                                                         margin="normal"
+                                                                                        type='number'
                                                                                         name="guests"
                                                                                         onChange={(e) => handleRoomChange('guests', e.target.value)}
                                                                                     />
@@ -1257,6 +1290,7 @@ const AddHotel = () => {
                                                                                         label="Room Price"
                                                                                         placeholder='eg: $$$'
                                                                                         variant="outlined"
+                                                                                        type='number'
                                                                                         margin="normal"
                                                                                         name="room_price"
                                                                                         onChange={(e) => handleRoomChange('booking_price', e.target.value)}
@@ -1266,6 +1300,7 @@ const AddHotel = () => {
                                                                                     <TextField
                                                                                         fullWidth
                                                                                         label="With Breakfast"
+                                                                                        type='number'
                                                                                         variant="outlined"
                                                                                         placeholder='eg: 1 - 5'
                                                                                         margin="normal"
@@ -1328,8 +1363,18 @@ const AddHotel = () => {
                                                                                     addedRoom.map((detail, index) => (
                                                                                         <Paper elevation={3} key={index} sx={{ padding: 2 }}>
                                                                                             <Typography variant="h6">Room No: {detail.roomNo}</Typography>
+                                                                                            <Typography variant="body1">Area: {detail.area} sq.ft.</Typography>
+                                                                                            <Typography variant="body1">Room Category: {detail.room_category}</Typography>
+                                                                                            <Typography variant="body1">Floors: {detail.floors}</Typography>
+                                                                                            <Typography variant="body1">Beds: {detail.beds}</Typography>
+                                                                                            <Typography variant="body1">Bathrooms: {detail.bathrooms}</Typography>
+                                                                                            <Typography variant="body1">Guests: {detail.guests}</Typography>
+                                                                                            <Typography variant="body1">Available Rooms: {detail.available_rooms}</Typography>
                                                                                             <Typography variant="body1">Booking Price: {detail.bookingPrice}</Typography>
-                                                                                            <Typography variant="body1">Area: {detail.area}</Typography>
+                                                                                            <Typography variant="body1">Booking Price (with Breakfast): {detail.wf}</Typography><Typography variant="body1"></Typography>
+                                                                                            <Typography variant="body1">
+                                                                                                Excluded Days: {detail.excluded_days ? detail.excluded_days.join(', ') : 'None'}
+                                                                                            </Typography>
                                                                                         </Paper>
                                                                                     ))
                                                                                 ) : (
