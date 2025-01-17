@@ -5,16 +5,17 @@ import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
 import ProductPerformance from '../views/dashboard/components/ProductPerformance';
 import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton, List, ListItem, ListItemText, Chip, ListItemButton } from '@mui/material';
-import { IconStar, IconEye, IconEdit, IconTrash, IconAlertCircle } from '@tabler/icons-react';
+import { IconStar, IconEye, IconEdit, IconTrash, IconAlertCircle, IconHotelService, IconBed } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { url } from '../../mainurl';
 import { toast } from 'react-toastify';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { IconBedFilled } from '@tabler/icons-react';
 
 const HotelPage = () => {
 
-    const [modal, setModal] = useState({ add: false, view: false, edit: false });
+    const [modal, setModal] = useState({ add: false, view: false, edit: false, roomlist: false, editrooms: false, deleterooms: false });
 
     // Function to toggle the modal state
     const toggleModal = (type) => {
@@ -394,6 +395,141 @@ const HotelPage = () => {
             });
     };
 
+    // Room List
+
+    const [roomList, setroomList] = useState([])
+    const [roomLoading, setroomLoading] = useState(false)
+
+    const fetchRooms = (id) => {
+        setroomLoading(true)
+        axios
+            .get(`${url}/hotel/hotels/${id}/room-categories/`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            })
+            .then((res) => {
+                setroomList(res.data);
+                setroomLoading(false)
+            })
+            .catch((error) => {
+                let refresh = String(authTokens.refresh);
+                axios.post(`${url}/api/token/refresh/`, { refresh: refresh }).then((res) => {
+                    localStorage.setItem("authTokens", JSON.stringify(res.data));
+                    //   setNewAuthTokens(JSON.stringify(res.data));
+
+                    const new_headers = {
+                        Authorization: `Bearer ${res.data.access}`,
+                    };
+                    axios
+                        .get(`${url}/hotel/hotels/${id}/room-categories/`, { headers: new_headers })
+                        .then((res) => {
+                            setroomList(res.data);
+                            setroomLoading(false)
+                        });
+                });
+            });
+    };
+
+    //  Edit Rooms
+
+    const [editId, seteditId] = useState()
+    const [roomEditData, setRoomEditData] = useState([])
+    const [editroomcategory, seteditroomcategory] = useState()
+
+    const handleRoomEdit = async (event) => {
+        event.preventDefault();
+        let submitData = {
+            area: roomEditData.area,
+            available_rooms: roomEditData.available_rooms,
+            bathrooms: roomEditData.bathrooms,
+            beds: roomEditData.beds,
+            bf: roomEditData.withbreakfast,
+            booking_price: roomEditData.booking_price,
+            floors: roomEditData.floors,
+            guests: roomEditData.guests,
+            room_category: categoryList.find((category) => category.category_name === editroomcategory)?.id,
+            rooms: roomEditData.rooms,
+        };
+
+        try {
+            const response = await axios.put(`${url}/hotel/room-category/${roomEditData.id}/`, submitData, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            });
+            if (response.data.message) {
+                toast.success(`${response.data.message}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+            }
+            toggleModal('editrooms');
+            setRoomEditData([])
+            seteditroomcategory([])
+            fetchRooms(editId);
+        } catch (error) {
+            toast.error(`${error.response.data.error}`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
+        } finally {
+        }
+    };
+
+    // Delete Rooms
+
+    const [roomDeleteData, setRoomDeleteData] = useState([])
+
+    const handleDeleteRooms = async (id) => {
+        try {
+            const response = await axios.delete(`${url}/hotel/room-category/${id}/`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            });
+            if (response.data.message) {
+                toast.success(`${response.data.message}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+            }
+            toggleModal('deleterooms')
+            fetchRooms(editId);
+        } catch (error) {
+            toast.error(`${error.response.data.error}`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
+        }
+    };
+
 
     return (
         <PageContainer title="Hotels" description="Hotels">
@@ -553,6 +689,11 @@ const HotelPage = () => {
                                         </TableCell>
                                         <TableCell align="center">
                                             <Typography variant="subtitle2" fontWeight={600}>
+                                                Rooms
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Typography variant="subtitle2" fontWeight={600}>
                                                 Action
                                             </Typography>
                                         </TableCell>
@@ -593,6 +734,7 @@ const HotelPage = () => {
                                                             alt=""
                                                             variant="rounded"
                                                             sx={{ width: 50, height: 50 }}
+                                                            onClick={() => { handleNavigateToViewHotel(item.id) }}
                                                         />
                                                     </Box>
                                                 </TableCell>
@@ -628,7 +770,7 @@ const HotelPage = () => {
                                                     <Box display="flex" alignItems="center" justifyContent="center">
                                                         {/* <IconStar width={15} style={{ marginRight: "5px" }} /> */}
                                                         <Typography variant="subtitle2" fontWeight={600}>
-                                                            {item.rating} Star
+                                                            {item.rating}
                                                         </Typography>
                                                     </Box>
                                                 </TableCell>
@@ -639,6 +781,9 @@ const HotelPage = () => {
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     <Typography variant="subtitle2" fontWeight={600}>{item.owner_contact_number}</Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Button sx={{ border: '1px solid lightgrey', cursor: "pointer" }} onClick={() => { toggleModal('roomlist'); fetchRooms(item.id), seteditId(item.id) }}><IconBedFilled className='m-0 p-0' /></Button>
                                                 </TableCell>
                                                 <TableCell align="right">
                                                     <Box display="flex" alignItems="center" justifyContent="center">
@@ -959,7 +1104,372 @@ const HotelPage = () => {
                 </DialogContent>
             </Dialog>
 
-            {/* delete confirmation */}
+            {/* room view modal */}
+
+            <Dialog
+                open={modal.roomlist}
+                onClose={() => toggleModal('roomlist')}
+                maxWidth="lg"
+                fullWidth
+                sx={{ padding: 2 }}
+            >
+                <DialogTitle sx={{ m: 1, p: 1, position: 'relative' }} id="customized-dialog-title">
+                    Added Rooms
+                    <IconButton
+                        onClick={() => toggleModal('roomlist')} sx={{ position: 'absolute', right: 8, top: 8 }}>x</IconButton>
+                </DialogTitle>
+
+                <DialogContent sx={{ padding: 3 }}>
+                    <form className="row gy-4 mt-2 mb-2">
+                        <Grid container spacing={3}>
+                            <Grid item sm={12} lg={12}>
+                                <Box sx={{ overflow: 'auto', width: { xs: '300px', sm: 'auto' } }}>
+                                    <Table aria-label="rooms table" sx={{ whiteSpace: 'nowrap' }}>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        SN
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        Image
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        Category
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        Rooms
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        Area
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        Floor
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        Beds
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        Bathrooms
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        Guests
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        Available Rooms
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600} align='center'>
+                                                        Actions
+                                                    </Typography>
+                                                </TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {roomLoading ? (
+                                                <TableRow>
+                                                    <TableCell colSpan={11} align="center">
+                                                        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px" height="100%">
+                                                            <CircularProgress />
+                                                            <Typography variant="subtitle2" fontWeight={600} sx={{ ml: 2 }}>
+                                                                Loading rooms...
+                                                            </Typography>
+                                                        </Box>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ) : (
+                                                roomList.map((item, index) => (
+                                                    <TableRow key={item.id}>
+                                                        <TableCell align='center'>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {index + 1}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align='center'>
+                                                            <Box
+                                                                display="flex"
+                                                                justifyContent="center"
+                                                                alignItems="center"
+                                                                height="100%"
+                                                            >
+                                                                <Avatar
+                                                                    src={`${url}/hotel${item.hotelroomimgs[0]?.file}` || ""}
+                                                                    alt=""
+                                                                    variant="rounded"
+                                                                    sx={{ width: 50, height: 50 }}
+                                                                />
+                                                            </Box>
+                                                        </TableCell>
+                                                        <TableCell align='center'>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {item.room_category?.category_name}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align='center'>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {item.rooms}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align='center'>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {item.area}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align='center'>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {item.floors}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align='center'>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {item.beds}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align='center'>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {item.bathrooms}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align='center'>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {item.guests}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align='center'>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {item.available_rooms}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align="right">
+                                                            <Box display="flex" alignItems="center" justifyContent="center">
+                                                                <Button
+                                                                    sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('editrooms'); setRoomEditData(item); fetchCategory(), seteditroomcategory(item.room_category?.category_name) }}><IconEdit width={15} />
+                                                                </Button>
+                                                                <Button
+                                                                    sx={{ border: '1px solid lightgrey' }} onClick={() => { toggleModal('deleterooms'); setRoomDeleteData(item); }}><IconTrash width={15} className='m-0 p-0' />
+                                                                </Button>
+                                                            </Box>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </Box>
+                            </Grid>
+                        </Grid>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* room edit modal */}
+
+            <Dialog
+                open={modal.editrooms}
+                onClose={() => toggleModal('editrooms')}
+                maxWidth="sm"
+                fullWidth
+                sx={{ padding: 4 }}
+            >
+                <DialogTitle sx={{ m: 0, p: 2, position: 'relative' }} id="customized-dialog-title">
+                    Edit Rooms
+                    <IconButton aria-label="close" onClick={() => toggleModal('editrooms')} sx={{ position: 'absolute', right: 8, top: 8 }}>x</IconButton>
+                </DialogTitle>
+
+                <DialogContent sx={{ padding: 3 }}>
+                    <form className="row gy-4 mt-2" onSubmit={handleRoomEdit}>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} sm={12}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Category</InputLabel>
+                                    <Select
+                                        // multiple
+                                        value={editroomcategory}
+                                        onOpen={fetchCategory}
+                                        onChange={(e) => { seteditroomcategory(e.target.value) }}
+                                        // renderValue={(selected) => selected.join(', ')}
+                                        label="Category"
+                                        MenuProps={MenuProps}>
+                                        {categoryList.map((item) => (
+                                            <MenuItem value={item.category_name}>{item.category_name}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Room No"
+                                    placeholder='eg: 123'
+                                    variant="outlined"
+                                    type='text'
+                                    margin="normal"
+                                    name="room_no"
+                                    defaultValue={roomEditData.rooms}
+                                    onChange={(e) => { setRoomEditData({ ...roomEditData, rooms: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Room Area"
+                                    placeholder='eg: in sq ft'
+                                    variant="outlined"
+                                    type='number'
+                                    margin="normal"
+                                    name="room_area"
+                                    defaultValue={roomEditData.area}
+                                    onChange={(e) => { setRoomEditData({ ...roomEditData, area: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Floor"
+                                    placeholder='eg: 1'
+                                    variant="outlined"
+                                    type='number'
+                                    margin="normal"
+                                    name="floor"
+                                    defaultValue={roomEditData.floors}
+                                    onChange={(e) => { setRoomEditData({ ...roomEditData, floors: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Beds"
+                                    placeholder='eg: 2'
+                                    variant="outlined"
+                                    type='number'
+                                    margin="normal"
+                                    name="beds"
+                                    defaultValue={roomEditData.beds}
+                                    onChange={(e) => { setRoomEditData({ ...roomEditData, beds: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Bathrooms"
+                                    placeholder='eg: 2'
+                                    variant="outlined"
+                                    type='number'
+                                    margin="normal"
+                                    name="bathrooms"
+                                    defaultValue={roomEditData.bathrooms}
+                                    onChange={(e) => { setRoomEditData({ ...roomEditData, bathrooms: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Guests"
+                                    variant="outlined"
+                                    placeholder='eg: 1 - 5'
+                                    margin="normal"
+                                    type='number'
+                                    name="guests"
+                                    defaultValue={roomEditData.guests}
+                                    onChange={(e) => { setRoomEditData({ ...roomEditData, guests: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Available Rooms"
+                                    variant="outlined"
+                                    placeholder='eg: 1 - 5'
+                                    margin="normal"
+                                    type='number'
+                                    name="available_rooms"
+                                    defaultValue={roomEditData.available_rooms}
+                                    onChange={(e) => { setRoomEditData({ ...roomEditData, available_rooms: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Room Price"
+                                    placeholder='eg: $$$'
+                                    variant="outlined"
+                                    type='text'
+                                    margin="normal"
+                                    name="room_price"
+                                    defaultValue={roomEditData.booking_price}
+                                    onChange={(e) => { setRoomEditData({ ...roomEditData, booking_price: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="With Breakfast"
+                                    type='number'
+                                    variant="outlined"
+                                    placeholder='eg: 1 - 5'
+                                    margin="normal"
+                                    name="withbreakfast"
+                                    onChange={(e) => { setRoomEditData({ ...roomEditData, withbreakfast: e.target.value }) }}
+                                />
+                            </Grid>
+                        </Grid>
+
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            sx={{ marginTop: 4 }}
+                        >
+                            Submit
+                        </Button>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* delete rooms */}
+
+            <Dialog
+                open={modal.deleterooms}
+                onClose={() => toggleModal('deleterooms')}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+                PaperProps={{ style: { borderRadius: '15px', padding: '16px', maxWidth: '350px' } }}>
+                <DialogTitle id="alert-dialog-title" style={{ textAlign: 'center', paddingBottom: '8px' }}><IconAlertCircle /></DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description" style={{ fontSize: '1rem', textAlign: 'center', color: '#333' }}>
+                        Are you sure you want to Delete {roomDeleteData.room_category?.category_name} ?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions style={{ justifyContent: 'center', padding: '16px' }}>
+                    <Button onClick={() => handleDeleteRooms(roomDeleteData.id)} style={{ backgroundColor: '#2ecc71', color: 'white', fontSize: '1rem', padding: '6px 24px', margin: '0 8px' }}>
+                        Yes
+                    </Button>
+                    <Button onClick={() => toggleModal('deleterooms')} style={{ backgroundColor: '#e74c3c', color: 'white', fontSize: '1rem', padding: '6px 24px', margin: '0 8px' }}>
+                        No
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* delete rooms */}
 
             <Dialog
                 open={modal.delete}
@@ -970,7 +1480,7 @@ const HotelPage = () => {
                 <DialogTitle id="alert-dialog-title" style={{ textAlign: 'center', paddingBottom: '8px' }}><IconAlertCircle /></DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description" style={{ fontSize: '1rem', textAlign: 'center', color: '#333' }}>
-                        Are you sure you want to Delete {deleteData.name}?
+                        Are you sure you want to Delete {deleteData.name} ?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions style={{ justifyContent: 'center', padding: '16px' }}>

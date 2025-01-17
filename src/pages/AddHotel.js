@@ -315,7 +315,7 @@ const AddHotel = () => {
                 withCredentials: false,
             })
             .then((res) => {
-                setaddedRoom(res.data.results);
+                setaddedRoom(res.data);
             })
             .catch((error) => {
                 let refresh = String(authTokens.refresh);
@@ -329,7 +329,7 @@ const AddHotel = () => {
                     axios
                         .get(`${url}/hotel/hotels/${id}/room-categories/`, { headers: new_headers })
                         .then((res) => {
-                            setaddedRoom(res.data.results);
+                            setaddedRoom(res.data);
                         });
                 });
             });
@@ -1362,9 +1362,9 @@ const AddHotel = () => {
                                                                                 {addedRoom.length > 0 ? (
                                                                                     addedRoom.map((detail, index) => (
                                                                                         <Paper elevation={3} key={index} sx={{ padding: 2 }}>
-                                                                                            <Typography variant="h6">Room No: {detail.roomNo}</Typography>
+                                                                                            <Typography variant="h6">Room No: {detail.rooms}</Typography>
                                                                                             <Typography variant="body1">Area: {detail.area} sq.ft.</Typography>
-                                                                                            <Typography variant="body1">Room Category: {detail.room_category}</Typography>
+                                                                                            <Typography variant="body1">Room Category: {detail.room_category?.category_name}</Typography>
                                                                                             <Typography variant="body1">Floors: {detail.floors}</Typography>
                                                                                             <Typography variant="body1">Beds: {detail.beds}</Typography>
                                                                                             <Typography variant="body1">Bathrooms: {detail.bathrooms}</Typography>
@@ -1373,7 +1373,7 @@ const AddHotel = () => {
                                                                                             <Typography variant="body1">Booking Price: {detail.bookingPrice}</Typography>
                                                                                             <Typography variant="body1">Booking Price (with Breakfast): {detail.wf}</Typography><Typography variant="body1"></Typography>
                                                                                             <Typography variant="body1">
-                                                                                                Excluded Days: {detail.excluded_days ? detail.excluded_days.join(', ') : 'None'}
+                                                                                                {/* Excluded Days: {detail.excluded_days ? detail.excluded_days.join(', ') : 'None'} */}
                                                                                             </Typography>
                                                                                         </Paper>
                                                                                     ))
