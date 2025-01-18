@@ -12,6 +12,8 @@ import { url } from '../../mainurl';
 import { toast } from 'react-toastify';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { IconBedFilled } from '@tabler/icons-react';
+import { useDropzone } from "react-dropzone";
+import { Card, CardMedia } from "@mui/material";
 
 const HotelPage = () => {
 
@@ -529,6 +531,112 @@ const HotelPage = () => {
             });
         }
     };
+
+
+    //  file upload
+
+    const [files, setFiles] = useState([]);
+
+    const onDrop = (acceptedFiles) => {
+        const updatedFiles = acceptedFiles.map((file) =>
+            Object.assign(file, {
+                preview: URL.createObjectURL(file), // Create a preview URL for each file
+            })
+        );
+        setFiles((prevFiles) => [...prevFiles, ...updatedFiles]);
+    };
+
+    
+    //  file add rooms
+
+    const handleFileSubmit = async (id) => {
+        event.preventDefault();
+        let submitData = {
+            files : files
+        }
+
+        try {
+            const response = await axios.post(`${url}/hotel/hotel-room-categories/${id}/images/`, submitData, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "multipart/form-data",
+                },
+                withCredentials: false,
+            });
+            if (response.data.message) {
+                toast.success(`${response.data.message}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+            }
+            setFiles([])
+            fetchRooms(editId)
+        } catch (error) {
+            toast.error(`${error.response.data.error}`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
+        } finally {
+        }
+    };
+
+    const handleRemoveFile = async (fileToRemove,deleteid) => {
+
+        if(!fileToRemove.file){
+            setFiles(files.filter((file) => file !== fileToRemove));
+        }
+    else{
+        
+        try {
+            const response = await axios.delete(`${url}/hotel/hotel-room-categories/${deleteid}/images/`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            });
+            if (response.data.message) {
+                toast.success(`${response.data.message}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+            }
+            toggleModal('editrooms')
+            fetchRooms(editId);
+        } catch (error) {
+            toast.error(`${error.response.data.error}`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
+        }
+    }
+    };
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop,
+        accept: "image/*,application/pdf", // Accept images and PDFs
+        multiple: true, // Allow multiple files
+    });
 
 
     return (
@@ -1262,7 +1370,7 @@ const HotelPage = () => {
                                                         <TableCell align="right">
                                                             <Box display="flex" alignItems="center" justifyContent="center">
                                                                 <Button
-                                                                    sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('editrooms'); setRoomEditData(item); fetchCategory(), seteditroomcategory(item.room_category?.category_name) }}><IconEdit width={15} />
+                                                                    sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('editrooms'); setRoomEditData(item); fetchCategory(), seteditroomcategory(item.room_category?.category_name), setFiles(item.hotelroomimgs) }}><IconEdit width={15} />
                                                                 </Button>
                                                                 <Button
                                                                     sx={{ border: '1px solid lightgrey' }} onClick={() => { toggleModal('deleterooms'); setRoomDeleteData(item); }}><IconTrash width={15} className='m-0 p-0' />
@@ -1314,6 +1422,65 @@ const HotelPage = () => {
                                         ))}
                                     </Select>
                                 </FormControl>
+                            </Grid>
+                            <Grid item xs={12} sm={12}>
+                                <Typography variant="h6" gutterBottom>
+                                    Upload Multiple Images
+                                </Typography>
+                                <Box
+                                    {...getRootProps()}
+                                    sx={{
+                                        border: "2px dashed #ccc",
+                                        borderRadius: "4px",
+                                        padding: "20px",
+                                        textAlign: "center",
+                                        cursor: "pointer",
+                                        backgroundColor: isDragActive ? "#f0f0f0" : "transparent",
+                                        marginTop: "10px"
+                                    }}
+                                >
+                                    <input {...getInputProps()} />
+                                    <Typography variant="body1" color="textSecondary">
+                                        {isDragActive ? "Drop files here..." : "Drag and drop files here or click to upload"}
+                                    </Typography>
+                                    <Button variant="contained" sx={{ mt: 2 }}>
+                                        Select Files
+                                    </Button>
+                                </Box>
+                                <Grid container spacing={2} style={{ marginTop: "15px", textAlign: "center" }}>
+                                    {files.map((file, index) => (
+                                        <Grid item key={index} xs={12} sm={2} md={2}>
+                                            <Card>
+                                                <CardMedia
+                                                    component="img"
+                                                    width="100%"
+                                                    height="100"
+                                                    image={`${url}/hotel${file.file}` || file.preview}
+                                                    alt={file.name}
+                                                />
+                                                <Button
+                                                    size="small"
+                                                    style={{ color: "red" }}
+                                                    onClick={() => handleRemoveFile(file,roomEditData.id)}
+                                                >
+                                                    Remove
+                                                </Button>
+                                            </Card>
+                                        </Grid>
+                                    ))}
+
+
+                                </Grid>
+                                <Button
+                                    type="button"
+                                    variant="contained"
+                                    color="primary"
+                                    fullWidth
+                                    onClick={()=>{handleFileSubmit(roomEditData.id)}}
+                                    sx={{ marginTop: 2 }}
+                                >
+                                    Submit
+                                </Button>
                             </Grid>
                             <Grid item xs={4}>
                                 <TextField
@@ -1493,7 +1660,7 @@ const HotelPage = () => {
                 </DialogActions>
             </Dialog>
 
-        </PageContainer>
+        </PageContainer >
     );
 };
 
