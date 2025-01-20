@@ -537,6 +537,7 @@ const HotelPage = () => {
 
     const [hotelfiles, sethotelfiles] = useState([])
     const [files, setFiles] = useState([]);
+    const [fileuploadmode, setfileuploadmode] = useState(null)
 
     const onDrop = (acceptedFiles) => {
         const updatedFiles = acceptedFiles.map((file) =>
@@ -544,7 +545,7 @@ const HotelPage = () => {
                 preview: URL.createObjectURL(file), // Create a preview URL for each file
             })
         );
-        setFiles((prevFiles) => [...prevFiles, ...updatedFiles]);
+        fileuploadmode == "hotel" ? sethotelfiles((prevFiles) => [...prevFiles, ...updatedFiles]) : setFiles((prevFiles) => [...prevFiles, ...updatedFiles]);
     };
 
     
@@ -986,7 +987,7 @@ const HotelPage = () => {
                                                     <Box display="flex" alignItems="center" justifyContent="center">
                                                         {/* <IconEye width={20} style={{ marginRight: "15px" }} /> */}
                                                         <Button
-                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); setedittags(item.tags);sethotelfiles(item.hotelimgs) }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
+                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); setedittags(item.tags);sethotelfiles(item.hotelimgs) , setfileuploadmode('hotel') }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
                                                         </Button>
                                                         <Button
                                                             sx={{ border: '1px solid lightgrey' }} onClick={() => { toggleModal('delete'); setDeleteData(item); }}><IconTrash width={15} className='m-0 p-0' />
@@ -1518,7 +1519,7 @@ const HotelPage = () => {
                                                         <TableCell align="right">
                                                             <Box display="flex" alignItems="center" justifyContent="center">
                                                                 <Button
-                                                                    sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('editrooms'); setRoomEditData(item); fetchCategory(), seteditroomcategory(item.room_category?.category_name), setFiles(item.hotelroomimgs) }}><IconEdit width={15} />
+                                                                    sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('editrooms'); setRoomEditData(item); fetchCategory(), seteditroomcategory(item.room_category?.category_name), setFiles(item.hotelroomimgs) , setfileuploadmode('room') }}><IconEdit width={15} />
                                                                 </Button>
                                                                 <Button
                                                                     sx={{ border: '1px solid lightgrey' }} onClick={() => { toggleModal('deleterooms'); setRoomDeleteData(item); }}><IconTrash width={15} className='m-0 p-0' />
