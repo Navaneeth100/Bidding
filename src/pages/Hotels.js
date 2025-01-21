@@ -1186,7 +1186,7 @@ const HotelPage = () => {
                                                 <Button
                                                     size="small"
                                                     style={{ color: "red" }}
-                                                    onClick={() => handleRemoveHotelFile(file,editData.id)}
+                                                    onClick={() => handleRemoveHotelFile(file,file.id)}
                                                 >
                                                     Remove
                                                 </Button>
@@ -1610,7 +1610,7 @@ const HotelPage = () => {
                                                 <Button
                                                     size="small"
                                                     style={{ color: "red" }}
-                                                    onClick={() => handleRemoveFile(file,roomEditData.id)}
+                                                    onClick={() => handleRemoveFile(file,file.id)}
                                                 >
                                                     Remove
                                                 </Button>
