@@ -63,6 +63,7 @@ const AddHotel = () => {
 
     const [files, setFiles] = useState([]);
     const [files1, setFiles1] = useState([]);
+    const [fileuploadmode, setfileuploadmode] = useState(null)
 
     const onDrop = (acceptedFiles) => {
         const updatedFiles = acceptedFiles.map((file) =>
@@ -70,11 +71,15 @@ const AddHotel = () => {
                 preview: URL.createObjectURL(file), // Create a preview URL for each file
             })
         );
-        setFiles((prevFiles) => [...prevFiles, ...updatedFiles]);
+        fileuploadmode == "hotel" ? setFiles((prevFiles) => [...prevFiles, ...updatedFiles]) : setFiles1((prevFiles) => [...prevFiles, ...updatedFiles]);
     };
 
     const handleRemoveFile = (fileToRemove) => {
         setFiles(files.filter((file) => file !== fileToRemove));
+    };
+
+    const handleRemoveRoomFile = (fileToRemove) => {
+        setFiles1(files1.filter((file) => file !== fileToRemove));
     };
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -352,7 +357,8 @@ const AddHotel = () => {
                 rooms: roomData.room_no,
                 available_rooms: roomData.room_no,
                 excluded_days: formattedDates,
-                bf: roomData.withbreakfast
+                bf: roomData.withbreakfast,
+                hotelroomimgs: files1
             }
 
             try {
@@ -374,26 +380,36 @@ const AddHotel = () => {
                 });
                 setRoomData([])
                 setSelectedDates([])
+                setFiles1([])
                 fetchAddedRooms(roomId)
                 if (response.status === 200) {
                     // return true;
                 }
             } catch (error) {
                 console.error('Error:', error);
+                toast.error(`${error?.response?.data?.error}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
             } finally {
             }
         }
-        else {
-            toast.error('Please Fill the Fields Completely...', {
-                position: 'top-right',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: 'colored',
-            });
-        }
+        // else {
+        //     toast.error('Please Fill the Fields Completely...', {
+        //         position: 'top-right',
+        //         autoClose: 3000,
+        //         hideProgressBar: false,
+        //         closeOnClick: true,
+        //         pauseOnHover: true,
+        //         draggable: true,
+        //         theme: 'colored',
+        //     });
+        // }
 
     };
 
@@ -512,6 +528,18 @@ const AddHotel = () => {
     }, [hotelPreview])
 
 
+    useEffect(() => {
+        if (activeStep == 0) {
+            setfileuploadmode("hotel")
+        }
+        else if (activeStep == 1) {
+            setfileuploadmode("room")
+        }
+        else {
+            setfileuploadmode(null)
+        }
+
+    }, [activeStep])
 
     //  navigate to List
 
@@ -1197,7 +1225,7 @@ const AddHotel = () => {
                                                                                                     <Button
                                                                                                         size="small"
                                                                                                         style={{ color: "red" }}
-                                                                                                        onClick={() => handleRemoveFile(file)}
+                                                                                                        onClick={() => handleRemoveRoomFile(file)}
                                                                                                     >
                                                                                                         Remove
                                                                                                     </Button>
@@ -1214,6 +1242,7 @@ const AddHotel = () => {
                                                                                         variant="outlined"
                                                                                         type='text'
                                                                                         margin="normal"
+                                                                                        value={roomData.room_no ? roomData.room_no : ''}
                                                                                         name="room_no"
                                                                                         onChange={(e) => handleRoomChange('room_no', e.target.value)}
                                                                                     />
@@ -1226,6 +1255,7 @@ const AddHotel = () => {
                                                                                         placeholder='eg: in sq ft'
                                                                                         variant="outlined"
                                                                                         type='number'
+                                                                                        value={roomData.area ? roomData.area : ''}
                                                                                         margin="normal"
                                                                                         name="room_area"
                                                                                         onChange={(e) => handleRoomChange('area', e.target.value)}
@@ -1239,6 +1269,7 @@ const AddHotel = () => {
                                                                                         placeholder='eg: 1'
                                                                                         variant="outlined"
                                                                                         type='number'
+                                                                                        value={roomData.floors ? roomData.floors : ''}
                                                                                         margin="normal"
                                                                                         name="floor"
                                                                                         onChange={(e) => handleRoomChange('floors', e.target.value)}
@@ -1252,6 +1283,7 @@ const AddHotel = () => {
                                                                                         placeholder='eg: 2'
                                                                                         variant="outlined"
                                                                                         type='number'
+                                                                                        value={roomData.beds ? roomData.beds : ''}
                                                                                         margin="normal"
                                                                                         name="beds"
                                                                                         onChange={(e) => handleRoomChange('beds', e.target.value)}
@@ -1265,6 +1297,7 @@ const AddHotel = () => {
                                                                                         placeholder='eg: 2'
                                                                                         variant="outlined"
                                                                                         type='number'
+                                                                                        value={roomData.bathrooms ? roomData.bathrooms : ''}
                                                                                         margin="normal"
                                                                                         name="bathrooms"
                                                                                         onChange={(e) => handleRoomChange('bathrooms', e.target.value)}
@@ -1279,6 +1312,7 @@ const AddHotel = () => {
                                                                                         placeholder='eg: 1 - 5'
                                                                                         margin="normal"
                                                                                         type='number'
+                                                                                        value={roomData.guests ? roomData.guests : ''}
                                                                                         name="guests"
                                                                                         onChange={(e) => handleRoomChange('guests', e.target.value)}
                                                                                     />
@@ -1291,8 +1325,9 @@ const AddHotel = () => {
                                                                                         placeholder='eg: $$$'
                                                                                         variant="outlined"
                                                                                         type='number'
+                                                                                        value={roomData.booking_price ? roomData.booking_price : ''}
                                                                                         margin="normal"
-                                                                                        name="room_price"
+                                                                                        name="booking_price"
                                                                                         onChange={(e) => handleRoomChange('booking_price', e.target.value)}
                                                                                     />
                                                                                 </Grid>
@@ -1303,12 +1338,13 @@ const AddHotel = () => {
                                                                                         type='number'
                                                                                         variant="outlined"
                                                                                         placeholder='eg: 1 - 5'
+                                                                                        value={roomData.withbreakfast ? roomData.withbreakfast : ''}
                                                                                         margin="normal"
                                                                                         name="withbreakfast"
                                                                                         onChange={(e) => handleRoomChange('withbreakfast', e.target.value)}
                                                                                     />
                                                                                 </Grid>
-                                                                                <Grid item xs={12}>
+                                                                                <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                                                                     <Calendar
                                                                                         onChange={handleDateChange}
                                                                                         value={selectedDates}
@@ -1358,11 +1394,11 @@ const AddHotel = () => {
                                                                     </Grid>
                                                                     <Grid item sm={6}>
                                                                         <Grid item xs={12} sm={12}>
-                                                                            <Box sx={{ display: 'flex', flexDirection: 'column', overflowY: 'auto', minHeight: '100%', maxHeight: '100%', border: '1px solid #ccc', borderRadius: '8px', padding: 2 }}>
+                                                                            <Box sx={{ display: 'flex', flexDirection: 'column', overflowY: 'auto', minHeight: '900px', maxHeight: '900px', border: '1px solid #ccc', borderRadius: '8px', padding: 2 }}>
                                                                                 {addedRoom.length > 0 ? (
                                                                                     addedRoom.map((detail, index) => (
-                                                                                        <Paper elevation={3} key={index} sx={{ padding: 2 }}>
-                                                                                            <Typography variant="h6">Room No: {detail.rooms}</Typography>
+                                                                                        <Paper elevation={3} key={index} sx={{ padding: 2, marginBottom: "10px" }}>
+                                                                                            <Typography variant="h5">Room No: {detail.rooms}</Typography>
                                                                                             <Typography variant="body1">Area: {detail.area} sq.ft.</Typography>
                                                                                             <Typography variant="body1">Room Category: {detail.room_category?.category_name}</Typography>
                                                                                             <Typography variant="body1">Floors: {detail.floors}</Typography>
@@ -1370,11 +1406,21 @@ const AddHotel = () => {
                                                                                             <Typography variant="body1">Bathrooms: {detail.bathrooms}</Typography>
                                                                                             <Typography variant="body1">Guests: {detail.guests}</Typography>
                                                                                             <Typography variant="body1">Available Rooms: {detail.available_rooms}</Typography>
-                                                                                            <Typography variant="body1">Booking Price: {detail.bookingPrice}</Typography>
-                                                                                            <Typography variant="body1">Booking Price (with Breakfast): {detail.wf}</Typography><Typography variant="body1"></Typography>
-                                                                                            <Typography variant="body1">
-                                                                                                {/* Excluded Days: {detail.excluded_days ? detail.excluded_days.join(', ') : 'None'} */}
-                                                                                            </Typography>
+                                                                                            <Typography variant="body1">Booking Price: {detail.booking_price}</Typography>
+                                                                                            <Typography variant="body1">Discount Price: {detail.discount}</Typography>
+                                                                                            <Typography variant="body1">Booking Price (with Breakfast): {detail.bf}</Typography><Typography variant="body1"></Typography>
+                                                                                            <Typography variant="h6" className='mt-1 mb-2'>Excluded Days:</Typography>
+                                                                                            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                                                                                                {detail?.exclusions.map((exclusion) =>
+                                                                                                    exclusion.excluded_days.map((day, index) => {
+                                                                                                        const date = new Date(day);
+                                                                                                        const formattedDate = `${String(date.getDate()).padStart(2, "0")}-${String(
+                                                                                                            date.getMonth() + 1
+                                                                                                        ).padStart(2, "0")}-${date.getFullYear()}`;
+                                                                                                        return <Chip key={`${exclusion.id}-${index}`} label={formattedDate} />;
+                                                                                                    })
+                                                                                                )}
+                                                                                            </Box>
                                                                                         </Paper>
                                                                                     ))
                                                                                 ) : (
@@ -1544,14 +1590,14 @@ const AddHotel = () => {
                                             )}
 
                                             <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-                                                <Button
+                                                {/* <Button
                                                     color="inherit"
                                                     disabled={activeStep === 0 || activeStep === 3}
                                                     onClick={handleBack}
                                                     sx={{ mr: 1 }}
                                                 >
                                                     Back
-                                                </Button>
+                                                </Button> */}
                                                 <Box sx={{ flex: '1 1 auto' }} />
                                                 <Button
                                                     onClick={(e) => { if (activeStep === 3) { handleArabicSubmit(e) } else { handleNext(e) } }} sx={{ mr: 1 }}>

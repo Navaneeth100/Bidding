@@ -5,7 +5,7 @@ import DashboardCard from '../components/shared/DashboardCard';
 import BlankCard from 'src/components/shared/BlankCard';
 import ProductPerformance from '../views/dashboard/components/ProductPerformance';
 import { Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControl, InputLabel, MenuItem, Select, TextField, IconButton, List, ListItem, ListItemText, Chip, ListItemButton } from '@mui/material';
-import { IconStar, IconEye, IconEdit, IconTrash, IconAlertCircle, IconHotelService, IconBed } from '@tabler/icons-react';
+import { IconStar, IconEye, IconEdit, IconTrash, IconAlertCircle, IconHotelService, IconBed, IconCalendar } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { url } from '../../mainurl';
@@ -14,10 +14,13 @@ import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { IconBedFilled } from '@tabler/icons-react';
 import { useDropzone } from "react-dropzone";
 import { Card, CardMedia } from "@mui/material";
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css'
+import '../App.css'
 
 const HotelPage = () => {
 
-    const [modal, setModal] = useState({ add: false, view: false, edit: false, roomlist: false, editrooms: false, deleterooms: false });
+    const [modal, setModal] = useState({ add: false, view: false, edit: false, roomlist: false, editrooms: false, deleterooms: false, calendar: false });
 
     // Function to toggle the modal state
     const toggleModal = (type) => {
@@ -454,6 +457,7 @@ const HotelPage = () => {
             guests: roomEditData.guests,
             room_category: categoryList.find((category) => category.category_name === editroomcategory)?.id,
             rooms: roomEditData.rooms,
+            excluded_days: formattedDates
         };
 
         try {
@@ -478,6 +482,7 @@ const HotelPage = () => {
             toggleModal('editrooms');
             setRoomEditData([])
             seteditroomcategory([])
+            setSelectedDates([])
             fetchRooms(editId);
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
@@ -554,7 +559,7 @@ const HotelPage = () => {
     const handleFileSubmit = async (id) => {
         event.preventDefault();
         let submitData = {
-            files : files
+            files: files
         }
 
         try {
@@ -593,23 +598,37 @@ const HotelPage = () => {
         }
     };
 
-    const handleRemoveFile = async (fileToRemove,deleteid) => {
+    const handleRemoveFile = async (fileToRemove, deleteid) => {
 
-        if(!fileToRemove.file){
+        if (!fileToRemove.file) {
             setFiles(files.filter((file) => file !== fileToRemove));
         }
-    else{
-        
-        try {
-            const response = await axios.delete(`${url}/hotel/hotel-room-categories/${deleteid}/images/`, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "application/json",
-                },
-                withCredentials: false,
-            });
-            if (response.data.message) {
-                toast.success(`${response.data.message}`, {
+        else {
+
+            try {
+                const response = await axios.delete(`${url}/hotel/hotel-room-categories/${deleteid}/images/`, {
+                    headers: {
+                        Authorization: `Bearer ${tokenStr}`,
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: false,
+                });
+                if (response.data.message) {
+                    toast.success(`${response.data.message}`, {
+                        position: 'top-right',
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: 'colored',
+                    });
+                }
+                // toggleModal('editrooms')
+                // fetchRooms(editId);
+                setFiles(files.filter((file) => file !== fileToRemove));
+            } catch (error) {
+                toast.error(`${error.response.data.error}`, {
                     position: 'top-right',
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -619,21 +638,7 @@ const HotelPage = () => {
                     theme: 'colored',
                 });
             }
-            // toggleModal('editrooms')
-            // fetchRooms(editId);
-            setFiles(files.filter((file) => file !== fileToRemove));
-        } catch (error) {
-            toast.error(`${error.response.data.error}`, {
-                position: 'top-right',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: 'colored',
-            });
         }
-    }
     };
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -648,7 +653,7 @@ const HotelPage = () => {
     const handleRoomFileSubmit = async (id) => {
         event.preventDefault();
         let submitData = {
-            files : hotelfiles
+            files: hotelfiles
         }
 
         try {
@@ -687,23 +692,35 @@ const HotelPage = () => {
         }
     };
 
-    const handleRemoveHotelFile = async (fileToRemove,deleteid) => {
+    const handleRemoveHotelFile = async (fileToRemove, deleteid) => {
 
-        if(!fileToRemove.file){
+        if (!fileToRemove.file) {
             sethotelfiles(hotelfiles.filter((file) => file !== fileToRemove));
         }
-    else{
-        
-        try {
-            const response = await axios.delete(`${url}/hotel/imghotels/${deleteid}/images/`, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "application/json",
-                },
-                withCredentials: false,
-            });
-            if (response.data.message) {
-                toast.success(`${response.data.message}`, {
+        else {
+
+            try {
+                const response = await axios.delete(`${url}/hotel/imghotels/${deleteid}/images/`, {
+                    headers: {
+                        Authorization: `Bearer ${tokenStr}`,
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: false,
+                });
+                if (response.data.message) {
+                    toast.success(`${response.data.message}`, {
+                        position: 'top-right',
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: 'colored',
+                    });
+                    sethotelfiles(hotelfiles.filter((file) => file !== fileToRemove));
+                }
+            } catch (error) {
+                toast.error(`${error.response.data.error}`, {
                     position: 'top-right',
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -712,20 +729,41 @@ const HotelPage = () => {
                     draggable: true,
                     theme: 'colored',
                 });
-                sethotelfiles(hotelfiles.filter((file) => file !== fileToRemove));
             }
-        } catch (error) {
-            toast.error(`${error.response.data.error}`, {
-                position: 'top-right',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: 'colored',
-            });
         }
-    }
+    };
+
+
+    // Dates
+
+    const [selectedDates, setSelectedDates] = useState([]);
+    const [showCalendar, setshowCalendar] = useState([])
+
+    const handleDateChange = (date) => {
+        // If the clicked date is already selected, remove it
+        if (selectedDates.some((d) => d.getDate() === date.getDate())) {
+            setSelectedDates(selectedDates.filter((d) => d.getDate() !== date.getDate()));
+        } else {
+            // Otherwise, add it to the selected dates array
+            setSelectedDates([...selectedDates, date]);
+        }
+    };
+
+    const formatDate = (date) => {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${year}-${month}-${day}`;
+    };
+
+    // Create an array of formatted dates
+    const formattedDates = selectedDates.map((date) => formatDate(date));
+
+    // formatdate for view
+
+    const formatDateView = (date) => {
+        const [year, month, day] = date.split("-");
+        return `${day}-${month}-${year}`;
     };
 
 
@@ -987,7 +1025,7 @@ const HotelPage = () => {
                                                     <Box display="flex" alignItems="center" justifyContent="center">
                                                         {/* <IconEye width={20} style={{ marginRight: "15px" }} /> */}
                                                         <Button
-                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); setedittags(item.tags);sethotelfiles(item.hotelimgs) , setfileuploadmode('hotel') }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
+                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); setedittags(item.tags); sethotelfiles(item.hotelimgs), setfileuploadmode('hotel') }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
                                                         </Button>
                                                         <Button
                                                             sx={{ border: '1px solid lightgrey' }} onClick={() => { toggleModal('delete'); setDeleteData(item); }}><IconTrash width={15} className='m-0 p-0' />
@@ -1186,7 +1224,7 @@ const HotelPage = () => {
                                                 <Button
                                                     size="small"
                                                     style={{ color: "red" }}
-                                                    onClick={() => handleRemoveHotelFile(file,file.id)}
+                                                    onClick={() => handleRemoveHotelFile(file, file.id)}
                                                 >
                                                     Remove
                                                 </Button>
@@ -1201,7 +1239,7 @@ const HotelPage = () => {
                                     variant="contained"
                                     color="primary"
                                     fullWidth
-                                    onClick={()=>{handleRoomFileSubmit(editData.id)}}
+                                    onClick={() => { handleRoomFileSubmit(editData.id) }}
                                     sx={{ marginTop: 2 }}
                                 >
                                     Submit
@@ -1431,6 +1469,11 @@ const HotelPage = () => {
                                                 </TableCell>
                                                 <TableCell align='center'>
                                                     <Typography variant="subtitle2" fontWeight={600}>
+                                                        Excluded Days
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600}>
                                                         Available Rooms
                                                     </Typography>
                                                 </TableCell>
@@ -1512,6 +1555,13 @@ const HotelPage = () => {
                                                             </Typography>
                                                         </TableCell>
                                                         <TableCell align='center'>
+                                                            <Box display="flex" alignItems="center" justifyContent="center">
+                                                                <Button
+                                                                    sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('calendar'); setshowCalendar(item?.exclusions?.flatMap(exclusion => exclusion.excluded_days.map(dateStr => new Date(dateStr)))) }}><IconCalendar width={15} />
+                                                                </Button>
+                                                            </Box>
+                                                        </TableCell>
+                                                        <TableCell align='center'>
                                                             <Typography variant="subtitle2" fontWeight={600}>
                                                                 {item.available_rooms}
                                                             </Typography>
@@ -1519,7 +1569,7 @@ const HotelPage = () => {
                                                         <TableCell align="right">
                                                             <Box display="flex" alignItems="center" justifyContent="center">
                                                                 <Button
-                                                                    sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('editrooms'); setRoomEditData(item); fetchCategory(), seteditroomcategory(item.room_category?.category_name), setFiles(item.hotelroomimgs) , setfileuploadmode('room') }}><IconEdit width={15} />
+                                                                    sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('editrooms'); setRoomEditData(item); fetchCategory(), seteditroomcategory(item.room_category?.category_name), setFiles(item.hotelroomimgs), setfileuploadmode('room'), setSelectedDates(item?.exclusions?.flatMap(exclusion => exclusion.excluded_days.map(dateStr => new Date(dateStr)))) }}><IconEdit width={15} />
                                                                 </Button>
                                                                 <Button
                                                                     sx={{ border: '1px solid lightgrey' }} onClick={() => { toggleModal('deleterooms'); setRoomDeleteData(item); }}><IconTrash width={15} className='m-0 p-0' />
@@ -1610,7 +1660,7 @@ const HotelPage = () => {
                                                 <Button
                                                     size="small"
                                                     style={{ color: "red" }}
-                                                    onClick={() => handleRemoveFile(file,file.id)}
+                                                    onClick={() => handleRemoveFile(file, file.id)}
                                                 >
                                                     Remove
                                                 </Button>
@@ -1625,7 +1675,7 @@ const HotelPage = () => {
                                     variant="contained"
                                     color="primary"
                                     fullWidth
-                                    onClick={()=>{handleFileSubmit(roomEditData.id)}}
+                                    onClick={() => { handleFileSubmit(roomEditData.id) }}
                                     sx={{ marginTop: 2 }}
                                 >
                                     Submit
@@ -1749,6 +1799,47 @@ const HotelPage = () => {
                             </Grid>
                         </Grid>
 
+                        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', marginTop: '10px' }}>
+                            <Calendar
+                                onChange={handleDateChange}
+                                value={selectedDates}
+                                selectRange={false}
+                                tileContent={({ date }) => {
+                                    // Apply the styling for all selected dates
+                                    if (selectedDates.some((d) => d.toDateString() === date.toDateString())) {
+                                        return (
+                                            <div
+                                                style={{
+                                                    backgroundColor: 'red',
+                                                    color: 'white',
+                                                    borderRadius: '50%',
+                                                    width: '20px',
+                                                    height: '20px',
+                                                    textAlign: 'center',
+                                                    lineHeight: '20px',
+                                                    margin: 'auto',
+                                                }}
+                                            >
+                                                X
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                }}
+                                tileClassName={({ date }) => {
+                                    // Add a class for all selected dates
+                                    return selectedDates.some((d) => d.toDateString() === date.toDateString())
+                                        ? 'selected-date'
+                                        : '';
+                                }}
+                            />
+                            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, marginTop: 2 }}>
+                                {formattedDates.map((date, index) => (
+                                    <Chip key={index} label={date} />
+                                ))}
+                            </Box>
+                        </Grid>
+
                         <Button
                             type="submit"
                             variant="contained"
@@ -1807,6 +1898,59 @@ const HotelPage = () => {
                         No
                     </Button>
                 </DialogActions>
+            </Dialog>
+
+            {/*  show calendar */}
+            
+            <Dialog
+                open={modal.calendar}
+                onClose={() => toggleModal('calendar')}
+                maxWidth="sm"
+                fullWidth
+                sx={{ padding: 4 }}
+            >
+                <DialogTitle sx={{ m: 0, p: 2, position: 'relative' }} id="customized-dialog-title">
+                    Excluded Days
+                    <IconButton aria-label="close" onClick={() => toggleModal('calendar')} sx={{ position: 'absolute', right: 8, top: 8 }}>x</IconButton>
+                </DialogTitle>
+
+                <DialogContent sx={{ padding: 3 }}>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', marginTop: '10px' }}>
+                            <Calendar
+                                value={showCalendar}
+                                selectRange={false}
+                                tileContent={({ date }) => {
+                                    if (showCalendar.some((d) => d.toDateString() === date.toDateString())) {
+                                        return (
+                                            <div
+                                                style={{
+                                                    backgroundColor: 'red',
+                                                    color: 'white',
+                                                    borderRadius: '50%',
+                                                    width: '20px',
+                                                    height: '20px',
+                                                    textAlign: 'center',
+                                                    lineHeight: '20px',
+                                                    margin: 'auto',
+                                                }}
+                                            >
+                                                X
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                }}
+                                tileClassName={({ date }) => {
+                                    return showCalendar.some((d) => d.toDateString() === date.toDateString())
+                                        ? 'selected-date'
+                                        : '';
+                                }}
+                                tileDisabled={() => true} // Disable all tiles
+                            />
+                        </Grid>
+                    </Grid>
+                </DialogContent>
             </Dialog>
 
         </PageContainer >
