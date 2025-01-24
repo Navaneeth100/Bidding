@@ -542,6 +542,7 @@ const HotelPage = () => {
 
     const [hotelfiles, sethotelfiles] = useState([])
     const [files, setFiles] = useState([]);
+    const [newroomfiles, setnewroomfiles] = useState([])
     const [fileuploadmode, setfileuploadmode] = useState(null)
 
     const onDrop = (acceptedFiles) => {
@@ -550,7 +551,7 @@ const HotelPage = () => {
                 preview: URL.createObjectURL(file), // Create a preview URL for each file
             })
         );
-        fileuploadmode == "hotel" ? sethotelfiles((prevFiles) => [...prevFiles, ...updatedFiles]) : setFiles((prevFiles) => [...prevFiles, ...updatedFiles]);
+        fileuploadmode == "hotel" ? sethotelfiles((prevFiles) => [...prevFiles, ...updatedFiles]) : fileuploadmode == "room" ? setFiles((prevFiles) => [...prevFiles, ...updatedFiles]) : setnewroomfiles((prevFiles) => [...prevFiles, ...updatedFiles]);
     };
 
     
@@ -734,7 +735,7 @@ const HotelPage = () => {
     };
 
 
-    // Dates
+    // Edit Dates
 
     const [selectedDates, setSelectedDates] = useState([]);
     const [showCalendar, setshowCalendar] = useState([])
@@ -759,11 +760,154 @@ const HotelPage = () => {
     // Create an array of formatted dates
     const formattedDates = selectedDates.map((date) => formatDate(date));
 
-    // formatdate for view
 
-    const formatDateView = (date) => {
-        const [year, month, day] = date.split("-");
-        return `${day}-${month}-${year}`;
+    // ADD ROOMS
+
+    const [newroomData, setNewRoomData] = useState([]);
+
+    const handleNewRoomChange = (field, value) => { setNewRoomData((prev) => ({ ...prev, [field]: value })) };
+
+    //  New Room file delete
+
+    const handleRemoveNewRoomFile = (fileToRemove) => {
+        setnewroomfiles(newroomfiles.filter((file) => file !== fileToRemove));
+    };
+
+    //  New Room file uploads
+
+    const handleNewRoomFileSubmit = async (id) => {
+        event.preventDefault();
+        let submitData = {
+            files: newroomfiles
+        }
+
+        try {
+            const response = await axios.post(`${url}/hotel/imghotels/${id}/images/`, submitData, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "multipart/form-data",
+                },
+                withCredentials: false,
+            });
+            if (response.data.message) {
+                toast.success(`${response.data.message}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+            }
+            setnewroomfiles([])
+        } catch (error) {
+            toast.error(`${error.response.data.error}`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
+        } finally {
+        }
+    };
+
+    // Room Dates
+
+    const [selectedNewRoomDates, setSelectedNewRoomDates] = useState([]);
+
+    const handleNewRoomDateChange = (date) => {
+        // If the clicked date is already selected, remove it
+        if (selectedNewRoomDates.some((d) => d.getTime() === date.getTime())) {
+            setSelectedNewRoomDates(selectedNewRoomDates.filter((d) => d.getTime() !== date.getTime()));
+        } else {
+            // Otherwise, add it to the selected dates array
+            setSelectedNewRoomDates([...selectedNewRoomDates, date]);
+        }
+    };
+
+    const formatNewRoomDate = (date) => {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${year}-${month}-${day}`;
+    };
+
+    // Create an array of formatted dates
+    const formattedNewRoomDates = selectedNewRoomDates.map((date) => formatNewRoomDate(date));
+
+    const handleNewRoomSubmit = async (event) => {
+        if (newroomData.room_category && newroomData.area && newroomData.beds && selectedNewRoomDates) {
+            event.preventDefault();
+            let submitData = {
+                room_category: categoryList.find((category) => category.category_name === newroomData.room_category)?.id,
+                area: newroomData.area,
+                floors: newroomData.floors,
+                beds: newroomData.beds,
+                bathrooms: newroomData.bathrooms,
+                guests: newroomData.guests,
+                booking_price: newroomData.booking_price,
+                rooms: newroomData.room_no,
+                available_rooms: newroomData.room_no,
+                excluded_days: formattedNewRoomDates,
+                bf: newroomData.withbreakfast,
+                hotelroomimgs: newroomfiles
+            }
+
+            try {
+                const response = await axios.post(`${url}/hotel/hotels/${editId}/room-categories/`, submitData, {
+                    headers: {
+                        Authorization: `Bearer ${tokenStr}`,
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: false,
+                });
+                toast.success(`${response.data.message}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+                setNewRoomData([])
+                setSelectedNewRoomDates([])
+                setnewroomfiles([])
+                toggleModal('newroom')
+                fetchRooms(editId)
+                if (response.status === 200) {
+                    // return true;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                toast.error(`${error?.response?.data?.error}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+            } finally {
+            }
+        }
+        else {
+            toast.error('Please Fill the Fields Completely...', {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
+        }
+
     };
 
 
@@ -1408,10 +1552,15 @@ const HotelPage = () => {
                 fullWidth
                 sx={{ padding: 2 }}
             >
-                <DialogTitle sx={{ m: 1, p: 1, position: 'relative' }} id="customized-dialog-title">
+                <DialogTitle sx={{ m: 1, p: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} id="customized-dialog-title">
                     Added Rooms
-                    <IconButton
-                        onClick={() => toggleModal('roomlist')} sx={{ position: 'absolute', right: 8, top: 8 }}>x</IconButton>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <Button size="small" variant="outlined" color="success" onClick={() => { toggleModal('newroom'), setfileuploadmode('newroom') }}>
+                            Add Rooms
+                        </Button>
+                        <IconButton
+                            onClick={() => toggleModal('roomlist')} sx={{ position: 'relative' }}>x</IconButton>
+                    </Box>
                 </DialogTitle>
 
                 <DialogContent sx={{ padding: 3 }}>
@@ -1833,11 +1982,11 @@ const HotelPage = () => {
                                         : '';
                                 }}
                             />
-                            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, marginTop: 2 }}>
+                            {/* <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, marginTop: 2 }}>
                                 {formattedDates.map((date, index) => (
                                     <Chip key={index} label={date} />
                                 ))}
-                            </Box>
+                            </Box> */}
                         </Grid>
 
                         <Button
@@ -1950,6 +2099,256 @@ const HotelPage = () => {
                             />
                         </Grid>
                     </Grid>
+                </DialogContent>
+            </Dialog>
+
+            {/*  Add New Rooms */}
+
+            <Dialog
+                open={modal.newroom}
+                onClose={() => toggleModal('newroom')}
+                maxWidth="sm"
+                fullWidth
+                sx={{ padding: 4 }}
+            >
+                <DialogTitle sx={{ m: 0, p: 2, position: 'relative' }} id="customized-dialog-title">
+                    Add Room
+                    <IconButton aria-label="close" onClick={() => toggleModal('newroom')} sx={{ position: 'absolute', right: 8, top: 8 }}>x</IconButton>
+                </DialogTitle>
+
+                <DialogContent sx={{ padding: 3 }}>
+                    <form className="row gy-4 mt-2">
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} sm={12}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Category</InputLabel>
+                                    <Select
+                                        value={newroomData.room_category || ""}
+                                        onOpen={fetchCategory}
+                                        onChange={(e) => handleNewRoomChange('room_category', e.target.value)}
+                                        label="Category"
+                                        MenuProps={MenuProps}>
+                                        {categoryList.map((item) => (
+                                            <MenuItem value={item.category_name}>{item.category_name}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={12} sm={12}>
+                                <Typography variant="h6" gutterBottom>
+                                    Upload Multiple Images
+                                </Typography>
+                                <Box
+                                    {...getRootProps()}
+                                    sx={{
+                                        border: "2px dashed #ccc",
+                                        borderRadius: "4px",
+                                        padding: "20px",
+                                        textAlign: "center",
+                                        cursor: "pointer",
+                                        backgroundColor: isDragActive ? "#f0f0f0" : "transparent",
+                                        marginTop: "10px"
+                                    }}
+                                >
+                                    <input {...getInputProps()} />
+                                    <Typography variant="body1" color="textSecondary">
+                                        {isDragActive ? "Drop files here..." : "Drag and drop files here or click to upload"}
+                                    </Typography>
+                                    <Button variant="contained" sx={{ mt: 2 }}>
+                                        Select Files
+                                    </Button>
+                                </Box>
+                                <Grid container spacing={2} style={{ marginTop: "15px", textAlign: "center" }}>
+                                    {newroomfiles.map((file, index) => (
+                                        <Grid item key={index} xs={12} sm={2} md={2}>
+                                            <Card>
+                                                <CardMedia
+                                                    component="img"
+                                                    width="100%"
+                                                    height="100"
+                                                    image={file.preview || `${url}/hotel${file.file}`}
+                                                    alt={file.name}
+                                                />
+                                                <Button
+                                                    size="small"
+                                                    style={{ color: "red" }}
+                                                    onClick={() => handleRemoveNewRoomFile(file, file.id)}
+                                                >
+                                                    Remove
+                                                </Button>
+                                            </Card>
+                                        </Grid>
+                                    ))}
+
+
+                                </Grid>
+                                {/* <Button
+                                    type="button"
+                                    variant="contained"
+                                    color="primary"
+                                    fullWidth
+                                    onClick={() => { handleNewRoomFileSubmit(editId) }}
+                                    sx={{ marginTop: 2 }}
+                                >
+                                    Submit
+                                </Button> */}
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Room No"
+                                    placeholder='eg: 123'
+                                    variant="outlined"
+                                    type='text'
+                                    margin="normal"
+                                    name="room_no"
+                                    onChange={(e) => { setNewRoomData({ ...newroomData, rooms: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Room Area"
+                                    placeholder='eg: in sq ft'
+                                    variant="outlined"
+                                    type='number'
+                                    margin="normal"
+                                    name="room_area"
+                                    onChange={(e) => { setNewRoomData({ ...newroomData, area: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Floor"
+                                    placeholder='eg: 1'
+                                    variant="outlined"
+                                    type='number'
+                                    margin="normal"
+                                    name="floor"
+                                    onChange={(e) => { setNewRoomData({ ...newroomData, floors: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Beds"
+                                    placeholder='eg: 2'
+                                    variant="outlined"
+                                    type='number'
+                                    margin="normal"
+                                    name="beds"
+                                    onChange={(e) => { setNewRoomData({ ...newroomData, beds: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Bathrooms"
+                                    placeholder='eg: 2'
+                                    variant="outlined"
+                                    type='number'
+                                    margin="normal"
+                                    name="bathrooms"
+                                    onChange={(e) => { setNewRoomData({ ...newroomData, bathrooms: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Guests"
+                                    variant="outlined"
+                                    placeholder='eg: 1 - 5'
+                                    margin="normal"
+                                    type='number'
+                                    name="guests"
+                                    onChange={(e) => { setNewRoomData({ ...newroomData, guests: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Available Rooms"
+                                    variant="outlined"
+                                    placeholder='eg: 1 - 5'
+                                    margin="normal"
+                                    type='number'
+                                    name="available_rooms"
+                                    onChange={(e) => { setNewRoomData({ ...newroomData, available_rooms: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Room Price"
+                                    placeholder='eg: $$$'
+                                    variant="outlined"
+                                    type='text'
+                                    margin="normal"
+                                    name="room_price"
+                                    onChange={(e) => { setNewRoomData({ ...newroomData, booking_price: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    fullWidth
+                                    label="With Breakfast"
+                                    type='number'
+                                    variant="outlined"
+                                    placeholder='eg: 1 - 5'
+                                    margin="normal"
+                                    name="withbreakfast"
+                                    onChange={(e) => { setNewRoomData({ ...newroomData, withbreakfast: e.target.value }) }}
+                                />
+                            </Grid>
+                        </Grid>
+
+                        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', marginTop: '10px' }}>
+                            <Calendar
+                                onChange={handleNewRoomDateChange}
+                                value={selectedNewRoomDates}
+                                selectRange={false}
+                                tileClassName={({ date, view }) => {
+                                    // Add inline styles to the selected dates
+                                    if (selectedNewRoomDates.some((d) => d.getTime() === date.getTime())) {
+                                        return 'selected-date';  // Use a class to apply inline styles later
+                                    }
+                                    return '';
+                                }}
+                                tileContent={({ date, view }) => {
+                                    if (selectedNewRoomDates.some((d) => d.getTime() === date.getTime())) {
+                                        return (
+                                            <div
+                                                style={{
+                                                    backgroundColor: 'red',
+                                                    color: 'white',
+                                                    borderRadius: '50%',
+                                                    width: '20px',
+                                                    height: '20px',
+                                                    textAlign: 'center',
+                                                    lineHeight: '20px',
+                                                    margin: 'auto',
+                                                }}
+                                            >
+                                                X
+                                            </div>
+                                        );
+                                    }
+                                    return '';
+                                }}
+                            />
+                        </Grid>
+
+                        <Button
+                            type="button"
+                            variant="contained"
+                            color="primary"
+                            sx={{ marginTop: 4 }}
+                            onClick={(e) => { handleNewRoomSubmit(e) }}
+                        >
+                            Submit
+                        </Button>
+                    </form>
                 </DialogContent>
             </Dialog>
 
