@@ -17,16 +17,6 @@ import Blog2 from './components/Blog2';
 
 const Dashboard = () => {
 
-  // pie chart
-
-  const desktopOS = [
-    { id: 'Dubai', value: 45, color: '#3f51b5' },
-    { id: 'Abu Dhabi', value: 30, color: '#ff9800' },
-    { id: 'Sharjah', value: 15, color: '#4caf50' },
-    { id: 'Ajman', value: 10, color: '#f44336' },
-  ];
-
-  const valueFormatter = (value) => `${value.id} - ${value.value}%`;
 
   // get Dashboard Data
 
@@ -68,9 +58,23 @@ const Dashboard = () => {
     fetchDashboard()
   }, [])
 
+  // pie chart
+
+  const totalImpressions = dashboardData.impressions_current_month + dashboardData.impressions_current_year + dashboardData.impressions_last_week + dashboardData.impressions_today || 0;
+
+  const desktopOS = [
+    { id: 'Today', count: dashboardData.impressions_today, value: (dashboardData.impressions_today / totalImpressions * 100).toFixed(2), color: '#D33E43 ' }, // Blue for today
+    { id: 'Weekly', count: dashboardData.impressions_last_week, value: (dashboardData.impressions_last_week / totalImpressions * 100).toFixed(2), color: '#666370 ' }, // Green for weekly
+    { id: 'Monthly', count: dashboardData.impressions_current_month, value: (dashboardData.impressions_current_month / totalImpressions * 100).toFixed(2), color: '#DD6E42' }, // Yellow for monthly
+    { id: 'Yearly', count: dashboardData.impressions_current_year, value: (dashboardData.impressions_current_year / totalImpressions * 100).toFixed(2), color: '#0A8754 ' }, // Red for yearly
+  ];
+
+
+  const valueFormatter = (value) => `${value.id} - ${value.count}`;
+
 
   return (
-    <PageContainer title="Dashboard" description="this is Dashboard">
+    <PageContainer title="Impression Overview" description="this is Dashboard">
       <Box>
         <Grid container spacing={3}>
           <Grid item xs={12} lg={8}>
@@ -114,7 +118,7 @@ const Dashboard = () => {
           <Grid item xs={12} lg={4}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
-                <YearlyBreakup value={dashboardData.impressions_current_year} />
+                <YearlyBreakup value={dashboardData.impressions_current_year} totalcount={totalImpressions} lastyear={dashboardData.impressions_last_year} />
               </Grid>
               <Grid item xs={12}>
                 <MonthlyEarnings value={dashboardData.impressions_current_month} />

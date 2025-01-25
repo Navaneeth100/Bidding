@@ -2,7 +2,7 @@ import React from 'react';
 import Chart from 'react-apexcharts';
 import { useTheme } from '@mui/material/styles';
 import { Stack, Typography, Avatar, Fab } from '@mui/material';
-import { IconArrowDownRight, IconCurrencyDollar, IconArrowUpLeft } from '@tabler/icons-react';
+import { IconArrowDownRight, IconCurrencyDollar, IconArrowUpLeft, IconCircleCheck } from '@tabler/icons-react';
 import DashboardCard from '../../../components/shared/DashboardCard';
 
 const MonthlyEarnings = ({value}) => {
@@ -56,8 +56,8 @@ const MonthlyEarnings = ({value}) => {
     <DashboardCard
       title="Monthly Impressions"
       action={
-        <Fab color="secondary" size="medium" sx={{color: '#ffffff'}}>
-          <IconCurrencyDollar width={24} />
+        <Fab color="light" size="medium" sx={{color: 'green'}}>
+          <IconCircleCheck width={24} />
         </Fab>
       }
       footer={
@@ -68,7 +68,7 @@ const MonthlyEarnings = ({value}) => {
         <Typography variant="h3" fontWeight="700" mt="-20px">
           {value}
         </Typography>
-        <Stack direction="row" spacing={1} my={1} alignItems="center">
+        {/* <Stack direction="row" spacing={1} my={1} alignItems="center">
           <Avatar sx={{ bgcolor: successlight, width: 27, height: 27 }}>
             <IconArrowUpLeft width={20} color="#39B69A" />
           </Avatar>
@@ -78,7 +78,7 @@ const MonthlyEarnings = ({value}) => {
           <Typography variant="subtitle2" color="textSecondary">
             last month
           </Typography>
-        </Stack>
+        </Stack> */}
       </>
     </DashboardCard>
   );

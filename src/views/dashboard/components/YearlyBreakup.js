@@ -6,7 +6,7 @@ import { IconArrowUpLeft } from '@tabler/icons-react';
 
 import DashboardCard from '../../../components/shared/DashboardCard';
 
-const YearlyBreakup = ({value}) => {
+const YearlyBreakup = ({value,totalcount,lastyear}) => {
   // chart color
   const theme = useTheme();
   const primary = theme.palette.primary.main;
@@ -59,7 +59,16 @@ const YearlyBreakup = ({value}) => {
       },
     ],
   };
-  const seriescolumnchart = [38, 40, 25];
+
+  const thisyearpercentage=(value/totalcount*100).toFixed(2);
+  const lastyearpercentage=(lastyear/totalcount*100).toFixed(2);
+  const balancepercentage = {
+    thisyearpercentage: parseFloat(thisyearpercentage),
+    lastyearpercentage: parseFloat(lastyearpercentage),
+    difference: (parseFloat(thisyearpercentage) - parseFloat(lastyearpercentage)).toFixed(2) // Difference as a percentage
+  };
+
+  const seriescolumnchart = [thisyearpercentage, lastyearpercentage, balancepercentage];
 
   return (
     <DashboardCard title="Yearly Bookings">
@@ -69,7 +78,7 @@ const YearlyBreakup = ({value}) => {
           <Typography variant="h3" fontWeight="700">
           {value}
           </Typography>
-          <Stack direction="row" spacing={1} mt={1} alignItems="center">
+          {/* <Stack direction="row" spacing={1} mt={1} alignItems="center">
             <Avatar sx={{ bgcolor: successlight, width: 27, height: 27 }}>
               <IconArrowUpLeft width={20} color="#39B69A" />
             </Avatar>
@@ -79,7 +88,7 @@ const YearlyBreakup = ({value}) => {
             <Typography variant="subtitle2" color="textSecondary">
               last year
             </Typography>
-          </Stack>
+          </Stack> */}
           <Stack spacing={3} mt={5} direction="row">
             <Stack direction="row" spacing={1} alignItems="center">
               <Avatar
@@ -103,7 +112,7 @@ const YearlyBreakup = ({value}) => {
         <Grid item xs={5} sm={5}>
           <Chart
             options={optionscolumnchart}
-            series={seriescolumnchart}
+            series={[balancepercentage.thisyearpercentage, balancepercentage.lastyearpercentage]}
             type="donut"
             height="140px"
           />
