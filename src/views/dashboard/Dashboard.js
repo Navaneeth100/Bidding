@@ -74,11 +74,11 @@ const Dashboard = () => {
 
 
   return (
-    <PageContainer title="Impression Overview" description="this is Dashboard">
+    <PageContainer title="Dashboard" description="this is Dashboard">
       <Box>
         <Grid container spacing={3}>
           <Grid item xs={12} lg={8}>
-            <DashboardCard title="Hotel Overview">
+            <DashboardCard title={`Impressions Overview (${totalImpressions})`}>
               <PieChart
                 series={[
                   {

@@ -23,6 +23,7 @@ const MonthlyEarnings = ({value}) => {
         show: false,
       },
       height: 60,
+      events: {}, // No events to disable interaction
       sparkline: {
         enabled: true,
       },
@@ -41,7 +42,8 @@ const MonthlyEarnings = ({value}) => {
       size: 0,
     },
     tooltip: {
-      theme: theme.palette.mode === 'dark' ? 'dark' : 'light',
+      // theme: theme.palette.mode === 'dark' ? 'dark' : 'light',
+      enabled: false, // Tooltip is disabled
     },
   };
   const seriescolumnchart = [

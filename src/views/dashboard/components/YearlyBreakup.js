@@ -23,6 +23,7 @@ const YearlyBreakup = ({value,totalcount,lastyear}) => {
         show: false,
       },
       height: 155,
+      events: {}, // No events to disable interaction
     },
     colors: [primary, primarylight, '#F9F9FD'],
     plotOptions: {
@@ -36,8 +37,9 @@ const YearlyBreakup = ({value,totalcount,lastyear}) => {
       },
     },
     tooltip: {
-      theme: theme.palette.mode === 'dark' ? 'dark' : 'light',
-      fillSeriesColor: false,
+      // theme: theme.palette.mode === 'dark' ? 'dark' : 'light',
+      // fillSeriesColor: false,
+      enabled: false, // Tooltip is disabled
     },
     stroke: {
       show: false,

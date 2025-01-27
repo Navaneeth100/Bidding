@@ -1054,6 +1054,11 @@ const HotelPage = () => {
                                         </TableCell>
                                         <TableCell align="center">
                                             <Typography variant="subtitle2" fontWeight={600}>
+                                                Impressions
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Typography variant="subtitle2" fontWeight={600}>
                                                 Ratings
                                             </Typography>
                                         </TableCell>
@@ -1082,7 +1087,7 @@ const HotelPage = () => {
                                 <TableBody>
                                     {loading ? (
                                         <TableRow>
-                                            <TableCell colSpan={8} align="center">
+                                            <TableCell colSpan={9} align="center">
                                                 <Box
                                                     display="flex"
                                                     justifyContent="center"
@@ -1147,6 +1152,11 @@ const HotelPage = () => {
                                                     </Box>
                                                 </TableCell>
                                                 <TableCell align="center">
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        {item.hotel_impressions}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
                                                     <Box display="flex" alignItems="center" justifyContent="center">
                                                         {/* <IconStar width={15} style={{ marginRight: "5px" }} /> */}
                                                         <Typography variant="subtitle2" fontWeight={600}>
@@ -1180,7 +1190,7 @@ const HotelPage = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={8} align="center">
+                                            <TableCell colSpan={9} align="center">
                                                 <Typography variant="subtitle2" fontWeight={600} sx={{ paddingTop: "300px" }}>
                                                     No Data to Display
                                                 </Typography>
