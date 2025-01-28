@@ -49,12 +49,12 @@ const Settings = () => {
         <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                    <Tab label="Notification" {...a11yProps(0)} />
-                    <Tab label="Privacy Policy" {...a11yProps(1)} />
-                    <Tab label="Logout" {...a11yProps(2)} />
+                    {/* <Tab label="Notification" {...a11yProps(0)} /> */}
+                    <Tab label="Privacy Policy" {...a11yProps(0)} />
+                    <Tab label="Logout" {...a11yProps(1)} />
                 </Tabs>
             </Box>
-            <CustomTabPanel value={value} index={0}>
+            {/* <CustomTabPanel value={value} index={0}>
                 <Typography variant="h2" gutterBottom>
                     Manage Notifications
                 </Typography>
@@ -68,8 +68,8 @@ const Settings = () => {
                         <Switch {...label} />
                     </Box>
                 </Box>
-            </CustomTabPanel>
-            <CustomTabPanel value={value} index={1}>
+            </CustomTabPanel> */}
+            <CustomTabPanel value={value} index={0}>
                 <Typography variant="h2" gutterBottom>
                     Privacy Policy
                 </Typography>
@@ -80,7 +80,7 @@ const Settings = () => {
                     Privacy Policy
                 </Button>
             </CustomTabPanel>
-            <CustomTabPanel value={value} index={2}>
+            <CustomTabPanel value={value} index={1}>
                 <Typography variant="h2" gutterBottom>
                     Logout
                 </Typography>

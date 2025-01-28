@@ -26,6 +26,14 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    // Handle keydown for form submission
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSubmit();
+        }
+    };
+
     const navigate = useNavigate()
 
     const handleSubmit = async () => {
@@ -99,7 +107,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
                                 </Button>
                             ),
                         }}
-                        onChange={(e) => { handleChange(e) }} />
+                        onChange={(e) => { handleChange(e) }} onKeyDown={handleKeyDown} />
                 </Box>
                 <Stack justifyContent="space-between" direction="row" alignItems="center" my={2}>
                     <FormGroup>

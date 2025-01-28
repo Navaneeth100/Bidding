@@ -678,7 +678,7 @@ const HotelPage = () => {
             }
             sethotelfiles([])
             toggleModal('edit')
-            fetchHotels()
+            fetchHotels(currentPage);
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
