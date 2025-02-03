@@ -713,6 +713,9 @@ const AddHotel = () => {
     //  arabic data submit
 
     const translateTags = async (tags) => {
+
+        if (!tags || tags.length === 0) return [];
+
         try {
             const requests = tags.map((tag) =>
                 axios.post(
@@ -742,18 +745,19 @@ const AddHotel = () => {
 
     const handleArabicSubmit = async (event) => {
         event.preventDefault();
+        const translatedTags = await translateTags(translatedHotelPreview.tags);
         let submitData = {
             name_ar: translatedHotelPreview.name,
             description_ar: translatedHotelPreview.description,
             locationName_ar: translatedHotelPreview.locationName,
             owner_name_ar: translatedHotelPreview.owner_name,
-            tags_ar: translateTags(translatedHotelPreview.tags)
+            tags_ar: translatedTags
         };
         try {
             const response = await axios.put(`${url}/hotel/updatehotels/${roomId}/?data=ar`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "multipart/form-data",
+                    "Content-Type": "application/json",
                 },
                 withCredentials: false,
             });
