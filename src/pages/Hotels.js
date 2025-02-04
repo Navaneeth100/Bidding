@@ -239,14 +239,49 @@ const HotelPage = () => {
         }
     };
 
+    //  arabic data submit
+
+    const apiKey = "AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g"; // Replace with your API key
+
+    const translateTags = async (tags) => {
+
+        if (!tags || tags.length === 0) return [];
+
+        try {
+            const requests = tags.map((tag) =>
+                axios.post(
+                    `https://translation.googleapis.com/language/translate/v2`,
+                    null,
+                    {
+                        params: {
+                            q: tag,
+                            target: "ar", // Arabic language code
+                            key: apiKey,
+                        },
+                    }
+                )
+            );
+            const responses = await Promise.all(requests);
+            const translatedTextArray = responses.map(
+                (response) => response.data.data.translations[0].translatedText
+            );
+
+            return translatedTextArray;
+        } catch (error) {
+            console.error("Error translating:", error);
+            return [];
+        }
+    };
+
     const handleEdit = async (event) => {
         event.preventDefault();
+        const translatedTags = await translateTags(edittags);
         let submitData = {
             name: editData.name,
             description: editData.description,
             rating: editData.rating,
-            location: selectedLocation || editData.location,
-            locationName: `${markerPosition.lat} , ${markerPosition.lng}`,
+            location: `${markerPosition.lat} , ${markerPosition.lng}`,
+            locationName: selectedLocation || editData.location,
             owner_name: editData.owner_name,
             owner_email: editData.owner_email,
             owner_contact_number: editData.owner_contact_number,
@@ -255,14 +290,15 @@ const HotelPage = () => {
             propertytype: editData.propertytype,
             emirates: editData.emirates,
             facilites: editfacilities,
-            tags: edittags
+            tags: edittags,
+            tags_ar: translatedTags
         };
 
         try {
             const response = await axios.put(`${url}/hotel/updatehotels/${editData.id}/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "multipart/form-data",
+                    "Content-Type": "application/json",
                 },
                 withCredentials: false,
             });
@@ -1324,7 +1360,7 @@ const HotelPage = () => {
                                         </List>
                                     )}
                                     <Typography variant="h6" className='mb-3' gutterBottom>
-                                        Selected Location : {selectedLocation || editData.locationName}
+                                        Selected Location : {editData.locationName || selectedLocation}
                                     </Typography>
                                     <LoadScript googleMapsApiKey="AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY" libraries={['places']}>
                                         <GoogleMap
@@ -1396,7 +1432,7 @@ const HotelPage = () => {
                                     onClick={() => { handleRoomFileSubmit(editData.id) }}
                                     sx={{ marginTop: 2 }}
                                 >
-                                    Submit
+                                    File Submit
                                 </Button>
                             </Grid>
                             <Grid item xs={6}>
@@ -1837,7 +1873,7 @@ const HotelPage = () => {
                                     onClick={() => { handleFileSubmit(roomEditData.id) }}
                                     sx={{ marginTop: 2 }}
                                 >
-                                    Submit
+                                    File Submit
                                 </Button>
                             </Grid>
                             <Grid item xs={4}>

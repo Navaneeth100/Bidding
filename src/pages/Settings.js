@@ -49,38 +49,34 @@ const Settings = () => {
         <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                    {/* <Tab label="Notification" {...a11yProps(0)} /> */}
-                    <Tab label="Privacy Policy" {...a11yProps(0)} />
-                    <Tab label="Logout" {...a11yProps(1)} />
+                    <Tab label="Terms And Conditions" {...a11yProps(0)} />
+                    <Tab label="Privacy Policy" {...a11yProps(1)} />
+                    <Tab label="Logout" {...a11yProps(2)} />
                 </Tabs>
             </Box>
-            {/* <CustomTabPanel value={value} index={0}>
-                <Typography variant="h2" gutterBottom>
-                    Manage Notifications
-                </Typography>
-                <Box sx={{ mt: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="h6">Email Notifications</Typography>
-                        <Switch {...label} defaultChecked />
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography variant="h6">Push Notifications</Typography>
-                        <Switch {...label} />
-                    </Box>
-                </Box>
-            </CustomTabPanel> */}
             <CustomTabPanel value={value} index={0}>
+                <Typography variant="h2" gutterBottom>
+                    Terms And Conditions
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                    These Terms and Conditions govern your use of our website and services. By accessing or using our website, you agree to comply with and be bound by these terms. If you do not agree to these terms, please refrain from using our services.
+                </Typography>
+                <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={() => window.open('https://sites.google.com/view/stay-termsandconditions/home?authuser=1', '_blank')}>
+                    Read Full Terms
+                </Button>
+            </CustomTabPanel>
+            <CustomTabPanel value={value} index={1}>
                 <Typography variant="h2" gutterBottom>
                     Privacy Policy
                 </Typography>
                 <Typography variant="body1" gutterBottom>
                     Learn about how we handle your data and protect your privacy. Our privacy policy ensures your personal information is secure.
                 </Typography>
-                <Button variant="contained" color="primary" sx={{ mt: 2 }}>
+                <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={() => window.open('https://sites.google.com/view/stay-privacypolicy/home?authuser=1', '_blank')}>
                     Privacy Policy
                 </Button>
             </CustomTabPanel>
-            <CustomTabPanel value={value} index={1}>
+            <CustomTabPanel value={value} index={2}>
                 <Typography variant="h2" gutterBottom>
                     Logout
                 </Typography>

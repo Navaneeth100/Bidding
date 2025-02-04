@@ -26,6 +26,11 @@ const HotelPage = () => {
         setModal((prev) => ({ ...prev, [type]: !prev[type] }));
     };
 
+    //  Select Images 
+
+    const [selectedIndex, setSelectedIndex] = useState(0);
+
+
     const { id } = useParams();
 
     // get HotelDetails
@@ -103,7 +108,7 @@ const HotelPage = () => {
                                 <Grid item xs={8}>
                                     <Box
                                         component="img"
-                                        src={`${url}/hotel${hotelDetails.hotelimgs[0].file}`}
+                                        src={hotelDetails.hotelimgs.length > 0 ? `${url}/hotel${hotelDetails.hotelimgs[selectedIndex].file}` : defaulthotel}
                                         alt=""
                                         sx={{
                                             width: '100%',
@@ -113,19 +118,23 @@ const HotelPage = () => {
                                     />
                                 </Grid>
                                 <Grid item xs={4}>
-                                    {hotelDetails?.hotelimgs?.slice(0, 2).map((item, index) => (
-                                        <Box
-                                            component="img"
-                                            src={`${url}/hotel${item.file}` || defaulthotel}
-                                            alt=""
-                                            sx={{
-                                                width: '100%',
-                                                height: '19vh',
-                                                borderRadius: 2,
-                                                marginBottom: 2
-                                            }}
-                                        />
-                                    ))}
+                                    <Box sx={{ height: '40vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                                        {hotelDetails.hotelimgs.length > 0 && hotelDetails?.hotelimgs?.map((item, index) => (
+                                            <Box
+                                                key={index}
+                                                component="img"
+                                                src={`${url}/hotel${item.file}` || defaulthotel}
+                                                alt=""
+                                                onClick={() => setSelectedIndex(index)}
+                                                sx={{
+                                                    width: '100%',
+                                                    height: '19vh',
+                                                    borderRadius: 2,
+                                                    marginBottom: 2
+                                                }}
+                                            />
+                                        ))}
+                                    </Box>
                                 </Grid>
                             </Grid>
                         </Box>
@@ -150,16 +159,16 @@ const HotelPage = () => {
                                     </Stack>
                                     <Box sx={{ mt: 2 }}>
                                         <Typography variant="h4" sx={{ fontWeight: "bold", textAlign: "center" }}>
-                                            {hotelDetails.owner_name}
+                                            {hotelDetails.owner_name || "N/A"}
                                         </Typography>
                                         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "start", mt: 2 }}>
                                             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
                                                 <IconMail fontSize="small" />
-                                                <Typography variant="h6">{hotelDetails.owner_email}</Typography>
+                                                <Typography variant="h6">{hotelDetails.owner_email || "N/A"}</Typography>
                                             </Box>
                                             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                                                 <IconPhone fontSize="small" />
-                                                <Typography variant="h6">{hotelDetails.owner_contact_number}</Typography>
+                                                <Typography variant="h6">{hotelDetails.owner_contact_number || "N/A"}</Typography>
                                             </Box>
                                         </Box>
                                     </Box>
@@ -172,16 +181,16 @@ const HotelPage = () => {
                                     <Card className="my-2">
                                         <CardBody>
                                             <CardTitle tag="h5" className='fw-bold'>
-                                                {hotelDetails.name}
+                                                {hotelDetails.name || "N/A"}
                                             </CardTitle>
                                             <CardText>
-                                                {hotelDetails.location}
+                                                {hotelDetails.location || "N/A"}
                                             </CardText>
                                             <CardText>
                                                 <Rating name="read-only" value={hotelDetails.rating} readOnly />
                                             </CardText>
                                             <CardText>
-                                                {hotelDetails.description}
+                                                {hotelDetails.description || "N/A"}
                                             </CardText>
                                             <CardText>
                                                 {hotelDetails.facilities?.map((facilities, index) => (
@@ -363,7 +372,7 @@ const HotelPage = () => {
 
                         <Box>
                             <Typography className='mb-3 mt-4' variant="h5">
-                                Location : {hotelDetails.locationName}
+                                Location : {hotelDetails.locationName} &nbsp; ( {hotelDetails.location || "N/A"} )
                             </Typography>
                             <LoadScript googleMapsApiKey="AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY" libraries={['places']}>
                                 <GoogleMap
