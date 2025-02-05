@@ -374,7 +374,7 @@ const HotelPage = () => {
                             <Typography className='mb-3 mt-4' variant="h5">
                                 Location : {hotelDetails.locationName} &nbsp; ( {hotelDetails.location || "N/A"} )
                             </Typography>
-                            <LoadScript googleMapsApiKey="AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY" libraries={['places']}>
+                            <LoadScript googleMapsApiKey="AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g" libraries={['places']}>
                                 <GoogleMap
                                     mapContainerStyle={{ height: '400px', width: '100%' }}
                                     zoom={15}

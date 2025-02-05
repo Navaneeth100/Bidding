@@ -63,10 +63,10 @@ const Dashboard = () => {
   const totalImpressions = dashboardData.impressions_current_month + dashboardData.impressions_current_year + dashboardData.impressions_last_week + dashboardData.impressions_today || 0;
 
   const desktopOS = [
-    { id: 'Today', count: dashboardData.impressions_today, value: (dashboardData.impressions_today / totalImpressions * 100).toFixed(2), color: '#D33E43 ' }, // Blue for today
-    { id: 'Weekly', count: dashboardData.impressions_last_week, value: (dashboardData.impressions_last_week / totalImpressions * 100).toFixed(2), color: '#666370 ' }, // Green for weekly
-    { id: 'Monthly', count: dashboardData.impressions_current_month, value: (dashboardData.impressions_current_month / totalImpressions * 100).toFixed(2), color: '#DD6E42' }, // Yellow for monthly
-    { id: 'Yearly', count: dashboardData.impressions_current_year, value: (dashboardData.impressions_current_year / totalImpressions * 100).toFixed(2), color: '#0A8754 ' }, // Red for yearly
+    { id: 'Today', count: dashboardData.impressions_today, value: (dashboardData.impressions_today / totalImpressions * 100).toFixed(2), color: '#9BBFEC ' }, // Blue for today
+    { id: 'Weekly', count: dashboardData.impressions_last_week, value: (dashboardData.impressions_last_week / totalImpressions * 100).toFixed(2), color: '#E8A09A ' }, // Green for weekly
+    { id: 'Monthly', count: dashboardData.impressions_current_month, value: (dashboardData.impressions_current_month / totalImpressions * 100).toFixed(2), color: '#FBE29F' }, // Yellow for monthly
+    { id: 'Yearly', count: dashboardData.impressions_current_year, value: (dashboardData.impressions_current_year / totalImpressions * 100).toFixed(2), color: '#C6D68F ' }, // Red for yearly
   ];
 
 

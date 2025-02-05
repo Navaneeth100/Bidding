@@ -132,6 +132,20 @@ const AddHotel = () => {
         }
 
         if (responseSuccess || activeStep === 1) {
+
+            if (activeStep === 1 && addedRoom.length === 0) {
+                toast.error("Please Add at least One Room to Proceed.", {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
+                return;
+            }
+
             const newCompleted = [...completed];
             newCompleted[activeStep] = true;
             setCompleted(newCompleted);
@@ -803,7 +817,9 @@ const AddHotel = () => {
                                 <Stepper nonLinear activeStep={activeStep}>
                                     {steps.map((label, index) => (
                                         <Step key={label} completed={completed[index]}>
-                                            <StepButton color="inherit" onClick={handleStep(index)}>
+                                            <StepButton color="inherit" 
+                                            // onClick={handleStep(index)}
+                                            >
                                                 {label}
                                             </StepButton>
                                         </Step>
@@ -962,7 +978,7 @@ const AddHotel = () => {
                                                                     <Typography variant="h6" className='mb-3' gutterBottom>
                                                                         Selected Location : {selectedLocation}
                                                                     </Typography>
-                                                                    <LoadScript googleMapsApiKey="AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY" libraries={['places']}>
+                                                                    <LoadScript googleMapsApiKey="AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g" libraries={['places']}>
                                                                         <GoogleMap
                                                                             mapContainerStyle={{ height: '400px', width: '100%' }}
                                                                             zoom={15}

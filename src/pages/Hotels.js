@@ -181,7 +181,7 @@ const HotelPage = () => {
         const fetchLocation = async () => {
             if (markerPosition.lat && markerPosition.lng && !isNaN(markerPosition.lat) && !isNaN(markerPosition.lng)) {
                 try {
-                    const geocoderUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${markerPosition.lat},${markerPosition.lng}&key=AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY`; // Replace with your API key
+                    const geocoderUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${markerPosition.lat},${markerPosition.lng}&key=AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g`; // Replace with your API key
                     const response = await fetch(geocoderUrl);
                     const data = await response.json();
 
@@ -1362,7 +1362,7 @@ const HotelPage = () => {
                                     <Typography variant="h6" className='mb-3' gutterBottom>
                                         Selected Location : {editData.locationName || selectedLocation}
                                     </Typography>
-                                    <LoadScript googleMapsApiKey="AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY" libraries={['places']}>
+                                    <LoadScript googleMapsApiKey="AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g" libraries={['places']}>
                                         <GoogleMap
                                             mapContainerStyle={{ height: '400px', width: '100%' }}
                                             zoom={15}
