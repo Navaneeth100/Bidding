@@ -216,6 +216,7 @@ const HotelPage = () => {
 
     const [editData, setEditData] = useState([])
     const [editfacilities, seteditfacilities] = useState([])
+    const [edithcategories, setedithcategories] = useState([])
     const [edittags, setedittags] = useState([])
 
     // Tag Adds
@@ -338,6 +339,7 @@ const HotelPage = () => {
             support_email: editData.support_email,
             propertytype: editData.propertytype,
             emirates: editData.emirates,
+            h_category: edithcategories,
             facilites: editfacilities,
             tags: edittags,
             tags_ar: translatedTags
@@ -532,6 +534,8 @@ const HotelPage = () => {
     const handleRoomEdit = async (event) => {
         event.preventDefault();
         let submitData = {
+            room_name: roomEditData.room_name,
+            room_name_ar: roomEditData.room_name_ar,
             area: roomEditData.area,
             available_rooms: roomEditData.available_rooms,
             bathrooms: roomEditData.bathrooms,
@@ -540,7 +544,7 @@ const HotelPage = () => {
             booking_price: roomEditData.booking_price,
             floors: roomEditData.floors,
             guests: roomEditData.guests,
-            room_category: categoryList.find((category) => category.category_name === editroomcategory)?.id,
+            // room_category: categoryList.find((category) => category.category_name === editroomcategory)?.id,
             rooms: roomEditData.rooms,
             excluded_days: formattedDates
         };
@@ -639,7 +643,7 @@ const HotelPage = () => {
         fileuploadmode == "hotel" ? sethotelfiles((prevFiles) => [...prevFiles, ...updatedFiles]) : fileuploadmode == "room" ? setFiles((prevFiles) => [...prevFiles, ...updatedFiles]) : setnewroomfiles((prevFiles) => [...prevFiles, ...updatedFiles]);
     };
 
-    
+
     //  file add rooms
 
     const handleFileSubmit = async (id) => {
@@ -925,10 +929,12 @@ const HotelPage = () => {
     const formattedNewRoomDates = selectedNewRoomDates.map((date) => formatNewRoomDate(date));
 
     const handleNewRoomSubmit = async (event) => {
-        if (newroomData.room_category && newroomData.area && newroomData.beds && selectedNewRoomDates) {
+        if (newroomData.room_name && newroomData.area && newroomData.beds && selectedNewRoomDates) {
             event.preventDefault();
             let submitData = {
-                room_category: categoryList.find((category) => category.category_name === newroomData.room_category)?.id,
+                // room_category: categoryList.find((category) => category.category_name === newroomData.room_category)?.id,
+                room_name: newroomData.room_name,
+                room_name_ar: newroomData.room_name_ar,
                 area: newroomData.area,
                 floors: newroomData.floors,
                 beds: newroomData.beds,
@@ -1158,11 +1164,11 @@ const HotelPage = () => {
                                                 Owner Name
                                             </Typography>
                                         </TableCell>
-                                        <TableCell align="center">
+                                        {/* <TableCell align="center">
                                             <Typography variant="subtitle2" fontWeight={600}>
                                                 Owner Contact
                                             </Typography>
-                                        </TableCell>
+                                        </TableCell> */}
                                         <TableCell align="center">
                                             <Typography variant="subtitle2" fontWeight={600}>
                                                 Rooms
@@ -1260,9 +1266,9 @@ const HotelPage = () => {
                                                         {item.owner_name}
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell align="center">
+                                                {/* <TableCell align="center">
                                                     <Typography variant="subtitle2" fontWeight={600}>{item.owner_contact_number}</Typography>
-                                                </TableCell>
+                                                </TableCell> */}
                                                 <TableCell align="center">
                                                     <Button sx={{ border: '1px solid lightgrey', cursor: "pointer" }} onClick={() => { toggleModal('roomlist'); fetchRooms(item.id), seteditId(item.id) }}><IconBedFilled className='m-0 p-0' /></Button>
                                                 </TableCell>
@@ -1270,7 +1276,7 @@ const HotelPage = () => {
                                                     <Box display="flex" alignItems="center" justifyContent="center">
                                                         {/* <IconEye width={20} style={{ marginRight: "15px" }} /> */}
                                                         <Button
-                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); setedittags(item.tags); sethotelfiles(item.hotelimgs), setfileuploadmode('hotel'), fetchFacilities() }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
+                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); setedithcategories(item.h_category); seteditfacilities(item.facilites); setedittags(item.tags); seteditcontacts(item.owner_contact_number); seteditwhatsappcontacts(item.owner_whatsapp_number); sethotelfiles(item.hotelimgs), setfileuploadmode('hotel'), fetchCategory(), fetchFacilities() }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
                                                         </Button>
                                                         <Button
                                                             sx={{ border: '1px solid lightgrey' }} onClick={() => { toggleModal('delete'); setDeleteData(item); }}><IconTrash width={15} className='m-0 p-0' />
@@ -1529,6 +1535,22 @@ const HotelPage = () => {
                             </Grid>
                             <Grid item xs={12}>
                                 <FormControl fullWidth>
+                                    <InputLabel>Hotel Category</InputLabel>
+                                    <Select
+                                        multiple
+                                        value={edithcategories}
+                                        onChange={(e) => { setedithcategories(e.target.value) }}
+                                        renderValue={(selected) => selected.join(', ')}
+                                        label="Hotel Category"
+                                        MenuProps={MenuProps}>
+                                        {categoryList.map((item) => (
+                                            <MenuItem value={item.category_name}>{item.category_name}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <FormControl fullWidth>
                                     <InputLabel>Facilites</InputLabel>
                                     <Select
                                         multiple
@@ -1755,7 +1777,7 @@ const HotelPage = () => {
                                                 </TableCell>
                                                 <TableCell align='center'>
                                                     <Typography variant="subtitle2" fontWeight={600}>
-                                                        Category
+                                                        Room Name
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell align='center'>
@@ -1842,7 +1864,7 @@ const HotelPage = () => {
                                                         </TableCell>
                                                         <TableCell align='center'>
                                                             <Typography variant="subtitle2" fontWeight={600}>
-                                                                {item.room_category?.category_name}
+                                                                {item.room_name}
                                                             </Typography>
                                                         </TableCell>
                                                         <TableCell align='center'>
@@ -1934,7 +1956,7 @@ const HotelPage = () => {
                 <DialogContent sx={{ padding: 3 }}>
                     <form className="row gy-4 mt-2" onSubmit={handleRoomEdit}>
                         <Grid container spacing={3}>
-                            <Grid item xs={12} sm={12}>
+                            {/* <Grid item xs={12} sm={12}>
                                 <FormControl fullWidth>
                                     <InputLabel>Category</InputLabel>
                                     <Select
@@ -1950,6 +1972,32 @@ const HotelPage = () => {
                                         ))}
                                     </Select>
                                 </FormControl>
+                            </Grid> */}
+                            <Grid item xs={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Room Name"
+                                    placeholder=''
+                                    variant="outlined"
+                                    type='text'
+                                    margin="normal"
+                                    name="room_name"
+                                    defaultValue={roomEditData.room_name}
+                                    onChange={(e) => { setRoomEditData({ ...roomEditData, room_name: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Room Name in Arabic"
+                                    placeholder=''
+                                    variant="outlined"
+                                    type='text'
+                                    margin="normal"
+                                    name="room_name_ar"
+                                    defaultValue={roomEditData.room_name_ar}
+                                    onChange={(e) => { setRoomEditData({ ...roomEditData, room_name_ar: e.target.value }) }}
+                                />
                             </Grid>
                             <Grid item xs={12} sm={12}>
                                 <Typography variant="h6" gutterBottom>
@@ -2231,7 +2279,7 @@ const HotelPage = () => {
             </Dialog>
 
             {/*  show calendar */}
-            
+
             <Dialog
                 open={modal.calendar}
                 onClose={() => toggleModal('calendar')}
@@ -2300,7 +2348,7 @@ const HotelPage = () => {
                 <DialogContent sx={{ padding: 3 }}>
                     <form className="row gy-4 mt-2">
                         <Grid container spacing={3}>
-                            <Grid item xs={12} sm={12}>
+                            {/* <Grid item xs={12} sm={12}>
                                 <FormControl fullWidth>
                                     <InputLabel>Category</InputLabel>
                                     <Select
@@ -2314,6 +2362,31 @@ const HotelPage = () => {
                                         ))}
                                     </Select>
                                 </FormControl>
+                            </Grid> */}
+
+                            <Grid item xs={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Room Name"
+                                    placeholder=''
+                                    variant="outlined"
+                                    type='text'
+                                    margin="normal"
+                                    name="room_name"
+                                    onChange={(e) => { setNewRoomData({ ...newroomData, room_name: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Room Name in Arabic"
+                                    placeholder=''
+                                    variant="outlined"
+                                    type='text'
+                                    margin="normal"
+                                    name="room_name_ar"
+                                    onChange={(e) => { setNewRoomData({ ...newroomData, room_name_ar: e.target.value }) }}
+                                />
                             </Grid>
                             <Grid item xs={12} sm={12}>
                                 <Typography variant="h6" gutterBottom>
