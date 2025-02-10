@@ -240,6 +240,52 @@ const HotelPage = () => {
         }
     };
 
+    // Contact Adds
+
+    const [contactInput, setcontactInput] = useState("");
+    const [editcontacts, seteditcontacts] = useState([])
+
+    const handleAddContacts = () => {
+        if (contactInput.trim() !== "") {
+            seteditcontacts((prevItems) => [...prevItems, contactInput]);
+            setcontactInput("");
+        }
+    };
+
+    const handleRemoveContact = (indexToRemove) => {
+        seteditcontacts((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
+    };
+
+    const handleContactsKeyDown = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            handleAddContacts();
+        }
+    };
+
+    // WhatsApp Contact Adds
+
+    const [whatsappcontactInput, setwhatsappcontactInput] = useState("");
+    const [editwhatsappcontacts, seteditwhatsappcontacts] = useState([])
+
+    const handleAddWhatsappContacts = () => {
+        if (whatsappcontactInput.trim() !== "") {
+            seteditwhatsappcontacts((prevItems) => [...prevItems, whatsappcontactInput]);
+            setwhatsappcontactInput("");
+        }
+    };
+
+    const handleRemoveWhatsappContact = (indexToRemove) => {
+        seteditwhatsappcontacts((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
+    };
+
+    const handlewhatsappContactsKeyDown = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            handleAddWhatsappContacts();
+        }
+    };
+
     //  arabic data submit
 
     const apiKey = "AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g"; // Replace with your API key
@@ -285,7 +331,8 @@ const HotelPage = () => {
             locationName: selectedLocation || editData.location,
             owner_name: editData.owner_name,
             owner_email: editData.owner_email,
-            owner_contact_number: editData.owner_contact_number,
+            owner_contact_number: editcontacts,
+            owner_whatsapp_number: editwhatsappcontacts,
             support_contact_number: editData.support_contact_number,
             support_whatsapp_number: editData.support_whatsapp_number,
             support_email: editData.support_email,
@@ -1546,7 +1593,7 @@ const HotelPage = () => {
                                     }}
                                 />
                             </Grid>
-                            <Grid item md={4} xs={12}>
+                            {/* <Grid item md={4} xs={12}>
                                 <TextField
                                     label="Owner Contact No."
                                     variant="outlined"
@@ -1557,7 +1604,66 @@ const HotelPage = () => {
                                         setEditData({ ...editData, owner_contact_number: e.target.value })
                                     }}
                                 />
+                            </Grid> */}
+
+                            {/* Multiple Contacts Adding */}
+
+                            <Grid item xs={12} sm={12}>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
+                                    <TextField
+                                        label="Enter Contact No"
+                                        variant="outlined"
+                                        fullWidth
+                                        value={contactInput}
+                                        onChange={(e) => setcontactInput(e.target.value)}
+                                        onKeyDown={handleContactsKeyDown}
+                                    />
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleAddContacts}
+                                    >
+                                        Add
+                                    </Button>
+                                </Box>
+                                <Box>
+                                    {editcontacts.map((item, index) => (
+                                        <span key={index}>
+                                            <Chip className='me-2 mb-2' label={item} variant="outlined" onDelete={() => handleRemoveContact(index)} />
+                                        </span>
+                                    ))}
+                                </Box>
                             </Grid>
+
+                            {/* Multiple WhatsApp Contacts Adding */}
+
+                            <Grid item xs={12} sm={12}>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
+                                    <TextField
+                                        label="Enter WhatsApp No"
+                                        variant="outlined"
+                                        fullWidth
+                                        value={whatsappcontactInput}
+                                        onChange={(e) => setwhatsappcontactInput(e.target.value)}
+                                        onKeyDown={handlewhatsappContactsKeyDown}
+                                    />
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleAddWhatsappContacts}
+                                    >
+                                        Add
+                                    </Button>
+                                </Box>
+                                <Box>
+                                    {editwhatsappcontacts.map((item, index) => (
+                                        <span key={index}>
+                                            <Chip className='me-2 mb-2' label={item} variant="outlined" onDelete={() => handleRemoveWhatsappContact(index)} />
+                                        </span>
+                                    ))}
+                                </Box>
+                            </Grid>
+
                             <Grid item md={4} xs={12}>
                                 <TextField
                                     label="support Email"
