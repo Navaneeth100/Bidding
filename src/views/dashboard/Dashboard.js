@@ -64,9 +64,9 @@ const Dashboard = () => {
 
   const desktopOS = [
     { id: 'Today', count: dashboardData.impressions_today, value: (dashboardData.impressions_today / totalImpressions * 100).toFixed(2), color: '#9BBFEC ' }, // Blue for today
-    { id: 'Last Week', count: dashboardData.impressions_last_week, value: (dashboardData.impressions_last_week / totalImpressions * 100).toFixed(2), color: '#E8A09A ' }, // Green for weekly
-    { id: 'Current Month', count: dashboardData.impressions_current_month, value: (dashboardData.impressions_current_month / totalImpressions * 100).toFixed(2), color: '#FBE29F' }, // Yellow for monthly
-    { id: 'Current Year', count: dashboardData.impressions_current_year, value: (dashboardData.impressions_current_year / totalImpressions * 100).toFixed(2), color: '#C6D68F ' }, // Red for yearly
+    { id: 'Weekly', count: dashboardData.impressions_last_week, value: (dashboardData.impressions_last_week / totalImpressions * 100).toFixed(2), color: '#E8A09A ' }, // Green for weekly
+    { id: 'Monthly', count: dashboardData.impressions_current_month, value: (dashboardData.impressions_current_month / totalImpressions * 100).toFixed(2), color: '#FBE29F' }, // Yellow for monthly
+    { id: 'Yearly', count: dashboardData.impressions_current_year, value: (dashboardData.impressions_current_year / totalImpressions * 100).toFixed(2), color: '#C6D68F ' }, // Red for yearly
   ];
 
 

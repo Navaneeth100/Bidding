@@ -439,12 +439,10 @@ const AddHotel = () => {
             event.preventDefault();
             let submitData = {
                 owner_name: ownerData.ownername,
-                owner_contact_number: contactsList,
-                owner_whatsapp_number: whatsappcontactsList,
+                owner_contact_number: ownerData.ownercontact,
                 owner_email: ownerData.owneremail,
                 support_email: ownerData.supportemail,
                 support_contact_number: ownerData.supportcontact,
-                support_whatsapp_number: ownerData.supportwhatsapp,
             }
 
             try {
@@ -587,52 +585,6 @@ const AddHotel = () => {
         if (e.key === "Enter") {
             e.preventDefault();
             handleAddTag();
-        }
-    };
-
-    // Contact Adds
-
-    const [contactinput, setcontactInput] = useState("");
-    const [contactsList, setcontactList] = useState([]);
-
-    const handleAddContact = () => {
-        if (contactinput.trim() !== "") {
-            setcontactList((prevItems) => [...prevItems, contactinput]);
-            setcontactInput("");
-        }
-    };
-
-    const handleRemoveContact = (indexToRemove) => {
-        setcontactList((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
-    };
-
-    const handleContactKeyDown = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            handleAddContact();
-        }
-    };
-
-    // WhatsApp Contact Adds
-
-    const [whatsappcontactinput, setwhatsappcontactInput] = useState("");
-    const [whatsappcontactsList, setwhatsappcontactList] = useState([]);
-
-    const handleAddWhatsappContact = () => {
-        if (whatsappcontactinput.trim() !== "") {
-            setwhatsappcontactList((prevItems) => [...prevItems, whatsappcontactinput]);
-            setwhatsappcontactInput("");
-        }
-    };
-
-    const handleRemoveWhatsappContact = (indexToRemove) => {
-        setwhatsappcontactList((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
-    };
-
-    const handlewhatsappContactKeyDown = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            handleAddWhatsappContact();
         }
     };
 
@@ -865,7 +817,7 @@ const AddHotel = () => {
                                 <Stepper nonLinear activeStep={activeStep}>
                                     {steps.map((label, index) => (
                                         <Step key={label} completed={completed[index]}>
-                                            <StepButton color="inherit"
+                                            <StepButton color="inherit" 
                                             // onClick={handleStep(index)}
                                             >
                                                 {label}
@@ -1520,7 +1472,7 @@ const AddHotel = () => {
                                                                 <Grid container spacing={2}>
                                                                     {[
                                                                         { label: 'Owner Name', key: 'ownername', group: 'owner', type: "text" },
-                                                                        // { label: 'Owner Contact No.', key: 'ownercontact', group: 'owner', type: "text" },
+                                                                        { label: 'Owner Contact No.', key: 'ownercontact', group: 'owner', type: "text" },
                                                                         { label: 'Owner Email', key: 'owneremail', group: 'owner', type: "email" },
                                                                     ].map((field, index) => (
                                                                         <Grid item xs={12} sm={6} key={index}>
@@ -1535,65 +1487,10 @@ const AddHotel = () => {
                                                                             />
                                                                         </Grid>
                                                                     ))}
-                                                                    <Grid item xs={12} sm={12}>
-                                                                        <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
-                                                                            <TextField
-                                                                                label="Enter Contact No"
-                                                                                variant="outlined"
-                                                                                type="number"
-                                                                                fullWidth
-                                                                                value={contactinput}
-                                                                                onChange={(e) => setcontactInput(e.target.value)}
-                                                                                onKeyDown={handleContactKeyDown}
-                                                                            />
-                                                                            <Button
-                                                                                variant="contained"
-                                                                                color="primary"
-                                                                                onClick={handleAddContact}
-                                                                            >
-                                                                                Add
-                                                                            </Button>
-                                                                        </Box>
-                                                                        <Box>
-                                                                            {contactsList.map((item, index) => (
-                                                                                <span key={index}>
-                                                                                    <Chip className='me-2 mb-2' label={item} variant="outlined" onDelete={() => handleRemoveContact(index)} />
-                                                                                </span>
-                                                                            ))}
-                                                                        </Box>
-                                                                    </Grid>
-                                                                    <Grid item xs={12} sm={12}>
-                                                                        <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
-                                                                            <TextField
-                                                                                label="Enter WhatAapp No"
-                                                                                variant="outlined"
-                                                                                fullWidth
-                                                                                type="number"
-                                                                                value={whatsappcontactinput}
-                                                                                onChange={(e) => setwhatsappcontactInput(e.target.value)}
-                                                                                onKeyDown={handlewhatsappContactKeyDown}
-                                                                            />
-                                                                            <Button
-                                                                                variant="contained"
-                                                                                color="primary"
-                                                                                onClick={handleAddWhatsappContact}
-                                                                            >
-                                                                                Add
-                                                                            </Button>
-                                                                        </Box>
-                                                                        <Box>
-                                                                            {whatsappcontactsList.map((item, index) => (
-                                                                                <span key={index}>
-                                                                                    <Chip className='me-2 mb-2' label={item} variant="outlined" onDelete={() => handleRemoveWhatsappContact(index)} />
-                                                                                </span>
-                                                                            ))}
-                                                                        </Box>
-                                                                    </Grid>
                                                                 </Grid>
                                                                 <Grid container spacing={2} className='mt-3'>
                                                                     {[
-                                                                        { label: 'Support Contact No', key: 'supportcontact', group: 'support', type: 'number' },
-                                                                        { label: 'Support WhatsApp No', key: 'supportwhatsapp', group: 'support', type: 'number' },
+                                                                        { label: 'Support Contact', key: 'supportcontact', group: 'support', type: 'text' },
                                                                         { label: 'Support Email', key: 'supportemail', group: 'support', type: 'email' },
                                                                     ].map((field, index) => (
                                                                         <Grid item xs={12} sm={6} key={index}>

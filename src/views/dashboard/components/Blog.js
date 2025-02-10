@@ -20,7 +20,7 @@ const Blog = ({value}) => {
                 <Grid item sm={12} md={4} lg={3} key={index}>
                     <BlankCard>
                         <Typography component={Link} to="/">
-                            <img src={product.image ? `${url}/hotel${product.image}`: defaulthotel} alt="img" width="100%" style={{ minHeight: "200px", objectFit: "cover" }} />
+                            <img src={product.image ? `${url}/hotel${product.image}`: defaulthotel} alt="img" width="100%" height="200"/>
                         </Typography>
                         <Tooltip title="Impression">
                             <Fab

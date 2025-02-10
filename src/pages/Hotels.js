@@ -72,7 +72,6 @@ const HotelPage = () => {
     const [facilitesfilter, setfacilitesfilter] = useState([])
     const [ratingfilter, setratingfilter] = useState([])
     const [locationfilter, setlocationfilter] = useState([])
-    const [searchText, setsearchText] = useState("")
 
     const MenuProps = { PaperProps: { style: { maxHeight: 200, overflowY: 'auto' } } };
 
@@ -81,7 +80,7 @@ const HotelPage = () => {
         const formattedcategoryfilter = categoryfilter.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id));
         const formattedfacilitiesfilter = facilitesfilter.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id));
         axios
-            .get(`${url}/hotel/createhotels/?category_id_search=${formattedcategoryfilter}&rating_search=${ratingfilter}&facility_id_search=${formattedfacilitiesfilter}&emirates_search=${locationfilter}&search=${searchText}&page=${page}&page_size=${pageSize}`, {
+            .get(`${url}/hotel/createhotels/?category_id_search=${formattedcategoryfilter}&rating_search=${ratingfilter}&facility_id_search=${formattedfacilitiesfilter}&emirates_search=${locationfilter}&page=${page}&page_size=${pageSize}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -106,7 +105,7 @@ const HotelPage = () => {
                         Authorization: `Bearer ${res.data.access}`,
                     };
                     axios
-                        .get(`${url}/hotel/createhotels/?category_id_search=${formattedcategoryfilter}&rating_search=${ratingfilter}&facility_id_search=${formattedfacilitiesfilter}&emirates_search=${locationfilter}&search=${searchText}&page=${page}&page_size=${pageSize}`, {
+                        .get(`${url}/hotel/createhotels/?category_id_search=${formattedcategoryfilter}&rating_search=${ratingfilter}&facility_id_search=${formattedfacilitiesfilter}&emirates_search=${locationfilter}&page=${page}&page_size=${pageSize}`, {
                             headers: new_headers,
                         })
                         .then((res) => {
@@ -125,7 +124,7 @@ const HotelPage = () => {
 
     useEffect(() => {
         fetchHotels(currentPage);
-    }, [currentPage, categoryfilter, facilitesfilter, ratingfilter, locationfilter, searchText]);
+    }, [currentPage, categoryfilter, facilitesfilter, ratingfilter, locationfilter]);
 
     // SN Handler
 
@@ -287,7 +286,6 @@ const HotelPage = () => {
             owner_email: editData.owner_email,
             owner_contact_number: editData.owner_contact_number,
             support_contact_number: editData.support_contact_number,
-            support_whatsapp_number: editData.support_whatsapp_number,
             support_email: editData.support_email,
             propertytype: editData.propertytype,
             emirates: editData.emirates,
@@ -592,7 +590,7 @@ const HotelPage = () => {
         fileuploadmode == "hotel" ? sethotelfiles((prevFiles) => [...prevFiles, ...updatedFiles]) : fileuploadmode == "room" ? setFiles((prevFiles) => [...prevFiles, ...updatedFiles]) : setnewroomfiles((prevFiles) => [...prevFiles, ...updatedFiles]);
     };
 
-
+    
     //  file add rooms
 
     const handleFileSubmit = async (id) => {
@@ -953,12 +951,6 @@ const HotelPage = () => {
         <PageContainer title="Hotels" description="Hotels">
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }} gap={2} mb={2}>
                 {/* <Button size="small" variant={calendarvisible ? "contained" : "outlined"} color='primary' onClick={toggleCalenadar}>Calendar</Button> */}
-                <TextField
-                    label="Search Hotel"
-                    variant="outlined"
-                    size="small"
-                    onChange={(e) => setsearchText(e.target.value)}
-                />
                 <Button size="small" variant={filtersVisible ? "contained" : "outlined"} color='primary' onClick={toggleFilters}>Filters</Button>
                 <Button size="small" variant="outlined" color='success' onClick={() => addHotel()}>Add Hotel</Button>
             </Box>
@@ -1223,7 +1215,7 @@ const HotelPage = () => {
                                                     <Box display="flex" alignItems="center" justifyContent="center">
                                                         {/* <IconEye width={20} style={{ marginRight: "15px" }} /> */}
                                                         <Button
-                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); setedittags(item.tags); sethotelfiles(item.hotelimgs), setfileuploadmode('hotel'), fetchFacilities() }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
+                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); setedittags(item.tags); sethotelfiles(item.hotelimgs), setfileuploadmode('hotel') }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
                                                         </Button>
                                                         <Button
                                                             sx={{ border: '1px solid lightgrey' }} onClick={() => { toggleModal('delete'); setDeleteData(item); }}><IconTrash width={15} className='m-0 p-0' />
@@ -1582,18 +1574,6 @@ const HotelPage = () => {
                                     }}
                                 />
                             </Grid>
-                            <Grid item md={4} xs={12}>
-                                <TextField
-                                    label="support WhatsApp No."
-                                    variant="outlined"
-                                    fullWidth
-                                    defaultValue={editData.support_whatsapp_number}
-                                    sx={{ mb: 2 }}
-                                    onChange={(e) => {
-                                        setEditData({ ...editData, support_whatsapp_number: e.target.value })
-                                    }}
-                                />
-                            </Grid>
 
                         </Grid>
 
@@ -1711,7 +1691,7 @@ const HotelPage = () => {
                                                         </Box>
                                                     </TableCell>
                                                 </TableRow>
-                                            ) : roomList.length > 0 ? (
+                                            ) : (
                                                 roomList.map((item, index) => (
                                                     <TableRow key={item.id}>
                                                         <TableCell align='center'>
@@ -1793,14 +1773,6 @@ const HotelPage = () => {
                                                         </TableCell>
                                                     </TableRow>
                                                 ))
-                                            ) : (
-                                                <TableRow>
-                                                    <TableCell colSpan={12} align="center">
-                                                        <Typography variant="subtitle1" fontWeight={600} color="gray" style={{ paddingTop: "50px", paddingBottom: "50px" }}>
-                                                            No Rooms Added
-                                                        </Typography>
-                                                    </TableCell>
-                                                </TableRow>
                                             )}
                                         </TableBody>
                                     </Table>
@@ -2017,7 +1989,6 @@ const HotelPage = () => {
                                     placeholder='eg: 1 - 5'
                                     margin="normal"
                                     name="withbreakfast"
-                                    defaultValue={roomEditData.bf}
                                     onChange={(e) => { setRoomEditData({ ...roomEditData, withbreakfast: e.target.value }) }}
                                 />
                             </Grid>
@@ -2125,7 +2096,7 @@ const HotelPage = () => {
             </Dialog>
 
             {/*  show calendar */}
-
+            
             <Dialog
                 open={modal.calendar}
                 onClose={() => toggleModal('calendar')}
