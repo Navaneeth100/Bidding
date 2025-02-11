@@ -354,16 +354,38 @@ const AddHotel = () => {
             });
     };
 
+// Translate Room Name
 
+const translateRoomName = async (text) => {
+    if (!text) return;
+    try {
+        const response = await axios.post(
+            `https://translation.googleapis.com/language/translate/v2`,
+            null,
+            {
+                params: {
+                    q: text,
+                    target: "ar",
+                    key: apiKey,
+                },
+            }
+        );
+        const translatedText = response.data.data.translations[0].translatedText;
+        return translatedText;
+    } catch (error) {
+        console.error("Translation Error:", error);
+    }
+};
 
     const handleRoomSubmit = async (event) => {
         // const isRoomDataValid = roomData.every((room) => Object.values(room).every((value) => String(value).trim() !== ''));
         if (roomId) {
             event.preventDefault();
+            const translatedRoomName = await translateRoomName(roomData.room_name);
             let submitData = {
                 // room_category: categoryList.find((category) => category.category_name === roomData.room_category)?.id,
                 room_name: roomData.room_name,
-                room_name_ar: roomData.room_name_ar,
+                room_name_ar: translatedRoomName,
                 area: roomData.area,
                 floors: roomData.floors,
                 beds: roomData.beds,
@@ -868,7 +890,7 @@ const AddHotel = () => {
                                     {steps.map((label, index) => (
                                         <Step key={label} completed={completed[index]}>
                                             <StepButton color="inherit"
-                                                onClick={handleStep(index)}
+                                                // onClick={handleStep(index)}
                                             >
                                                 {label}
                                             </StepButton>
@@ -1271,7 +1293,7 @@ const AddHotel = () => {
                                                                                     onChange={(e) => handleRoomChange('room_name', e.target.value)}
                                                                                 />
                                                                             </Grid>
-                                                                            <Grid item xs={12}>
+                                                                            {/* <Grid item xs={12}>
                                                                                 <TextField
                                                                                     fullWidth
                                                                                     label="Room Name in Arabic"
@@ -1283,7 +1305,7 @@ const AddHotel = () => {
                                                                                     name="room_name_ar"
                                                                                     onChange={(e) => handleRoomChange('room_name_ar', e.target.value)}
                                                                                 />
-                                                                            </Grid>
+                                                                            </Grid> */}
                                                                             <Grid item sm={12}>
                                                                                 {/* <Typography variant="h6" gutterBottom>
                                                                                             Room Images

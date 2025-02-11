@@ -339,8 +339,8 @@ const HotelPage = () => {
             support_email: editData.support_email,
             propertytype: editData.propertytype,
             emirates: editData.emirates,
-            h_category: edithcategories,
-            facilites: editfacilities,
+            h_category: edithcategories.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id)),
+            facilities: editfacilities.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id)),
             tags: edittags,
             tags_ar: translatedTags
         };
@@ -533,9 +533,10 @@ const HotelPage = () => {
 
     const handleRoomEdit = async (event) => {
         event.preventDefault();
+        const translatedRoomName = await translateRoomName(roomEditData.room_name);
         let submitData = {
             room_name: roomEditData.room_name,
-            room_name_ar: roomEditData.room_name_ar,
+            room_name_ar: translatedRoomName,
             area: roomEditData.area,
             available_rooms: roomEditData.available_rooms,
             bathrooms: roomEditData.bathrooms,
@@ -928,13 +929,37 @@ const HotelPage = () => {
     // Create an array of formatted dates
     const formattedNewRoomDates = selectedNewRoomDates.map((date) => formatNewRoomDate(date));
 
+    // Translate Room Name
+
+    const translateRoomName = async (text) => {
+        if (!text) return;
+        try {
+            const response = await axios.post(
+                `https://translation.googleapis.com/language/translate/v2`,
+                null,
+                {
+                    params: {
+                        q: text,
+                        target: "ar",
+                        key: apiKey,
+                    },
+                }
+            );
+            const translatedText = response.data.data.translations[0].translatedText;
+            return translatedText;
+        } catch (error) {
+            console.error("Translation Error:", error);
+        }
+    };
+
     const handleNewRoomSubmit = async (event) => {
         if (newroomData.room_name && newroomData.area && newroomData.beds && selectedNewRoomDates) {
             event.preventDefault();
+            const translatedRoomName = await translateRoomName(newroomData.room_name);
             let submitData = {
                 // room_category: categoryList.find((category) => category.category_name === newroomData.room_category)?.id,
                 room_name: newroomData.room_name,
-                room_name_ar: newroomData.room_name_ar,
+                room_name_ar: translatedRoomName,
                 area: newroomData.area,
                 floors: newroomData.floors,
                 beds: newroomData.beds,
@@ -1276,7 +1301,7 @@ const HotelPage = () => {
                                                     <Box display="flex" alignItems="center" justifyContent="center">
                                                         {/* <IconEye width={20} style={{ marginRight: "15px" }} /> */}
                                                         <Button
-                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); setedithcategories(item.h_category); seteditfacilities(item.facilites); setedittags(item.tags); seteditcontacts(item.owner_contact_number); seteditwhatsappcontacts(item.owner_whatsapp_number); sethotelfiles(item.hotelimgs), setfileuploadmode('hotel'), fetchCategory(), fetchFacilities() }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
+                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); setedithcategories(item.h_category?.length > 0 ? item.h_category?.map((category)=>category.category_name) : []); seteditfacilities(item.facilities?.length > 0 ? item.facilities?.map((facility)=>facility.name) : []); setedittags(item.tags); seteditcontacts(item.owner_contact_number); seteditwhatsappcontacts(item.owner_whatsapp_number); sethotelfiles(item.hotelimgs), setfileuploadmode('hotel'), fetchCategory(), fetchFacilities() }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
                                                         </Button>
                                                         <Button
                                                             sx={{ border: '1px solid lightgrey' }} onClick={() => { toggleModal('delete'); setDeleteData(item); }}><IconTrash width={15} className='m-0 p-0' />
@@ -1973,7 +1998,7 @@ const HotelPage = () => {
                                     </Select>
                                 </FormControl>
                             </Grid> */}
-                            <Grid item xs={6}>
+                            <Grid item xs={12}>
                                 <TextField
                                     fullWidth
                                     label="Room Name"
@@ -1986,7 +2011,7 @@ const HotelPage = () => {
                                     onChange={(e) => { setRoomEditData({ ...roomEditData, room_name: e.target.value }) }}
                                 />
                             </Grid>
-                            <Grid item xs={6}>
+                            {/* <Grid item xs={6}>
                                 <TextField
                                     fullWidth
                                     label="Room Name in Arabic"
@@ -1998,7 +2023,7 @@ const HotelPage = () => {
                                     defaultValue={roomEditData.room_name_ar}
                                     onChange={(e) => { setRoomEditData({ ...roomEditData, room_name_ar: e.target.value }) }}
                                 />
-                            </Grid>
+                            </Grid> */}
                             <Grid item xs={12} sm={12}>
                                 <Typography variant="h6" gutterBottom>
                                     Upload Multiple Images
@@ -2364,7 +2389,7 @@ const HotelPage = () => {
                                 </FormControl>
                             </Grid> */}
 
-                            <Grid item xs={6}>
+                            <Grid item xs={12}>
                                 <TextField
                                     fullWidth
                                     label="Room Name"
@@ -2376,7 +2401,7 @@ const HotelPage = () => {
                                     onChange={(e) => { setNewRoomData({ ...newroomData, room_name: e.target.value }) }}
                                 />
                             </Grid>
-                            <Grid item xs={6}>
+                            {/* <Grid item xs={6}>
                                 <TextField
                                     fullWidth
                                     label="Room Name in Arabic"
@@ -2387,7 +2412,7 @@ const HotelPage = () => {
                                     name="room_name_ar"
                                     onChange={(e) => { setNewRoomData({ ...newroomData, room_name_ar: e.target.value }) }}
                                 />
-                            </Grid>
+                            </Grid> */}
                             <Grid item xs={12} sm={12}>
                                 <Typography variant="h6" gutterBottom>
                                     Upload Multiple Images

@@ -143,11 +143,36 @@ const Category = () => {
 
     const [formData, setFormData] = useState([])
 
+    // Translate Category Name
+
+    const translateCategory = async (text) => {
+        if (!text) return;
+        try {
+            const response = await axios.post(
+                `https://translation.googleapis.com/language/translate/v2`,
+                null,
+                {
+                    params: {
+                        q: text,
+                        target: "ar",
+                        key: "AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g",
+                    },
+                }
+            );
+            const translatedText = response.data.data.translations[0].translatedText;
+            return translatedText;
+        } catch (error) {
+            console.error("Translation Error:", error);
+        }
+    };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
+        const translatedCategoryName = await translateCategory(formData.category_name);
         let submitData = {
             icon: selectedFile,
             category_name: formData.category_name,
+            category_name_ar: translatedCategoryName,
             description: formData.description,
         }
 
@@ -193,9 +218,11 @@ const Category = () => {
 
     const handleEdit = async (event) => {
         event.preventDefault();
+        const translatedCategoryName = await translateCategory(editData.category_name);
         let submitData = {
-            icon: selectedFile ? selectedFile : editData.icon,
+            icon: selectedFile ? selectedFile : previewUrl,
             category_name: editData.category_name,
+            category_name_ar: translatedCategoryName,
             description: editData.description,
         };
 
@@ -440,12 +467,12 @@ const Category = () => {
                                                         alignItems="center"
                                                         height="100%"
                                                     >
-                                                    <Avatar
-                                                        src={`${url}/hotel${item.icon}`}
-                                                        alt=""
-                                                        variant="rounded"
-                                                        sx={{ width: 50, height: 50 }}
-                                                    />
+                                                        <Avatar
+                                                            src={`${url}${item.icon}`}
+                                                            alt=""
+                                                            variant="rounded"
+                                                            sx={{ width: 50, height: 50 }}
+                                                        />
                                                     </Box>
                                                 </TableCell>
                                                 <TableCell align="center">
@@ -625,7 +652,7 @@ const Category = () => {
                             <Grid item md={6} xs={6}>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
                                     <Avatar
-                                        src={previewUrl ? previewUrl : `${url}/hotel${editData.icon}`}
+                                        src={previewUrl ? previewUrl : `${url}${editData.icon}`}
                                         alt=""
                                         variant="rounded"
                                         sx={{ width: 100, height: 100, margin: "0 auto" }}

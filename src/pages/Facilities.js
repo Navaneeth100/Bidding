@@ -145,11 +145,36 @@ const Facilities = () => {
 
     const [formData, setFormData] = useState([])
 
+    // Translate Facilities
+
+    const translateFacilities = async (text) => {
+        if (!text) return;
+        try {
+            const response = await axios.post(
+                `https://translation.googleapis.com/language/translate/v2`,
+                null,
+                {
+                    params: {
+                        q: text,
+                        target: "ar",
+                        key: "AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g",
+                    },
+                }
+            );
+            const translatedText = response.data.data.translations[0].translatedText;
+            return translatedText;
+        } catch (error) {
+            console.error("Translation Error:", error);
+        }
+    };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
+        const translatedFacilities = await translateFacilities(formData.name);
         let submitData = {
             icon: selectedFile,
             name: formData.name,
+            name_ar: translatedFacilities
         }
 
         try {
@@ -194,9 +219,11 @@ const Facilities = () => {
 
     const handleEdit = async (event) => {
         event.preventDefault();
+        const translatedFacilities = await translateFacilities(editData.name);
         let submitData = {
             name: editData.name,
-            icon: selectedFile || editData.icon
+            name_ar: translatedFacilities,
+            icon: selectedFile || previewUrl
         };
 
         try {
@@ -436,7 +463,7 @@ const Facilities = () => {
                                                         height="100%"
                                                     >
                                                         <Avatar
-                                                            src={`${url}/hotel${item.icon}`}
+                                                            src={`${url}${item.icon}`}
                                                             alt=""
                                                             variant="rounded"
                                                             sx={{ width: 50, height: 50 }}
@@ -538,12 +565,12 @@ const Facilities = () => {
                         <Grid container spacing={3}>
                             <Grid item md={12} xs={12}>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
-                                        <Avatar
-                                            src={previewUrl ? previewUrl : ""}
-                                            alt=""
-                                            variant="rounded"
-                                            sx={{ width: 100, height: 100, margin: "0 auto" }}
-                                        />
+                                    <Avatar
+                                        src={previewUrl ? previewUrl : ""}
+                                        alt=""
+                                        variant="rounded"
+                                        sx={{ width: 100, height: 100, margin: "0 auto" }}
+                                    />
                                 </Box>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
                                     <input
@@ -604,12 +631,12 @@ const Facilities = () => {
                         <Grid container spacing={3}>
                             <Grid item md={12} xs={12}>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
-                                        <Avatar
-                                            src={previewUrl ? previewUrl : `${url}/hotel${editData.icon}`}
-                                            alt=""
-                                            variant="rounded"
-                                            sx={{ width: 100, height: 100, margin: "0 auto" }}
-                                        />
+                                    <Avatar
+                                        src={previewUrl ? previewUrl : `${url}${editData.icon}`}
+                                        alt=""
+                                        variant="rounded"
+                                        sx={{ width: 100, height: 100, margin: "0 auto" }}
+                                    />
                                 </Box>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
                                     <input
