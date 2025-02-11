@@ -108,7 +108,7 @@ const HotelPage = () => {
                                 <Grid item xs={8}>
                                     <Box
                                         component="img"
-                                        src={hotelDetails.hotelimgs.length > 0 ? `${url}/hotel${hotelDetails.hotelimgs[selectedIndex].file}` : defaulthotel}
+                                        src={hotelDetails.hotelimgs.length > 0 ? `${url}${hotelDetails.hotelimgs[selectedIndex].file}` : defaulthotel}
                                         alt=""
                                         sx={{
                                             width: '100%',
@@ -123,7 +123,7 @@ const HotelPage = () => {
                                             <Box
                                                 key={index}
                                                 component="img"
-                                                src={`${url}/hotel${item.file}` || defaulthotel}
+                                                src={`${url}${item.file}` || defaulthotel}
                                                 alt=""
                                                 onClick={() => setSelectedIndex(index)}
                                                 sx={{
@@ -195,7 +195,7 @@ const HotelPage = () => {
                                             <CardText>
                                                 {hotelDetails.facilities?.map((facilities, index) => (
                                                     <Chip
-                                                        avatar={<Avatar alt="" src={`${url}/hotel${facilities.icon}`} />}
+                                                        avatar={<Avatar alt="" src={`${url}${facilities.icon}`} />}
                                                         label={facilities.name}
                                                         variant="outlined"
                                                         className='me-2'
@@ -232,7 +232,7 @@ const HotelPage = () => {
                                 >
                                     <BlankCard>
                                         <Typography>
-                                            <img src={`${url}/hotel${item.file}`} alt="img" width="100%" height="200px" />
+                                            <img src={`${url}${item.file}`} alt="img" width="100%" height="200px" />
                                         </Typography>
                                     </BlankCard>
                                 </Box>
@@ -315,7 +315,7 @@ const HotelPage = () => {
                                                             height="100%"
                                                         >
                                                             <Avatar
-                                                                src={`${url}/hotel${item.hotelroomimgs[0]?.file}` || ""}
+                                                                src={`${url}${item.hotelroomimgs[0]?.file}` || ""}
                                                                 alt=""
                                                                 variant="rounded"
                                                                 sx={{ width: 50, height: 50 }}

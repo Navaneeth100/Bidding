@@ -1237,7 +1237,7 @@ const HotelPage = () => {
                                                         height="100%"
                                                     >
                                                         <Avatar
-                                                            src={`${url}/hotel${item.hotelimgs[0]?.file}` || ""}
+                                                            src={`${url}${item.hotelimgs[0]?.file}` || ""}
                                                             alt=""
                                                             variant="rounded"
                                                             sx={{ width: 50, height: 50 }}
@@ -1494,7 +1494,7 @@ const HotelPage = () => {
                                                     component="img"
                                                     width="100%"
                                                     height="100"
-                                                    image={file.preview || `${url}/hotel${file.file}`}
+                                                    image={file.preview || `${url}${file.file}`}
                                                     alt={file.name}
                                                 />
                                                 <Button
@@ -1880,7 +1880,7 @@ const HotelPage = () => {
                                                                 height="100%"
                                                             >
                                                                 <Avatar
-                                                                    src={`${url}/hotel${item.hotelroomimgs[0]?.file}` || ""}
+                                                                    src={`${url}${item.hotelroomimgs[0]?.file}` || ""}
                                                                     alt=""
                                                                     variant="rounded"
                                                                     sx={{ width: 50, height: 50 }}
@@ -2056,7 +2056,7 @@ const HotelPage = () => {
                                                     component="img"
                                                     width="100%"
                                                     height="100"
-                                                    image={file.preview || `${url}/hotel${file.file}`}
+                                                    image={file.preview || `${url}${file.file}`}
                                                     alt={file.name}
                                                 />
                                                 <Button
@@ -2445,7 +2445,7 @@ const HotelPage = () => {
                                                     component="img"
                                                     width="100%"
                                                     height="100"
-                                                    image={file.preview || `${url}/hotel${file.file}`}
+                                                    image={file.preview || `${url}${file.file}`}
                                                     alt={file.name}
                                                 />
                                                 <Button
