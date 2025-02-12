@@ -268,6 +268,7 @@ const AddHotel = () => {
                 h_category: categories.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id)),
                 tags: tagsList,
                 propertytype: propertytype,
+                others: propertytype == "Others" ? formData.others : null,
                 emirates: emirates,
                 facilities: facilities.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id)),
                 images: files,
@@ -354,28 +355,28 @@ const AddHotel = () => {
             });
     };
 
-// Translate Room Name
+    // Translate Room Name
 
-const translateRoomName = async (text) => {
-    if (!text) return;
-    try {
-        const response = await axios.post(
-            `https://translation.googleapis.com/language/translate/v2`,
-            null,
-            {
-                params: {
-                    q: text,
-                    target: "ar",
-                    key: apiKey,
-                },
-            }
-        );
-        const translatedText = response.data.data.translations[0].translatedText;
-        return translatedText;
-    } catch (error) {
-        console.error("Translation Error:", error);
-    }
-};
+    const translateRoomName = async (text) => {
+        if (!text) return;
+        try {
+            const response = await axios.post(
+                `https://translation.googleapis.com/language/translate/v2`,
+                null,
+                {
+                    params: {
+                        q: text,
+                        target: "ar",
+                        key: apiKey,
+                    },
+                }
+            );
+            const translatedText = response.data.data.translations[0].translatedText;
+            return translatedText;
+        } catch (error) {
+            console.error("Translation Error:", error);
+        }
+    };
 
     const handleRoomSubmit = async (event) => {
         // const isRoomDataValid = roomData.every((room) => Object.values(room).every((value) => String(value).trim() !== ''));
@@ -386,14 +387,14 @@ const translateRoomName = async (text) => {
                 // room_category: categoryList.find((category) => category.category_name === roomData.room_category)?.id,
                 room_name: roomData.room_name,
                 room_name_ar: translatedRoomName,
-                area: roomData.area,
-                floors: roomData.floors,
-                beds: roomData.beds,
-                bathrooms: roomData.bathrooms,
-                guests: roomData.guests,
+                // area: roomData.area,
+                // floors: roomData.floors,
+                // beds: roomData.beds,
+                // bathrooms: roomData.bathrooms,
+                // guests: roomData.guests,
                 booking_price: roomData.booking_price,
-                rooms: roomData.room_no,
-                available_rooms: roomData.room_no,
+                // rooms: roomData.room_no,
+                // available_rooms: roomData.room_no,
                 excluded_days: formattedDates,
                 bf: roomData.withbreakfast,
                 hotelroomimgs: files1
@@ -890,7 +891,7 @@ const translateRoomName = async (text) => {
                                     {steps.map((label, index) => (
                                         <Step key={label} completed={completed[index]}>
                                             <StepButton color="inherit"
-                                                // onClick={handleStep(index)}
+                                            // onClick={handleStep(index)}
                                             >
                                                 {label}
                                             </StepButton>
@@ -1098,6 +1099,18 @@ const translateRoomName = async (text) => {
                                                                     </Select>
                                                                 </FormControl>
                                                             </Grid>
+                                                            {propertytype == "Others" && <>
+                                                                <Grid item xs={6}>
+                                                                    <TextField
+                                                                        fullWidth
+                                                                        label="Others"
+                                                                        placeholder='Others'
+                                                                        variant="outlined"
+                                                                        type='text'
+                                                                        name="others"
+                                                                        onChange={(e) => handleChange('others', e.target.value)}
+                                                                    />
+                                                                </Grid></>}
                                                             <Grid item xs={6}>
                                                                 <FormControl fullWidth>
                                                                     <InputLabel>Emirates</InputLabel>
@@ -1280,20 +1293,20 @@ const translateRoomName = async (text) => {
                                                                                         </FormControl>
                                                                                     </Grid> */}
 
-                                                                            <Grid item xs={12}>
-                                                                                <TextField
-                                                                                    fullWidth
-                                                                                    label="Room Name"
-                                                                                    placeholder='Room Name'
-                                                                                    variant="outlined"
-                                                                                    type='text'
-                                                                                    margin="normal"
-                                                                                    value={roomData.room_name ? roomData.room_name : ''}
-                                                                                    name="room_name"
-                                                                                    onChange={(e) => handleRoomChange('room_name', e.target.value)}
-                                                                                />
-                                                                            </Grid>
-                                                                            {/* <Grid item xs={12}>
+                                                                                <Grid item xs={12}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Room Name"
+                                                                                        placeholder='Room Name'
+                                                                                        variant="outlined"
+                                                                                        type='text'
+                                                                                        margin="normal"
+                                                                                        value={roomData.room_name ? roomData.room_name : ''}
+                                                                                        name="room_name"
+                                                                                        onChange={(e) => handleRoomChange('room_name', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
+                                                                                {/* <Grid item xs={12}>
                                                                                 <TextField
                                                                                     fullWidth
                                                                                     label="Room Name in Arabic"
@@ -1306,466 +1319,466 @@ const translateRoomName = async (text) => {
                                                                                     onChange={(e) => handleRoomChange('room_name_ar', e.target.value)}
                                                                                 />
                                                                             </Grid> */}
-                                                                            <Grid item sm={12}>
-                                                                                {/* <Typography variant="h6" gutterBottom>
+                                                                                <Grid item sm={12}>
+                                                                                    {/* <Typography variant="h6" gutterBottom>
                                                                                             Room Images
                                                                                         </Typography> */}
-                                                                                <Box
-                                                                                    {...getRootProps()}
-                                                                                    sx={{
-                                                                                        border: "2px dashed #ccc",
-                                                                                        borderRadius: "4px",
-                                                                                        padding: "20px",
-                                                                                        textAlign: "center",
-                                                                                        cursor: "pointer",
-                                                                                        backgroundColor: isDragActive ? "#f0f0f0" : "transparent",
-                                                                                        marginTop: "10px"
-                                                                                    }}
-                                                                                >
-                                                                                    <input {...getInputProps()} />
-                                                                                    <Typography variant="body1" color="textSecondary">
-                                                                                        {isDragActive ? "Drop files here..." : "Drag and drop files here or click to upload"}
-                                                                                    </Typography>
-                                                                                    <Button variant="contained" sx={{ mt: 2 }}>
-                                                                                        Select Files
-                                                                                    </Button>
-                                                                                </Box>
-                                                                                <Grid container spacing={2} style={{ marginTop: "15px", textAlign: "center" }}>
-                                                                                    {files1.map((file, index) => (
-                                                                                        <Grid item key={index} xs={12} sm={3} md={3}>
-                                                                                            <Card>
-                                                                                                <CardMedia
-                                                                                                    component="img"
-                                                                                                    width="100%"
-                                                                                                    height="100"
-                                                                                                    image={file.preview}
-                                                                                                    alt={file.name}
-                                                                                                />
-                                                                                                <Button
-                                                                                                    size="small"
-                                                                                                    style={{ color: "red" }}
-                                                                                                    onClick={() => handleRemoveRoomFile(file)}
-                                                                                                >
-                                                                                                    Remove
-                                                                                                </Button>
-                                                                                            </Card>
-                                                                                        </Grid>
-                                                                                    ))}
+                                                                                    <Box
+                                                                                        {...getRootProps()}
+                                                                                        sx={{
+                                                                                            border: "2px dashed #ccc",
+                                                                                            borderRadius: "4px",
+                                                                                            padding: "20px",
+                                                                                            textAlign: "center",
+                                                                                            cursor: "pointer",
+                                                                                            backgroundColor: isDragActive ? "#f0f0f0" : "transparent",
+                                                                                            marginTop: "10px"
+                                                                                        }}
+                                                                                    >
+                                                                                        <input {...getInputProps()} />
+                                                                                        <Typography variant="body1" color="textSecondary">
+                                                                                            {isDragActive ? "Drop files here..." : "Drag and drop files here or click to upload"}
+                                                                                        </Typography>
+                                                                                        <Button variant="contained" sx={{ mt: 2 }}>
+                                                                                            Select Files
+                                                                                        </Button>
+                                                                                    </Box>
+                                                                                    <Grid container spacing={2} style={{ marginTop: "15px", textAlign: "center" }}>
+                                                                                        {files1.map((file, index) => (
+                                                                                            <Grid item key={index} xs={12} sm={3} md={3}>
+                                                                                                <Card>
+                                                                                                    <CardMedia
+                                                                                                        component="img"
+                                                                                                        width="100%"
+                                                                                                        height="100"
+                                                                                                        image={file.preview}
+                                                                                                        alt={file.name}
+                                                                                                    />
+                                                                                                    <Button
+                                                                                                        size="small"
+                                                                                                        style={{ color: "red" }}
+                                                                                                        onClick={() => handleRemoveRoomFile(file)}
+                                                                                                    >
+                                                                                                        Remove
+                                                                                                    </Button>
+                                                                                                </Card>
+                                                                                            </Grid>
+                                                                                        ))}
+                                                                                    </Grid>
                                                                                 </Grid>
-                                                                            </Grid>
-                                                                            <Grid item xs={4}>
-                                                                                <TextField
-                                                                                    fullWidth
-                                                                                    label="Room No"
-                                                                                    placeholder='eg: 123'
-                                                                                    variant="outlined"
-                                                                                    type='text'
-                                                                                    margin="normal"
-                                                                                    value={roomData.room_no ? roomData.room_no : ''}
-                                                                                    name="room_no"
-                                                                                    onChange={(e) => handleRoomChange('room_no', e.target.value)}
-                                                                                />
-                                                                            </Grid>
+                                                                                {/* <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Room No"
+                                                                                        placeholder='eg: 123'
+                                                                                        variant="outlined"
+                                                                                        type='text'
+                                                                                        margin="normal"
+                                                                                        value={roomData.room_no ? roomData.room_no : ''}
+                                                                                        name="room_no"
+                                                                                        onChange={(e) => handleRoomChange('room_no', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
 
-                                                                            <Grid item xs={4}>
-                                                                                <TextField
-                                                                                    fullWidth
-                                                                                    label="Room Area"
-                                                                                    placeholder='eg: in sq ft'
-                                                                                    variant="outlined"
-                                                                                    type='number'
-                                                                                    value={roomData.area ? roomData.area : ''}
-                                                                                    margin="normal"
-                                                                                    name="room_area"
-                                                                                    onChange={(e) => handleRoomChange('area', e.target.value)}
-                                                                                />
-                                                                            </Grid>
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Room Area"
+                                                                                        placeholder='eg: in sq ft'
+                                                                                        variant="outlined"
+                                                                                        type='number'
+                                                                                        value={roomData.area ? roomData.area : ''}
+                                                                                        margin="normal"
+                                                                                        name="room_area"
+                                                                                        onChange={(e) => handleRoomChange('area', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
 
-                                                                            <Grid item xs={4}>
-                                                                                <TextField
-                                                                                    fullWidth
-                                                                                    label="Floor"
-                                                                                    placeholder='eg: 1'
-                                                                                    variant="outlined"
-                                                                                    type='number'
-                                                                                    value={roomData.floors ? roomData.floors : ''}
-                                                                                    margin="normal"
-                                                                                    name="floor"
-                                                                                    onChange={(e) => handleRoomChange('floors', e.target.value)}
-                                                                                />
-                                                                            </Grid>
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Floor"
+                                                                                        placeholder='eg: 1'
+                                                                                        variant="outlined"
+                                                                                        type='number'
+                                                                                        value={roomData.floors ? roomData.floors : ''}
+                                                                                        margin="normal"
+                                                                                        name="floor"
+                                                                                        onChange={(e) => handleRoomChange('floors', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
 
-                                                                            <Grid item xs={4}>
-                                                                                <TextField
-                                                                                    fullWidth
-                                                                                    label="Beds"
-                                                                                    placeholder='eg: 2'
-                                                                                    variant="outlined"
-                                                                                    type='number'
-                                                                                    value={roomData.beds ? roomData.beds : ''}
-                                                                                    margin="normal"
-                                                                                    name="beds"
-                                                                                    onChange={(e) => handleRoomChange('beds', e.target.value)}
-                                                                                />
-                                                                            </Grid>
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Beds"
+                                                                                        placeholder='eg: 2'
+                                                                                        variant="outlined"
+                                                                                        type='number'
+                                                                                        value={roomData.beds ? roomData.beds : ''}
+                                                                                        margin="normal"
+                                                                                        name="beds"
+                                                                                        onChange={(e) => handleRoomChange('beds', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
 
-                                                                            <Grid item xs={4}>
-                                                                                <TextField
-                                                                                    fullWidth
-                                                                                    label="Bathrooms"
-                                                                                    placeholder='eg: 2'
-                                                                                    variant="outlined"
-                                                                                    type='number'
-                                                                                    value={roomData.bathrooms ? roomData.bathrooms : ''}
-                                                                                    margin="normal"
-                                                                                    name="bathrooms"
-                                                                                    onChange={(e) => handleRoomChange('bathrooms', e.target.value)}
-                                                                                />
-                                                                            </Grid>
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Bathrooms"
+                                                                                        placeholder='eg: 2'
+                                                                                        variant="outlined"
+                                                                                        type='number'
+                                                                                        value={roomData.bathrooms ? roomData.bathrooms : ''}
+                                                                                        margin="normal"
+                                                                                        name="bathrooms"
+                                                                                        onChange={(e) => handleRoomChange('bathrooms', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
 
-                                                                            <Grid item xs={4}>
-                                                                                <TextField
-                                                                                    fullWidth
-                                                                                    label="Guests"
-                                                                                    variant="outlined"
-                                                                                    placeholder='eg: 1 - 5'
-                                                                                    margin="normal"
-                                                                                    type='number'
-                                                                                    value={roomData.guests ? roomData.guests : ''}
-                                                                                    name="guests"
-                                                                                    onChange={(e) => handleRoomChange('guests', e.target.value)}
-                                                                                />
-                                                                            </Grid>
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Guests"
+                                                                                        variant="outlined"
+                                                                                        placeholder='eg: 1 - 5'
+                                                                                        margin="normal"
+                                                                                        type='number'
+                                                                                        value={roomData.guests ? roomData.guests : ''}
+                                                                                        name="guests"
+                                                                                        onChange={(e) => handleRoomChange('guests', e.target.value)}
+                                                                                    />
+                                                                                </Grid> */}
 
-                                                                            <Grid item xs={4}>
-                                                                                <TextField
-                                                                                    fullWidth
-                                                                                    label="Room Price"
-                                                                                    placeholder='eg: $$$'
-                                                                                    variant="outlined"
-                                                                                    type='number'
-                                                                                    value={roomData.booking_price ? roomData.booking_price : ''}
-                                                                                    margin="normal"
-                                                                                    name="booking_price"
-                                                                                    onChange={(e) => handleRoomChange('booking_price', e.target.value)}
-                                                                                />
-                                                                            </Grid>
-                                                                            <Grid item xs={4}>
-                                                                                <TextField
-                                                                                    fullWidth
-                                                                                    label="With Breakfast"
-                                                                                    type='number'
-                                                                                    variant="outlined"
-                                                                                    placeholder='eg: 1 - 5'
-                                                                                    value={roomData.withbreakfast ? roomData.withbreakfast : ''}
-                                                                                    margin="normal"
-                                                                                    name="withbreakfast"
-                                                                                    onChange={(e) => handleRoomChange('withbreakfast', e.target.value)}
-                                                                                />
-                                                                            </Grid>
-                                                                            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                                                                <Calendar
-                                                                                    onChange={handleDateChange}
-                                                                                    value={selectedDates}
-                                                                                    selectRange={false}
-                                                                                    tileClassName={({ date, view }) => {
-                                                                                        // Add inline styles to the selected dates
-                                                                                        if (selectedDates.some((d) => d.getTime() === date.getTime())) {
-                                                                                            return 'selected-date';  // Use a class to apply inline styles later
-                                                                                        }
-                                                                                        return '';
-                                                                                    }}
-                                                                                    tileContent={({ date, view }) => {
-                                                                                        if (selectedDates.some((d) => d.getTime() === date.getTime())) {
-                                                                                            return (
-                                                                                                <div
-                                                                                                    style={{
-                                                                                                        backgroundColor: 'red',
-                                                                                                        color: 'white',
-                                                                                                        borderRadius: '50%',
-                                                                                                        width: '20px',
-                                                                                                        height: '20px',
-                                                                                                        textAlign: 'center',
-                                                                                                        lineHeight: '20px',
-                                                                                                        margin: 'auto',
-                                                                                                    }}
-                                                                                                >
-                                                                                                    X
-                                                                                                </div>
-                                                                                            );
-                                                                                        }
-                                                                                        return '';
-                                                                                    }}
-                                                                                />
-                                                                                {/* {selectedDates.map((date, index) => (
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="Room Price"
+                                                                                        placeholder='eg: $$$'
+                                                                                        variant="outlined"
+                                                                                        type='number'
+                                                                                        value={roomData.booking_price ? roomData.booking_price : ''}
+                                                                                        margin="normal"
+                                                                                        name="booking_price"
+                                                                                        onChange={(e) => handleRoomChange('booking_price', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
+                                                                                <Grid item xs={4}>
+                                                                                    <TextField
+                                                                                        fullWidth
+                                                                                        label="With Breakfast"
+                                                                                        type='number'
+                                                                                        variant="outlined"
+                                                                                        placeholder='eg: 1 - 5'
+                                                                                        value={roomData.withbreakfast ? roomData.withbreakfast : ''}
+                                                                                        margin="normal"
+                                                                                        name="withbreakfast"
+                                                                                        onChange={(e) => handleRoomChange('withbreakfast', e.target.value)}
+                                                                                    />
+                                                                                </Grid>
+                                                                                <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                                                                    <Calendar
+                                                                                        onChange={handleDateChange}
+                                                                                        value={selectedDates}
+                                                                                        selectRange={false}
+                                                                                        tileClassName={({ date, view }) => {
+                                                                                            // Add inline styles to the selected dates
+                                                                                            if (selectedDates.some((d) => d.getTime() === date.getTime())) {
+                                                                                                return 'selected-date';  // Use a class to apply inline styles later
+                                                                                            }
+                                                                                            return '';
+                                                                                        }}
+                                                                                        tileContent={({ date, view }) => {
+                                                                                            if (selectedDates.some((d) => d.getTime() === date.getTime())) {
+                                                                                                return (
+                                                                                                    <div
+                                                                                                        style={{
+                                                                                                            backgroundColor: 'red',
+                                                                                                            color: 'white',
+                                                                                                            borderRadius: '50%',
+                                                                                                            width: '20px',
+                                                                                                            height: '20px',
+                                                                                                            textAlign: 'center',
+                                                                                                            lineHeight: '20px',
+                                                                                                            margin: 'auto',
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        X
+                                                                                                    </div>
+                                                                                                );
+                                                                                            }
+                                                                                            return '';
+                                                                                        }}
+                                                                                    />
+                                                                                    {/* {selectedDates.map((date, index) => (
                                                                                             <li key={index}>{date.toDateString()}</li>
                                                                                         ))} */}
+                                                                                </Grid>
+                                                                                <Grid item xs={12}>
+                                                                                    <Button
+                                                                                        fullWidth
+                                                                                        variant="contained"
+                                                                                        onClick={(e) => handleRoomSubmit(e)}
+                                                                                    >Save</Button>
+                                                                                </Grid>
                                                                             </Grid>
-                                                                            <Grid item xs={12}>
-                                                                                <Button
-                                                                                    fullWidth
-                                                                                    variant="contained"
-                                                                                    onClick={(e) => handleRoomSubmit(e)}
-                                                                                >Save</Button>
-                                                                            </Grid>
+                                                                        </Box>
                                                                     </Grid>
-                                                                </Box>
-                                                            </Grid>
-                                                            <Grid item sm={6}>
-                                                                <Grid item xs={12} sm={12}>
-                                                                    <Box sx={{ display: 'flex', flexDirection: 'column', overflowY: 'auto', minHeight: '900px', maxHeight: '900px', border: '1px solid #ccc', borderRadius: '8px', padding: 2 }}>
-                                                                        {addedRoom.length > 0 ? (
-                                                                            addedRoom.map((detail, index) => (
-                                                                                <Paper elevation={3} key={index} sx={{ padding: 2, marginBottom: "10px" }}>
-                                                                                    <Typography variant="h5">Room No: {detail.rooms}</Typography>
-                                                                                    <Typography variant="h5">Room Name: {detail.room_name}</Typography>
-                                                                                    <Typography variant="body1">Area: {detail.area} sq.ft.</Typography>
-                                                                                    {/* <Typography variant="body1">Room Category: {detail.room_category?.category_name}</Typography> */}
-                                                                                    <Typography variant="body1">Floors: {detail.floors}</Typography>
-                                                                                    <Typography variant="body1">Beds: {detail.beds}</Typography>
-                                                                                    <Typography variant="body1">Bathrooms: {detail.bathrooms}</Typography>
-                                                                                    <Typography variant="body1">Guests: {detail.guests}</Typography>
-                                                                                    <Typography variant="body1">Available Rooms: {detail.available_rooms}</Typography>
-                                                                                    <Typography variant="body1">Booking Price: {detail.booking_price}</Typography>
-                                                                                    <Typography variant="body1">Discount Price: {detail.discount}</Typography>
-                                                                                    <Typography variant="body1">Booking Price (with Breakfast): {detail.bf}</Typography><Typography variant="body1"></Typography>
-                                                                                    <Typography variant="h6" className='mt-1 mb-2'>Excluded Days:</Typography>
-                                                                                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                                                                                        {detail?.exclusions.map((exclusion) =>
-                                                                                            exclusion.excluded_days.map((day, index) => {
-                                                                                                const date = new Date(day);
-                                                                                                const formattedDate = `${String(date.getDate()).padStart(2, "0")}-${String(
-                                                                                                    date.getMonth() + 1
-                                                                                                ).padStart(2, "0")}-${date.getFullYear()}`;
-                                                                                                return <Chip key={`${exclusion.id}-${index}`} label={formattedDate} />;
-                                                                                            })
-                                                                                        )}
-                                                                                    </Box>
-                                                                                </Paper>
-                                                                            ))
-                                                                        ) : (
-                                                                            <Paper elevation={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', minHeight: 200, }}>
-                                                                                <Typography variant="h6" color="textSecondary">
-                                                                                    No Rooms Added
-                                                                                </Typography>
-                                                                            </Paper>
-                                                                        )}
-                                                                    </Box>
+                                                                    <Grid item sm={6}>
+                                                                        <Grid item xs={12} sm={12}>
+                                                                            <Box sx={{ display: 'flex', flexDirection: 'column', overflowY: 'auto', minHeight: '900px', maxHeight: '900px', border: '1px solid #ccc', borderRadius: '8px', padding: 2 }}>
+                                                                                {addedRoom.length > 0 ? (
+                                                                                    addedRoom.map((detail, index) => (
+                                                                                        <Paper elevation={3} key={index} sx={{ padding: 2, marginBottom: "10px" }}>
+                                                                                            {/* <Typography variant="h5">Room No: {detail.rooms}</Typography> */}
+                                                                                            <Typography variant="h5">Room Name: {detail.room_name}</Typography>
+                                                                                            {/* <Typography variant="body1">Area: {detail.area} sq.ft.</Typography> */}
+                                                                                            {/* <Typography variant="body1">Room Category: {detail.room_category?.category_name}</Typography> */}
+                                                                                            {/* <Typography variant="body1">Floors: {detail.floors}</Typography>
+                                                                                            <Typography variant="body1">Beds: {detail.beds}</Typography>
+                                                                                            <Typography variant="body1">Bathrooms: {detail.bathrooms}</Typography>
+                                                                                            <Typography variant="body1">Guests: {detail.guests}</Typography>
+                                                                                            <Typography variant="body1">Available Rooms: {detail.available_rooms}</Typography> */}
+                                                                                            <Typography variant="body1">Booking Price: {detail.booking_price}</Typography>
+                                                                                            <Typography variant="body1">Discount Price: {detail.discount}</Typography>
+                                                                                            <Typography variant="body1">Booking Price (with Breakfast): {detail.bf}</Typography><Typography variant="body1"></Typography>
+                                                                                            <Typography variant="h6" className='mt-1 mb-2'>Excluded Days:</Typography>
+                                                                                            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                                                                                                {detail?.exclusions.map((exclusion) =>
+                                                                                                    exclusion.excluded_days.map((day, index) => {
+                                                                                                        const date = new Date(day);
+                                                                                                        const formattedDate = `${String(date.getDate()).padStart(2, "0")}-${String(
+                                                                                                            date.getMonth() + 1
+                                                                                                        ).padStart(2, "0")}-${date.getFullYear()}`;
+                                                                                                        return <Chip key={`${exclusion.id}-${index}`} label={formattedDate} />;
+                                                                                                    })
+                                                                                                )}
+                                                                                            </Box>
+                                                                                        </Paper>
+                                                                                    ))
+                                                                                ) : (
+                                                                                    <Paper elevation={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', minHeight: 200, }}>
+                                                                                        <Typography variant="h6" color="textSecondary">
+                                                                                            No Rooms Added
+                                                                                        </Typography>
+                                                                                    </Paper>
+                                                                                )}
+                                                                            </Box>
+                                                                        </Grid>
+                                                                    </Grid>
                                                                 </Grid>
-                                                            </Grid>
-                                                    </Grid>
-                                                </Paper>
+                                                            </Paper>
                                                         </Box>
                                                     </Grid>
-                            </React.Fragment>
+                                                </React.Fragment>
                                             )}
 
-                            {/* Third Step: Completed */}
-                            {activeStep === 2 && (
-                                <React.Fragment>
-                                    <Grid container spacing={2} sx={{ p: 3, mt: 1 }}>
-                                        <Box sx={{ mt: 4, width: '100%' }}>
-                                            <form>
-                                                <Typography variant="h5" className='mb-3' gutterBottom>
-                                                    Owner and Support Details
-                                                </Typography>
-                                                <Grid container spacing={2}>
-                                                    {[
-                                                        { label: 'Owner Name', key: 'ownername', group: 'owner', type: "text" },
-                                                        // { label: 'Owner Contact No.', key: 'ownercontact', group: 'owner', type: "text" },
-                                                        { label: 'Owner Email', key: 'owneremail', group: 'owner', type: "email" },
-                                                    ].map((field, index) => (
-                                                        <Grid item xs={12} sm={6} key={index}>
-                                                            <TextField
-                                                                label={field.label}
-                                                                type={field.type}
-                                                                variant="outlined"
-                                                                fullWidth
-                                                                onChange={(e) =>
-                                                                    handleOwnerDataChange(field.key, e.target.value)
-                                                                }
-                                                            />
-                                                        </Grid>
-                                                    ))}
-                                                    <Grid item xs={12} sm={12}>
-                                                        <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
-                                                            <TextField
-                                                                label="Enter Contact No"
-                                                                variant="outlined"
-                                                                type="number"
-                                                                fullWidth
-                                                                value={contactinput}
-                                                                onChange={(e) => setcontactInput(e.target.value)}
-                                                                onKeyDown={handleContactKeyDown}
-                                                            />
-                                                            <Button
-                                                                variant="contained"
-                                                                color="primary"
-                                                                onClick={handleAddContact}
-                                                            >
-                                                                Add
-                                                            </Button>
-                                                        </Box>
-                                                        <Box>
-                                                            {contactsList.map((item, index) => (
-                                                                <span key={index}>
-                                                                    <Chip className='me-2 mb-2' label={item} variant="outlined" onDelete={() => handleRemoveContact(index)} />
-                                                                </span>
-                                                            ))}
+                                            {/* Third Step: Completed */}
+                                            {activeStep === 2 && (
+                                                <React.Fragment>
+                                                    <Grid container spacing={2} sx={{ p: 3, mt: 1 }}>
+                                                        <Box sx={{ mt: 4, width: '100%' }}>
+                                                            <form>
+                                                                <Typography variant="h5" className='mb-3' gutterBottom>
+                                                                    Owner and Support Details
+                                                                </Typography>
+                                                                <Grid container spacing={2}>
+                                                                    {[
+                                                                        { label: 'Owner Name', key: 'ownername', group: 'owner', type: "text" },
+                                                                        // { label: 'Owner Contact No.', key: 'ownercontact', group: 'owner', type: "text" },
+                                                                        { label: 'Owner Email', key: 'owneremail', group: 'owner', type: "email" },
+                                                                    ].map((field, index) => (
+                                                                        <Grid item xs={12} sm={6} key={index}>
+                                                                            <TextField
+                                                                                label={field.label}
+                                                                                type={field.type}
+                                                                                variant="outlined"
+                                                                                fullWidth
+                                                                                onChange={(e) =>
+                                                                                    handleOwnerDataChange(field.key, e.target.value)
+                                                                                }
+                                                                            />
+                                                                        </Grid>
+                                                                    ))}
+                                                                    <Grid item xs={12} sm={12}>
+                                                                        <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
+                                                                            <TextField
+                                                                                label="Enter Contact No"
+                                                                                variant="outlined"
+                                                                                type="number"
+                                                                                fullWidth
+                                                                                value={contactinput}
+                                                                                onChange={(e) => setcontactInput(e.target.value)}
+                                                                                onKeyDown={handleContactKeyDown}
+                                                                            />
+                                                                            <Button
+                                                                                variant="contained"
+                                                                                color="primary"
+                                                                                onClick={handleAddContact}
+                                                                            >
+                                                                                Add
+                                                                            </Button>
+                                                                        </Box>
+                                                                        <Box>
+                                                                            {contactsList.map((item, index) => (
+                                                                                <span key={index}>
+                                                                                    <Chip className='me-2 mb-2' label={item} variant="outlined" onDelete={() => handleRemoveContact(index)} />
+                                                                                </span>
+                                                                            ))}
+                                                                        </Box>
+                                                                    </Grid>
+                                                                    <Grid item xs={12} sm={12}>
+                                                                        <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
+                                                                            <TextField
+                                                                                label="Enter WhatAapp No"
+                                                                                variant="outlined"
+                                                                                fullWidth
+                                                                                type="number"
+                                                                                value={whatsappcontactinput}
+                                                                                onChange={(e) => setwhatsappcontactInput(e.target.value)}
+                                                                                onKeyDown={handlewhatsappContactKeyDown}
+                                                                            />
+                                                                            <Button
+                                                                                variant="contained"
+                                                                                color="primary"
+                                                                                onClick={handleAddWhatsappContact}
+                                                                            >
+                                                                                Add
+                                                                            </Button>
+                                                                        </Box>
+                                                                        <Box>
+                                                                            {whatsappcontactsList.map((item, index) => (
+                                                                                <span key={index}>
+                                                                                    <Chip className='me-2 mb-2' label={item} variant="outlined" onDelete={() => handleRemoveWhatsappContact(index)} />
+                                                                                </span>
+                                                                            ))}
+                                                                        </Box>
+                                                                    </Grid>
+                                                                </Grid>
+                                                                <Grid container spacing={2} className='mt-3'>
+                                                                    {[
+                                                                        { label: 'Support Contact No', key: 'supportcontact', group: 'support', type: 'number' },
+                                                                        { label: 'Support WhatsApp No', key: 'supportwhatsapp', group: 'support', type: 'number' },
+                                                                        { label: 'Support Email', key: 'supportemail', group: 'support', type: 'email' },
+                                                                    ].map((field, index) => (
+                                                                        <Grid item xs={12} sm={6} key={index}>
+                                                                            <TextField
+                                                                                label={field.label}
+                                                                                type={field.type}
+                                                                                variant="outlined"
+                                                                                fullWidth
+                                                                                onChange={(e) =>
+                                                                                    handleOwnerDataChange(field.key, e.target.value)
+                                                                                }
+                                                                            />
+                                                                        </Grid>
+                                                                    ))}
+                                                                </Grid>
+                                                            </form>
                                                         </Box>
                                                     </Grid>
-                                                    <Grid item xs={12} sm={12}>
-                                                        <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
-                                                            <TextField
-                                                                label="Enter WhatAapp No"
-                                                                variant="outlined"
-                                                                fullWidth
-                                                                type="number"
-                                                                value={whatsappcontactinput}
-                                                                onChange={(e) => setwhatsappcontactInput(e.target.value)}
-                                                                onKeyDown={handlewhatsappContactKeyDown}
-                                                            />
-                                                            <Button
-                                                                variant="contained"
-                                                                color="primary"
-                                                                onClick={handleAddWhatsappContact}
-                                                            >
-                                                                Add
-                                                            </Button>
-                                                        </Box>
-                                                        <Box>
-                                                            {whatsappcontactsList.map((item, index) => (
-                                                                <span key={index}>
-                                                                    <Chip className='me-2 mb-2' label={item} variant="outlined" onDelete={() => handleRemoveWhatsappContact(index)} />
-                                                                </span>
-                                                            ))}
-                                                        </Box>
+                                                </React.Fragment>
+                                            )}
+
+                                            {/* Fourth Step: Preview */}
+                                            {activeStep === 3 && (
+                                                <React.Fragment>
+                                                    <Grid container spacing={2} sx={{ p: 3, mt: 1 }}>
+                                                        {/* English */}
+                                                        <Grid item xs={12} sm={6}>
+                                                            <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', height: '100%', minHeight: "500px" }}>
+                                                                {isLoading ? (<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><CircularProgress size={25} /> <Typography sx={{ ml: 2 }}>Fetching Details...</Typography> </Box>) : (
+                                                                    <Paper elevation={2} sx={{ p: 3 }}>
+                                                                        <Typography variant="h4" component="h2" sx={{ color: 'black', mb: 1 }}>
+                                                                            {hotelPreview.name}
+                                                                            <Typography variant="h4" component="span" sx={{ float: 'right', color: '#2196f3' }}>
+                                                                                {hotelPreview.id}
+                                                                            </Typography>
+                                                                        </Typography>
+                                                                        <Typography className='mb-2'>
+                                                                            <Rating name="read-only" value={hotelPreview.rating} readOnly />
+                                                                        </Typography>
+                                                                        <Typography variant="h6" sx={{ color: 'text.secondary' }}>
+                                                                            {hotelPreview.location},{hotelPreview.locationName}
+                                                                        </Typography>
+
+                                                                        <Grid container spacing={2} sx={{ mt: 1, mb: 3 }}>
+                                                                            {hotelPreview.facilities?.map((facilities, index) => (
+                                                                                <Grid item xs={4} key={index}>
+                                                                                    <Chip
+                                                                                        avatar={<Avatar alt="" src={`${url}/hotel/media/${facilities[1]}`} />}
+                                                                                        label={facilities[0]}
+                                                                                        variant="outlined"
+                                                                                    />
+                                                                                </Grid>
+                                                                            ))}
+                                                                        </Grid>
+
+                                                                        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Description</Typography>
+                                                                        <Typography variant="body2" sx={{ mb: 2 }}>
+                                                                            {hotelPreview.description}
+                                                                        </Typography>
+
+                                                                        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Owner Details</Typography>
+                                                                        <Typography variant="body2" sx={{ mb: 2 }}>
+                                                                            {hotelPreview.owner_name}<br />
+                                                                            {hotelPreview.owner_email}<br />
+                                                                            {hotelPreview.owner_contact_number?.join(', ')}
+                                                                        </Typography>
+                                                                    </Paper>)}
+                                                            </Box>
+                                                        </Grid>
+
+                                                        {/* Arabic */}
+                                                        <Grid item xs={12} sm={6}>
+                                                            <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', height: '100%', minHeight: "500px" }}>
+                                                                {translateLoading ? (<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><CircularProgress size={25} /> <Typography sx={{ ml: 2 }}>Fetching Details...</Typography> </Box>) : (
+                                                                    <Paper elevation={2} sx={{ p: 3 }}>
+                                                                        <Typography variant="h4" component="h2" sx={{ color: 'black', mb: 1 }}>
+                                                                            {translatedHotelPreview.name}
+                                                                            <Typography variant="h4" component="span" sx={{ float: 'right', color: '#2196f3' }}>
+                                                                                {translatedHotelPreview.id}
+                                                                            </Typography>
+                                                                        </Typography>
+                                                                        <Typography className='mb-2'>
+                                                                            <Rating name="read-only" value={translatedHotelPreview.rating} readOnly />
+                                                                        </Typography>
+                                                                        <Typography variant="h6" sx={{ color: 'text.secondary' }}>
+                                                                            {translatedHotelPreview.location},{translatedHotelPreview.locationName}
+                                                                        </Typography>
+
+                                                                        <Grid container spacing={2} sx={{ mt: 1, mb: 3 }}>
+                                                                            {translatedHotelPreview.facilities?.map((facilities, index) => (
+                                                                                <Grid item xs={4} key={index}>
+                                                                                    <Chip
+                                                                                        avatar={<Avatar alt="" src={`${url}/hotel/media/${facilities[1]}`} />}
+                                                                                        label={facilities[0]}
+                                                                                        variant="outlined"
+                                                                                    />
+                                                                                </Grid>
+                                                                            ))}
+                                                                        </Grid>
+
+                                                                        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Description</Typography>
+                                                                        <Typography variant="body2" sx={{ mb: 2 }}>
+                                                                            {translatedHotelPreview.description}
+                                                                        </Typography>
+
+                                                                        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Owner Details</Typography>
+                                                                        <Typography variant="body2" sx={{ mb: 2 }}>
+                                                                            {translatedHotelPreview.owner_name}<br />
+                                                                            {translatedHotelPreview.owner_email}<br />
+                                                                            {translatedHotelPreview.owner_contact_number?.join(', ')}
+                                                                        </Typography>
+                                                                    </Paper>)}
+                                                            </Box>
+                                                        </Grid>
                                                     </Grid>
-                                                </Grid>
-                                                <Grid container spacing={2} className='mt-3'>
-                                                    {[
-                                                        { label: 'Support Contact No', key: 'supportcontact', group: 'support', type: 'number' },
-                                                        { label: 'Support WhatsApp No', key: 'supportwhatsapp', group: 'support', type: 'number' },
-                                                        { label: 'Support Email', key: 'supportemail', group: 'support', type: 'email' },
-                                                    ].map((field, index) => (
-                                                        <Grid item xs={12} sm={6} key={index}>
-                                                            <TextField
-                                                                label={field.label}
-                                                                type={field.type}
-                                                                variant="outlined"
-                                                                fullWidth
-                                                                onChange={(e) =>
-                                                                    handleOwnerDataChange(field.key, e.target.value)
-                                                                }
-                                                            />
-                                                        </Grid>
-                                                    ))}
-                                                </Grid>
-                                            </form>
-                                        </Box>
-                                    </Grid>
-                                </React.Fragment>
-                            )}
+                                                </React.Fragment>
+                                            )}
 
-                            {/* Fourth Step: Preview */}
-                            {activeStep === 3 && (
-                                <React.Fragment>
-                                    <Grid container spacing={2} sx={{ p: 3, mt: 1 }}>
-                                        {/* English */}
-                                        <Grid item xs={12} sm={6}>
-                                            <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', height: '100%', minHeight: "500px" }}>
-                                                {isLoading ? (<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><CircularProgress size={25} /> <Typography sx={{ ml: 2 }}>Fetching Details...</Typography> </Box>) : (
-                                                    <Paper elevation={2} sx={{ p: 3 }}>
-                                                        <Typography variant="h4" component="h2" sx={{ color: 'black', mb: 1 }}>
-                                                            {hotelPreview.name}
-                                                            <Typography variant="h4" component="span" sx={{ float: 'right', color: '#2196f3' }}>
-                                                                {hotelPreview.id}
-                                                            </Typography>
-                                                        </Typography>
-                                                        <Typography className='mb-2'>
-                                                            <Rating name="read-only" value={hotelPreview.rating} readOnly />
-                                                        </Typography>
-                                                        <Typography variant="h6" sx={{ color: 'text.secondary' }}>
-                                                            {hotelPreview.location},{hotelPreview.locationName}
-                                                        </Typography>
-
-                                                        <Grid container spacing={2} sx={{ mt: 1, mb: 3 }}>
-                                                            {hotelPreview.facilities?.map((facilities, index) => (
-                                                                <Grid item xs={4} key={index}>
-                                                                    <Chip
-                                                                        avatar={<Avatar alt="" src={`${url}/hotel/media/${facilities[1]}`} />}
-                                                                        label={facilities[0]}
-                                                                        variant="outlined"
-                                                                    />
-                                                                </Grid>
-                                                            ))}
-                                                        </Grid>
-
-                                                        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Description</Typography>
-                                                        <Typography variant="body2" sx={{ mb: 2 }}>
-                                                            {hotelPreview.description}
-                                                        </Typography>
-
-                                                        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Owner Details</Typography>
-                                                        <Typography variant="body2" sx={{ mb: 2 }}>
-                                                            {hotelPreview.owner_name}<br />
-                                                            {hotelPreview.owner_email}<br />
-                                                            {hotelPreview.owner_contact_number?.join(', ')}
-                                                        </Typography>
-                                                    </Paper>)}
-                                            </Box>
-                                        </Grid>
-
-                                        {/* Arabic */}
-                                        <Grid item xs={12} sm={6}>
-                                            <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', height: '100%', minHeight: "500px" }}>
-                                                {translateLoading ? (<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><CircularProgress size={25} /> <Typography sx={{ ml: 2 }}>Fetching Details...</Typography> </Box>) : (
-                                                    <Paper elevation={2} sx={{ p: 3 }}>
-                                                        <Typography variant="h4" component="h2" sx={{ color: 'black', mb: 1 }}>
-                                                            {translatedHotelPreview.name}
-                                                            <Typography variant="h4" component="span" sx={{ float: 'right', color: '#2196f3' }}>
-                                                                {translatedHotelPreview.id}
-                                                            </Typography>
-                                                        </Typography>
-                                                        <Typography className='mb-2'>
-                                                            <Rating name="read-only" value={translatedHotelPreview.rating} readOnly />
-                                                        </Typography>
-                                                        <Typography variant="h6" sx={{ color: 'text.secondary' }}>
-                                                            {translatedHotelPreview.location},{translatedHotelPreview.locationName}
-                                                        </Typography>
-
-                                                        <Grid container spacing={2} sx={{ mt: 1, mb: 3 }}>
-                                                            {translatedHotelPreview.facilities?.map((facilities, index) => (
-                                                                <Grid item xs={4} key={index}>
-                                                                    <Chip
-                                                                        avatar={<Avatar alt="" src={`${url}/hotel/media/${facilities[1]}`} />}
-                                                                        label={facilities[0]}
-                                                                        variant="outlined"
-                                                                    />
-                                                                </Grid>
-                                                            ))}
-                                                        </Grid>
-
-                                                        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Description</Typography>
-                                                        <Typography variant="body2" sx={{ mb: 2 }}>
-                                                            {translatedHotelPreview.description}
-                                                        </Typography>
-
-                                                        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Owner Details</Typography>
-                                                        <Typography variant="body2" sx={{ mb: 2 }}>
-                                                            {translatedHotelPreview.owner_name}<br />
-                                                            {translatedHotelPreview.owner_email}<br />
-                                                            {translatedHotelPreview.owner_contact_number?.join(', ')}
-                                                        </Typography>
-                                                    </Paper>)}
-                                            </Box>
-                                        </Grid>
-                                    </Grid>
-                                </React.Fragment>
-                            )}
-
-                            <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-                                {/* <Button
+                                            <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+                                                {/* <Button
                                                     color="inherit"
                                                     disabled={activeStep === 0 || activeStep === 3}
                                                     onClick={handleBack}
@@ -1773,19 +1786,19 @@ const translateRoomName = async (text) => {
                                                 >
                                                     Back
                                                 </Button> */}
-                                <Box sx={{ flex: '1 1 auto' }} />
-                                <Button
-                                    onClick={(e) => { if (activeStep === 3) { handleArabicSubmit(e) } else { handleNext(e) } }} sx={{ mr: 1 }}>
-                                    {activeStep == 3 ? "Finish" : "Next"}
-                                </Button>
-                            </Box>
-                        </React.Fragment>
+                                                <Box sx={{ flex: '1 1 auto' }} />
+                                                <Button
+                                                    onClick={(e) => { if (activeStep === 3) { handleArabicSubmit(e) } else { handleNext(e) } }} sx={{ mr: 1 }}>
+                                                    {activeStep == 3 ? "Finish" : "Next"}
+                                                </Button>
+                                            </Box>
+                                        </React.Fragment>
                                     )}
-                    </div>
-                </Box>
-            </Grid>
+                                </div>
+                            </Box>
+                        </Grid>
 
-        </DashboardCard>
+                    </DashboardCard>
                 </Grid >
             </Grid >
         </PageContainer >

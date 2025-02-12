@@ -77,7 +77,7 @@ const Dashboard = () => {
     <PageContainer title="Dashboard" description="this is Dashboard">
       <Box>
         <Grid container spacing={3}>
-          <Grid item xs={12} lg={8}>
+          {/* <Grid item xs={12} lg={8}>
             <DashboardCard title={`Impressions Overview (${totalImpressions})`}>
               <PieChart
                 series={[
@@ -124,7 +124,7 @@ const Dashboard = () => {
                 <MonthlyEarnings value={dashboardData.impressions_current_month} />
               </Grid>
             </Grid>
-          </Grid>
+          </Grid> */}
           {/* <Grid item xs={12} lg={12}>
             <ProductPerformance value={dashboardData.top_impression_hotels}/>
           </Grid> */}

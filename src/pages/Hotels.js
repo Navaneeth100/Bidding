@@ -338,6 +338,7 @@ const HotelPage = () => {
             support_whatsapp_number: editData.support_whatsapp_number,
             support_email: editData.support_email,
             propertytype: editData.propertytype,
+            others: editData.propertytype == "Others" ? editData.others : null,
             emirates: editData.emirates,
             h_category: edithcategories.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id)),
             facilities: editfacilities.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id)),
@@ -537,16 +538,16 @@ const HotelPage = () => {
         let submitData = {
             room_name: roomEditData.room_name,
             room_name_ar: translatedRoomName,
-            area: roomEditData.area,
-            available_rooms: roomEditData.available_rooms,
-            bathrooms: roomEditData.bathrooms,
-            beds: roomEditData.beds,
+            // area: roomEditData.area,
+            // available_rooms: roomEditData.available_rooms,
+            // bathrooms: roomEditData.bathrooms,
+            // beds: roomEditData.beds,
             bf: roomEditData.withbreakfast,
             booking_price: roomEditData.booking_price,
-            floors: roomEditData.floors,
-            guests: roomEditData.guests,
+            // floors: roomEditData.floors,
+            // guests: roomEditData.guests,
             // room_category: categoryList.find((category) => category.category_name === editroomcategory)?.id,
-            rooms: roomEditData.rooms,
+            // rooms: roomEditData.rooms,
             excluded_days: formattedDates
         };
 
@@ -953,21 +954,21 @@ const HotelPage = () => {
     };
 
     const handleNewRoomSubmit = async (event) => {
-        if (newroomData.room_name && newroomData.area && newroomData.beds && selectedNewRoomDates) {
+        if (newroomData.room_name && newroomData.booking_price && newroomData.bf && selectedNewRoomDates) {
             event.preventDefault();
             const translatedRoomName = await translateRoomName(newroomData.room_name);
             let submitData = {
                 // room_category: categoryList.find((category) => category.category_name === newroomData.room_category)?.id,
                 room_name: newroomData.room_name,
                 room_name_ar: translatedRoomName,
-                area: newroomData.area,
-                floors: newroomData.floors,
-                beds: newroomData.beds,
-                bathrooms: newroomData.bathrooms,
-                guests: newroomData.guests,
+                // area: newroomData.area,
+                // floors: newroomData.floors,
+                // beds: newroomData.beds,
+                // bathrooms: newroomData.bathrooms,
+                // guests: newroomData.guests,
                 booking_price: newroomData.booking_price,
-                rooms: newroomData.room_no,
-                available_rooms: newroomData.room_no,
+                // rooms: newroomData.room_no,
+                // available_rooms: newroomData.room_no,
                 excluded_days: formattedNewRoomDates,
                 bf: newroomData.withbreakfast,
                 hotelroomimgs: newroomfiles
@@ -1301,7 +1302,7 @@ const HotelPage = () => {
                                                     <Box display="flex" alignItems="center" justifyContent="center">
                                                         {/* <IconEye width={20} style={{ marginRight: "15px" }} /> */}
                                                         <Button
-                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); setedithcategories(item.h_category?.length > 0 ? item.h_category?.map((category)=>category.category_name) : []); seteditfacilities(item.facilities?.length > 0 ? item.facilities?.map((facility)=>facility.name) : []); setedittags(item.tags); seteditcontacts(item.owner_contact_number); seteditwhatsappcontacts(item.owner_whatsapp_number); sethotelfiles(item.hotelimgs), setfileuploadmode('hotel'), fetchCategory(), fetchFacilities() }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
+                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); setedithcategories(item.h_category?.length > 0 ? item.h_category?.map((category) => category.category_name) : []); seteditfacilities(item.facilities?.length > 0 ? item.facilities?.map((facility) => facility.name) : []); setedittags(item.tags); seteditcontacts(item.owner_contact_number); seteditwhatsappcontacts(item.owner_whatsapp_number); sethotelfiles(item.hotelimgs), setfileuploadmode('hotel'), fetchCategory(), fetchFacilities() }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
                                                         </Button>
                                                         <Button
                                                             sx={{ border: '1px solid lightgrey' }} onClick={() => { toggleModal('delete'); setDeleteData(item); }}><IconTrash width={15} className='m-0 p-0' />
@@ -1538,6 +1539,19 @@ const HotelPage = () => {
                                     </Select>
                                 </FormControl>
                             </Grid>
+                            {editData.propertytype == "Others" && <>
+                                <Grid item xs={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Others"
+                                        placeholder='Others'
+                                        variant="outlined"
+                                        type='text'
+                                        name="others"
+                                        defaultValue={editData.others}
+                                        onChange={(e) => setEditData({ ...editData, others: e.target.value })}
+                                    />
+                                </Grid></>}
                             <Grid item xs={6}>
                                 <FormControl fullWidth>
                                     <InputLabel>Emirates</InputLabel>
@@ -1807,6 +1821,21 @@ const HotelPage = () => {
                                                 </TableCell>
                                                 <TableCell align='center'>
                                                     <Typography variant="subtitle2" fontWeight={600}>
+                                                        Room Name in Arabic
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        Booking Price
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        With BreakFast
+                                                    </Typography>
+                                                </TableCell>
+                                                {/* <TableCell align='center'>
+                                                    <Typography variant="subtitle2" fontWeight={600}>
                                                         Rooms
                                                     </Typography>
                                                 </TableCell>
@@ -1834,17 +1863,17 @@ const HotelPage = () => {
                                                     <Typography variant="subtitle2" fontWeight={600}>
                                                         Guests
                                                     </Typography>
-                                                </TableCell>
+                                                </TableCell> */}
                                                 <TableCell align='center'>
                                                     <Typography variant="subtitle2" fontWeight={600}>
                                                         Excluded Days
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell align='center'>
+                                                {/* <TableCell align='center'>
                                                     <Typography variant="subtitle2" fontWeight={600}>
                                                         Available Rooms
                                                     </Typography>
-                                                </TableCell>
+                                                </TableCell> */}
                                                 <TableCell align='center'>
                                                     <Typography variant="subtitle2" fontWeight={600} align='center'>
                                                         Actions
@@ -1894,6 +1923,21 @@ const HotelPage = () => {
                                                         </TableCell>
                                                         <TableCell align='center'>
                                                             <Typography variant="subtitle2" fontWeight={600}>
+                                                                {item.room_name_ar}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align='center'>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {item.booking_price}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align='center'>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                                {item.bf}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        {/* <TableCell align='center'>
+                                                            <Typography variant="subtitle2" fontWeight={600}>
                                                                 {item.rooms}
                                                             </Typography>
                                                         </TableCell>
@@ -1921,7 +1965,7 @@ const HotelPage = () => {
                                                             <Typography variant="subtitle2" fontWeight={600}>
                                                                 {item.guests}
                                                             </Typography>
-                                                        </TableCell>
+                                                        </TableCell> */}
                                                         <TableCell align='center'>
                                                             <Box display="flex" alignItems="center" justifyContent="center">
                                                                 <Button
@@ -1929,11 +1973,11 @@ const HotelPage = () => {
                                                                 </Button>
                                                             </Box>
                                                         </TableCell>
-                                                        <TableCell align='center'>
+                                                        {/* <TableCell align='center'>
                                                             <Typography variant="subtitle2" fontWeight={600}>
                                                                 {item.available_rooms}
                                                             </Typography>
-                                                        </TableCell>
+                                                        </TableCell> */}
                                                         <TableCell align="right">
                                                             <Box display="flex" alignItems="center" justifyContent="center">
                                                                 <Button
@@ -2083,7 +2127,7 @@ const HotelPage = () => {
                                     File Submit
                                 </Button>
                             </Grid>
-                            <Grid item xs={4}>
+                            {/* <Grid item xs={4}>
                                 <TextField
                                     fullWidth
                                     label="Room No"
@@ -2173,8 +2217,8 @@ const HotelPage = () => {
                                     defaultValue={roomEditData.available_rooms}
                                     onChange={(e) => { setRoomEditData({ ...roomEditData, available_rooms: e.target.value }) }}
                                 />
-                            </Grid>
-                            <Grid item xs={4}>
+                            </Grid> */}
+                            <Grid item xs={6}>
                                 <TextField
                                     fullWidth
                                     label="Room Price"
@@ -2187,7 +2231,7 @@ const HotelPage = () => {
                                     onChange={(e) => { setRoomEditData({ ...roomEditData, booking_price: e.target.value }) }}
                                 />
                             </Grid>
-                            <Grid item xs={4}>
+                            <Grid item xs={6}>
                                 <TextField
                                     fullWidth
                                     label="With Breakfast"
@@ -2472,7 +2516,7 @@ const HotelPage = () => {
                                     Submit
                                 </Button> */}
                             </Grid>
-                            <Grid item xs={4}>
+                            {/* <Grid item xs={4}>
                                 <TextField
                                     fullWidth
                                     label="Room No"
@@ -2555,8 +2599,8 @@ const HotelPage = () => {
                                     name="available_rooms"
                                     onChange={(e) => { setNewRoomData({ ...newroomData, available_rooms: e.target.value }) }}
                                 />
-                            </Grid>
-                            <Grid item xs={4}>
+                            </Grid> */}
+                            <Grid item xs={6}>
                                 <TextField
                                     fullWidth
                                     label="Room Price"
@@ -2568,7 +2612,7 @@ const HotelPage = () => {
                                     onChange={(e) => { setNewRoomData({ ...newroomData, booking_price: e.target.value }) }}
                                 />
                             </Grid>
-                            <Grid item xs={4}>
+                            <Grid item xs={6}>
                                 <TextField
                                     fullWidth
                                     label="With Breakfast"
