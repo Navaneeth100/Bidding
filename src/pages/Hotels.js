@@ -977,7 +977,7 @@ const HotelPage = () => {
                 const response = await axios.post(`${url}/hotel/hotels/${editId}/room-categories/`, submitData, {
                     headers: {
                         Authorization: `Bearer ${tokenStr}`,
-                        "Content-Type": "application/json",
+                        "Content-Type": "multipart/form-data",
                     },
                     withCredentials: false,
                 });

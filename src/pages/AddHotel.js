@@ -281,7 +281,7 @@ const AddHotel = () => {
                 const response = await axios.post(`${url}/hotel/createhotels/`, submitData, {
                     headers: {
                         Authorization: `Bearer ${tokenStr}`,
-                        "Content-Type": "application/json",
+                        "Content-Type": "multipart/form-data",
                     },
                     withCredentials: false,
                 });
@@ -403,7 +403,7 @@ const translateRoomName = async (text) => {
                 const response = await axios.post(`${url}/hotel/hotels/${roomId}/room-categories/`, submitData, {
                     headers: {
                         Authorization: `Bearer ${tokenStr}`,
-                        "Content-Type": "application/json",
+                        "Content-Type": "multipart/form-data",
                     },
                     withCredentials: false,
                 });
