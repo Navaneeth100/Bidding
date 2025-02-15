@@ -182,7 +182,7 @@ const HotelPage = () => {
         const fetchLocation = async () => {
             if (markerPosition.lat && markerPosition.lng && !isNaN(markerPosition.lat) && !isNaN(markerPosition.lng)) {
                 try {
-                    const geocoderUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${markerPosition.lat},${markerPosition.lng}&key=AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g`; // Replace with your API key
+                    const geocoderUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${markerPosition.lat},${markerPosition.lng}&key=AIzaSyAVPUw1ZmigH0aqgcAjTbYY2IE72Gu4HOY`; // Replace with your API key
                     const response = await fetch(geocoderUrl);
                     const data = await response.json();
 
@@ -1302,7 +1302,12 @@ const HotelPage = () => {
                                                     <Box display="flex" alignItems="center" justifyContent="center">
                                                         {/* <IconEye width={20} style={{ marginRight: "15px" }} /> */}
                                                         <Button
-                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => { toggleModal('edit'); setEditData(item); setedithcategories(item.h_category?.length > 0 ? item.h_category?.map((category) => category.category_name) : []); seteditfacilities(item.facilities?.length > 0 ? item.facilities?.map((facility) => facility.name) : []); setedittags(item.tags); seteditcontacts(item.owner_contact_number); seteditwhatsappcontacts(item.owner_whatsapp_number); sethotelfiles(item.hotelimgs), setfileuploadmode('hotel'), fetchCategory(), fetchFacilities() }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
+                                                            sx={{ border: '1px solid lightgrey', marginRight: "10px" }} onClick={() => {
+                                                                toggleModal('edit'); setEditData(item); setSelectedLocation(item.locationName);
+                                                                const [lat, lng] = item.location.split(",").map(Number);
+                                                                setMarkerPosition({ lat, lng }); setCenter({ lat, lng });
+                                                                setedithcategories(item.h_category?.length > 0 ? item.h_category?.map((category) => category.category_name) : []); seteditfacilities(item.facilities?.length > 0 ? item.facilities?.map((facility) => facility.name) : []); setedittags(item.tags); seteditcontacts(item.owner_contact_number); seteditwhatsappcontacts(item.owner_whatsapp_number); sethotelfiles(item.hotelimgs), setfileuploadmode('hotel'), fetchCategory(), fetchFacilities()
+                                                            }}><IconEdit width={15} /><Typography variant="subtitle2" fontWeight={500} className='ms-1 me-1' > Edit </Typography>
                                                         </Button>
                                                         <Button
                                                             sx={{ border: '1px solid lightgrey' }} onClick={() => { toggleModal('delete'); setDeleteData(item); }}><IconTrash width={15} className='m-0 p-0' />
@@ -1447,7 +1452,7 @@ const HotelPage = () => {
                                         </List>
                                     )}
                                     <Typography variant="h6" className='mb-3' gutterBottom>
-                                        Selected Location : {editData.locationName || selectedLocation}
+                                        Selected Location : {selectedLocation}
                                     </Typography>
                                     <LoadScript googleMapsApiKey="AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g" libraries={['places']}>
                                         <GoogleMap

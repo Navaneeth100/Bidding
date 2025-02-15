@@ -1706,8 +1706,8 @@ const AddHotel = () => {
                                                                             {hotelPreview.facilities?.map((facilities, index) => (
                                                                                 <Grid item xs={4} key={index}>
                                                                                     <Chip
-                                                                                        avatar={<Avatar alt="" src={`${url}/hotel/media/${facilities[1]}`} />}
-                                                                                        label={facilities[0]}
+                                                                                        avatar={<Avatar alt="" src={`${url}${facilities.icon}`} />}
+                                                                                        label={facilities.name}
                                                                                         variant="outlined"
                                                                                     />
                                                                                 </Grid>
@@ -1751,8 +1751,8 @@ const AddHotel = () => {
                                                                             {translatedHotelPreview.facilities?.map((facilities, index) => (
                                                                                 <Grid item xs={4} key={index}>
                                                                                     <Chip
-                                                                                        avatar={<Avatar alt="" src={`${url}/hotel/media/${facilities[1]}`} />}
-                                                                                        label={facilities[0]}
+                                                                                        avatar={<Avatar alt="" src={`${url}${facilities.icon}`} />}
+                                                                                        label={facilities.name}
                                                                                         variant="outlined"
                                                                                     />
                                                                                 </Grid>
