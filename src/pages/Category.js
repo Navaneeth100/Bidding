@@ -428,6 +428,11 @@ const Category = () => {
                                         </TableCell>
                                         <TableCell align='center'>
                                             <Typography variant="subtitle2" fontWeight={600}>
+                                                Arabic Name
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align='center'>
+                                            <Typography variant="subtitle2" fontWeight={600}>
                                                 Description
                                             </Typography>
                                         </TableCell>
@@ -441,7 +446,7 @@ const Category = () => {
                                 <TableBody>
                                     {loading ? (
                                         <TableRow>
-                                            <TableCell colSpan={4} align="center">
+                                            <TableCell colSpan={6} align="center">
                                                 <Box
                                                     display="flex"
                                                     justifyContent="center"
@@ -482,6 +487,11 @@ const Category = () => {
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     <Typography variant="subtitle2" fontWeight={600}>
+                                                        {item.category_name_ar}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Typography variant="subtitle2" fontWeight={600}>
                                                         {item.description}
                                                     </Typography>
                                                 </TableCell>
@@ -500,7 +510,7 @@ const Category = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={5} align="center" sx={{ paddingTop: "300px" }}>
+                                            <TableCell colSpan={6} align="center" sx={{ paddingTop: "300px" }}>
                                                 <Typography variant="subtitle2" fontWeight={600}>
                                                     No Data to Display
                                                 </Typography>

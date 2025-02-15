@@ -954,7 +954,7 @@ const HotelPage = () => {
     };
 
     const handleNewRoomSubmit = async (event) => {
-        if (newroomData.room_name && newroomData.booking_price && newroomData.bf && selectedNewRoomDates) {
+        if (newroomData.room_name && newroomData.booking_price && newroomData.withbreakfast && selectedNewRoomDates.length > 0) {
             event.preventDefault();
             const translatedRoomName = await translateRoomName(newroomData.room_name);
             let submitData = {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Grid, Box } from '@mui/material';
+import { Grid, Box, CircularProgress } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import SalesOverview from './components/SalesOverview';
 import YearlyBreakup from './components/YearlyBreakup';
@@ -23,8 +23,10 @@ const Dashboard = () => {
   const authTokens = JSON.parse(localStorage.getItem('authTokens'));
   let tokenStr = String(authTokens.access);
   const [dashboardData, setdashboardData] = useState([])
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchDashboard = () => {
+    setIsLoading(true);
     axios
       .get(`${url}/hotel/statistics/`, {
         headers: {
@@ -35,6 +37,7 @@ const Dashboard = () => {
       })
       .then((res) => {
         setdashboardData(res.data);
+        setIsLoading(false);
       })
       .catch((error) => {
         let refresh = String(authTokens.refresh);
@@ -49,6 +52,7 @@ const Dashboard = () => {
             .get(`${url}/hotel/statistics/`, { headers: new_headers })
             .then((res) => {
               setdashboardData(res.data);
+              setIsLoading(false);
             });
         });
       });
@@ -76,8 +80,43 @@ const Dashboard = () => {
   return (
     <PageContainer title="Dashboard" description="this is Dashboard">
       <Box>
-        <Grid container spacing={3}>
-          {/* <Grid item xs={12} lg={8}>
+        {isLoading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height="70vh">
+            <CircularProgress size={40} />
+          </Box>
+        ) : (
+          <Grid container spacing={3}>
+            {[
+              { title: "Total Hotels", count: dashboardData.total_hotels || 0, bgColor: "primary.light" },
+              { title: "Impressions Last Year", count: dashboardData.impressions_last_year || 0, bgColor: "secondary.light" },
+              { title: "Impressions Current Year", count: dashboardData.impressions_current_year || 0, bgColor: "success.light" },
+              { title: "Impressions Current Month", count: dashboardData.impressions_current_month || 0, bgColor: "warning.light" },
+              { title: "Impressions Last Week", count: dashboardData.impressions_last_week || 0, bgColor: "info.light" },
+              { title: "Impressions Today", count: dashboardData.impressions_today || 0, bgColor: "primary.light" },
+            ].map((item, index) => (
+              <Grid item xs={12} sm={4} key={index}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "start",
+                    justifyContent: "center",
+                    p: 3,
+                    borderRadius: 2,
+                    boxShadow: 3,
+                    bgcolor: item.bgColor,
+                  }}
+                >
+                  <Typography variant="h5" fontWeight="bold" color="">
+                    {item.title}
+                  </Typography>
+                  <Typography variant="h1" color="" fontWeight="bold">
+                    {item.count}
+                  </Typography>
+                </Box>
+              </Grid>
+            ))}
+            {/* <Grid item xs={12} lg={8}>
             <DashboardCard title={`Impressions Overview (${totalImpressions})`}>
               <PieChart
                 series={[
@@ -125,19 +164,20 @@ const Dashboard = () => {
               </Grid>
             </Grid>
           </Grid> */}
-          {/* <Grid item xs={12} lg={12}>
+            {/* <Grid item xs={12} lg={12}>
             <ProductPerformance value={dashboardData.top_impression_hotels}/>
           </Grid> */}
-          {/* <Grid item xs={12}>
+            {/* <Grid item xs={12}>
             <Blog value={dashboardData.top_impression_hotels} />
           </Grid> */}
-          <Grid item xs={12}>
-            <Blog2 value={dashboardData.most_favorite_hotels} />
+            <Grid item xs={12}>
+              <Blog2 value={dashboardData.most_favorite_hotels} />
+            </Grid>
+            <Grid item xs={12}>
+              <Blog value={dashboardData.top_impression_hotels} />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <Blog value={dashboardData.top_impression_hotels} />
-          </Grid>
-        </Grid>
+        )}
       </Box>
     </PageContainer>
   );

@@ -257,17 +257,17 @@ const HotelPage = () => {
                                                         Image
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell align='center'>
+                                                {/* <TableCell align='center'>
                                                     <Typography variant="subtitle2" fontWeight={600}>
                                                         Category
                                                     </Typography>
-                                                </TableCell>
+                                                </TableCell> */}
                                                 <TableCell align='center'>
                                                     <Typography variant="subtitle2" fontWeight={600}>
-                                                        Rooms
+                                                        Room Name
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell align='center'>
+                                                {/* <TableCell align='center'>
                                                     <Typography variant="subtitle2" fontWeight={600}>
                                                         Area
                                                     </Typography>
@@ -281,15 +281,15 @@ const HotelPage = () => {
                                                     <Typography variant="subtitle2" fontWeight={600}>
                                                         Beds
                                                     </Typography>
-                                                </TableCell>
+                                                </TableCell> */}
                                                 <TableCell align='center'>
                                                     <Typography variant="subtitle2" fontWeight={600}>
-                                                        Bathrooms
+                                                        Booking Price
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell align='center'>
                                                     <Typography variant="subtitle2" fontWeight={600}>
-                                                        Guests
+                                                        With Breakfast
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell align='center'>
@@ -322,17 +322,17 @@ const HotelPage = () => {
                                                             />
                                                         </Box>
                                                     </TableCell>
-                                                    <TableCell align='center'>
+                                                    {/* <TableCell align='center'>
                                                         <Typography variant="subtitle2" fontWeight={600}>
                                                             {item.room_category}
                                                         </Typography>
-                                                    </TableCell>
+                                                    </TableCell> */}
                                                     <TableCell align='center'>
                                                         <Typography variant="subtitle2" fontWeight={600}>
-                                                            {item.rooms}
+                                                            {item.room_name}
                                                         </Typography>
                                                     </TableCell>
-                                                    <TableCell align='center'>
+                                                    {/* <TableCell align='center'>
                                                         <Typography variant="subtitle2" fontWeight={600}>
                                                             {item.area}
                                                         </Typography>
@@ -346,15 +346,15 @@ const HotelPage = () => {
                                                         <Typography variant="subtitle2" fontWeight={600}>
                                                             {item.beds}
                                                         </Typography>
-                                                    </TableCell>
+                                                    </TableCell> */}
                                                     <TableCell align='center'>
                                                         <Typography variant="subtitle2" fontWeight={600}>
-                                                            {item.bathrooms}
+                                                            {item.booking_price}
                                                         </Typography>
                                                     </TableCell>
                                                     <TableCell align='center'>
                                                         <Typography variant="subtitle2" fontWeight={600}>
-                                                            {item.guests}
+                                                            {item.bf}
                                                         </Typography>
                                                     </TableCell>
                                                     <TableCell align='center'>

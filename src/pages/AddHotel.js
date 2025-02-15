@@ -1540,7 +1540,7 @@ const AddHotel = () => {
                                                                                             <Typography variant="body1">Guests: {detail.guests}</Typography>
                                                                                             <Typography variant="body1">Available Rooms: {detail.available_rooms}</Typography> */}
                                                                                             <Typography variant="body1">Booking Price: {detail.booking_price}</Typography>
-                                                                                            <Typography variant="body1">Discount Price: {detail.discount}</Typography>
+                                                                                            {/* <Typography variant="body1">Discount Price: {detail.discount}</Typography> */}
                                                                                             <Typography variant="body1">Booking Price (with Breakfast): {detail.bf}</Typography><Typography variant="body1"></Typography>
                                                                                             <Typography variant="h6" className='mt-1 mb-2'>Excluded Days:</Typography>
                                                                                             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>

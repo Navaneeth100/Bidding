@@ -423,7 +423,12 @@ const Facilities = () => {
                                         </TableCell>
                                         <TableCell align='center'>
                                             <Typography variant="subtitle2" fontWeight={600}>
-                                                Facilities
+                                                Name
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align='center'>
+                                            <Typography variant="subtitle2" fontWeight={600}>
+                                                Arabic Name
                                             </Typography>
                                         </TableCell>
                                         <TableCell align="center">
@@ -436,7 +441,7 @@ const Facilities = () => {
                                 <TableBody>
                                     {loading ? (
                                         <TableRow>
-                                            <TableCell colSpan={4} align="center">
+                                            <TableCell colSpan={5} align="center">
                                                 <Box
                                                     display="flex"
                                                     justifyContent="center"
@@ -476,6 +481,11 @@ const Facilities = () => {
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell align="center">
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        {item.name_ar}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
                                                     <Box display="flex" alignItems="center" justifyContent="center">
                                                         {/* <IconEye width={30} style={{ marginRight: "15px", cursor: "pointer" }} /> */}
                                                         <Button
@@ -490,7 +500,7 @@ const Facilities = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={4} align="center" sx={{ paddingTop: "300px" }}>
+                                            <TableCell colSpan={5} align="center" sx={{ paddingTop: "300px" }}>
                                                 <Typography variant="subtitle2" fontWeight={600}>
                                                     No Data to Display
                                                 </Typography>
