@@ -252,15 +252,41 @@ const AddHotel = () => {
 
     const [roomId, setroomId] = useState(null)
 
+
+    // Translate Location Name
+
+    const translateLocationName = async (text) => {
+        if (!text) return;
+        try {
+            const response = await axios.post(
+                `https://translation.googleapis.com/language/translate/v2`,
+                null,
+                {
+                    params: {
+                        q: text,
+                        target: "ar",
+                        key: "AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g",
+                    },
+                }
+            );
+            const translatedText = response.data.data.translations[0].translatedText;
+            return translatedText;
+        } catch (error) {
+            console.error("Translation Error:", error);
+        }
+    };
+
     const handleHotelSubmit = async (event) => {
         if (formData.name && formData.description && formData.rating && selectedLocation) {
             event.preventDefault();
+            const translatedLocationName = await translateLocationName(selectedLocation);
             let submitData = {
                 name: formData.name,
                 description: formData.description,
                 // pro_img: profilepicture,
                 rating: `${formData.rating}`,
                 locationName: selectedLocation,
+                locationName_ar: translatedLocationName,
                 location: `${markerPosition.lat},${markerPosition.lng}`,
                 booking_price: formData.bookingPrice,
                 discount: formData.discount,

@@ -321,15 +321,40 @@ const HotelPage = () => {
         }
     };
 
+    // Translate Location Name
+
+    const translateLocationName = async (text) => {
+        if (!text) return;
+        try {
+            const response = await axios.post(
+                `https://translation.googleapis.com/language/translate/v2`,
+                null,
+                {
+                    params: {
+                        q: text,
+                        target: "ar",
+                        key: "AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g",
+                    },
+                }
+            );
+            const translatedText = response.data.data.translations[0].translatedText;
+            return translatedText;
+        } catch (error) {
+            console.error("Translation Error:", error);
+        }
+    };
+
     const handleEdit = async (event) => {
         event.preventDefault();
         const translatedTags = await translateTags(edittags);
+        const translatedLocationName = await translateLocationName(selectedLocation || editData.location);
         let submitData = {
             name: editData.name,
             description: editData.description,
             rating: editData.rating,
             location: `${markerPosition.lat} , ${markerPosition.lng}`,
             locationName: selectedLocation || editData.location,
+            locationName_ar: translatedLocationName,
             owner_name: editData.owner_name,
             owner_email: editData.owner_email,
             owner_contact_number: editcontacts,
