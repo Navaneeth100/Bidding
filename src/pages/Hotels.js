@@ -72,6 +72,8 @@ const HotelPage = () => {
     const [facilitesfilter, setfacilitesfilter] = useState([])
     const [ratingfilter, setratingfilter] = useState([])
     const [locationfilter, setlocationfilter] = useState([])
+    const [emiratesfilter, setemiratesfilter] = useState([])
+    const [propertytypefilter, setpropertytypefilter] = useState([])
     const [searchText, setsearchText] = useState("")
 
     const MenuProps = { PaperProps: { style: { maxHeight: 200, overflowY: 'auto' } } };
@@ -81,7 +83,7 @@ const HotelPage = () => {
         const formattedcategoryfilter = categoryfilter.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id));
         const formattedfacilitiesfilter = facilitesfilter.map(name => parseInt(facilitiesList.find(item => item.name === name)?.id));
         axios
-            .get(`${url}/hotel/createhotels/?category_id_search=${formattedcategoryfilter}&rating_search=${ratingfilter}&facility_id_search=${formattedfacilitiesfilter}&emirates_search=${locationfilter}&search=${searchText}&page=${page}&page_size=${pageSize}`, {
+            .get(`${url}/hotel/createhotels/?category_id_search=${formattedcategoryfilter}&rating_search=${ratingfilter}&facility_id_search=${formattedfacilitiesfilter}&emirates_search=${emiratesfilter}&propertytype_search=${propertytypefilter}&search=${searchText}&page=${page}&page_size=${pageSize}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -106,7 +108,7 @@ const HotelPage = () => {
                         Authorization: `Bearer ${res.data.access}`,
                     };
                     axios
-                        .get(`${url}/hotel/createhotels/?category_id_search=${formattedcategoryfilter}&rating_search=${ratingfilter}&facility_id_search=${formattedfacilitiesfilter}&emirates_search=${locationfilter}&search=${searchText}&page=${page}&page_size=${pageSize}`, {
+                        .get(`${url}/hotel/createhotels/?category_id_search=${formattedcategoryfilter}&rating_search=${ratingfilter}&facility_id_search=${formattedfacilitiesfilter}&emirates_search=${emiratesfilter}&propertytype_search=${propertytypefilter}&search=${searchText}&page=${page}&page_size=${pageSize}`, {
                             headers: new_headers,
                         })
                         .then((res) => {
@@ -125,7 +127,7 @@ const HotelPage = () => {
 
     useEffect(() => {
         fetchHotels(currentPage);
-    }, [currentPage, categoryfilter, facilitesfilter, ratingfilter, locationfilter, searchText]);
+    }, [currentPage, categoryfilter, facilitesfilter, ratingfilter, emiratesfilter, propertytypefilter, searchText]);
 
     // SN Handler
 
@@ -1126,7 +1128,7 @@ const HotelPage = () => {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={12} sm={3}>
+                        {/* <Grid item xs={12} sm={3}>
                             <TextField
                                 label="Location"
                                 variant="outlined"
@@ -1134,11 +1136,46 @@ const HotelPage = () => {
                                 sx={{ mb: 2 }}
                                 onChange={(e) => setlocationfilter(e.target.value)}
                             />
+                        </Grid> */}
+                        <Grid item xs={12} sm={3}>
+                            <FormControl fullWidth>
+                                <InputLabel>Emirates</InputLabel>
+                                <Select
+                                    value={emiratesfilter}
+                                    onChange={(e) => { setemiratesfilter(e.target.value) }}
+                                    label="Emirates"
+                                    MenuProps={MenuProps}>
+                                    <MenuItem value="Dubai">Dubai</MenuItem>
+                                    <MenuItem value="Abu Dhabi">Abu Dhabi</MenuItem>
+                                    <MenuItem value="Sharjah">Sharjah</MenuItem>
+                                    <MenuItem value="Ajman">Ajman</MenuItem>
+                                    <MenuItem value="Fujeirah">Fujeirah</MenuItem>
+                                    <MenuItem value="RAK">RAK</MenuItem>
+                                    <MenuItem value="UAQ">UAQ</MenuItem>
+                                    <MenuItem value="Al Ain">Al Ain</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={3}>
+                            <FormControl fullWidth>
+                                <InputLabel>Property Type</InputLabel>
+                                <Select
+                                    value={propertytypefilter}
+                                    onChange={(e) => { setpropertytypefilter(e.target.value) }}
+                                    label="Property Type"
+                                    MenuProps={MenuProps}>
+                                    <MenuItem value="Hotels">Hotels</MenuItem>
+                                    <MenuItem value="Apartments">Apartments</MenuItem>
+                                    <MenuItem value="Resorts">Resorts</MenuItem>
+                                    <MenuItem value="Villas">Villas</MenuItem>
+                                    <MenuItem value="Others">Others</MenuItem>
+                                </Select>
+                            </FormControl>
                         </Grid>
                     </Grid>
                     <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 2 }}>
-                        <Button variant="contained" color="primary" sx={{ mr: 2 }} onClick={() => fetchHotels(currentPage)}>Submit</Button>
-                        <Button variant="outlined" color="primary" onClick={() => { setcategoryfilter([]); setratingfilter(''); setfacilitesfilter([]); setlocationfilter(''); fetchHotels(1) }}>Clear</Button>
+                        {/* <Button variant="contained" color="primary" sx={{ mr: 2 }} onClick={() => fetchHotels(currentPage)}>Submit</Button> */}
+                        <Button variant="outlined" color="primary" onClick={() => { setcategoryfilter([]); setratingfilter(''); setfacilitesfilter([]); setemiratesfilter(''); setpropertytypefilter(''); fetchHotels(1) }}>Clear</Button>
                     </Box>
                 </Box>
             )}
@@ -1407,6 +1444,7 @@ const HotelPage = () => {
                 maxWidth="lg"
                 fullWidth
                 sx={{ padding: 2 }}
+                PaperProps={{ sx: { overflowY: 'unset' } }}
             >
                 <DialogTitle sx={{ m: 2, p: 2, position: 'relative' }} id="customized-dialog-title">
                     Edit Hotel
