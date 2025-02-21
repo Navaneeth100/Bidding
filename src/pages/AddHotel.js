@@ -1077,7 +1077,7 @@ const AddHotel = () => {
                                                                     <Typography variant="h6" className='mb-3' gutterBottom>
                                                                         Selected Location : {selectedLocation}
                                                                     </Typography>
-                                                                    <LoadScript googleMapsApiKey="AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g" libraries={['places']}>
+                                                                    {/* <LoadScript googleMapsApiKey="AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g" libraries={['places']}> */}
                                                                         <GoogleMap
                                                                             mapContainerStyle={{ height: '400px', width: '100%' }}
                                                                             zoom={15}
@@ -1088,7 +1088,7 @@ const AddHotel = () => {
                                                                                 onDragEnd={handleMarkerDragEnd}
                                                                             />
                                                                         </GoogleMap>
-                                                                    </LoadScript>
+                                                                    {/* </LoadScript> */}
                                                                 </Box>
                                                             </Grid>
                                                             {[
