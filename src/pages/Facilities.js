@@ -170,23 +170,38 @@ const Facilities = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const translatedFacilities = await translateFacilities(formData.name);
-        let submitData = {
-            icon: selectedFile,
-            name: formData.name,
-            name_ar: translatedFacilities
-        }
+        if (formData.name && selectedFile) {
+            const translatedFacilities = await translateFacilities(formData.name);
+            let submitData = {
+                icon: selectedFile,
+                name: formData.name,
+                name_ar: translatedFacilities
+            }
 
-        try {
-            const response = await axios.post(`${url}/hotel/facilities/`, submitData, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "multipart/form-data",
-                },
-                withCredentials: false,
-            });
-            if (response.data.message) {
-                toast.success(`${response.data.message}`, {
+            try {
+                const response = await axios.post(`${url}/hotel/facilities/`, submitData, {
+                    headers: {
+                        Authorization: `Bearer ${tokenStr}`,
+                        "Content-Type": "multipart/form-data",
+                    },
+                    withCredentials: false,
+                });
+                if (response.data.message) {
+                    toast.success(`${response.data.message}`, {
+                        position: 'top-right',
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: 'colored',
+                    });
+                }
+                toggleModal('add')
+                resetForm()
+                fetchFacilities()
+            } catch (error) {
+                toast.error(`${error.response.data.error}`, {
                     position: 'top-right',
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -196,11 +211,8 @@ const Facilities = () => {
                     theme: 'colored',
                 });
             }
-            toggleModal('add')
-            resetForm()
-            fetchFacilities()
-        } catch (error) {
-            toast.error(`${error.response.data.error}`, {
+        } else {
+            toast.error('Please fill all required fields and select a file.', {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -209,7 +221,6 @@ const Facilities = () => {
                 draggable: true,
                 theme: 'colored',
             });
-        } finally {
         }
     };
 
@@ -219,23 +230,38 @@ const Facilities = () => {
 
     const handleEdit = async (event) => {
         event.preventDefault();
-        const translatedFacilities = await translateFacilities(editData.name);
-        let submitData = {
-            name: editData.name,
-            name_ar: translatedFacilities,
-            icon: selectedFile || previewUrl
-        };
+        if (editData.name && selectedFile || previewUrl) {
+            const translatedFacilities = await translateFacilities(editData.name);
+            let submitData = {
+                name: editData.name,
+                name_ar: translatedFacilities,
+                icon: selectedFile || previewUrl
+            };
 
-        try {
-            const response = await axios.put(`${url}/hotel/facilities/${editData.id}/`, submitData, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "multipart/form-data",
-                },
-                withCredentials: false,
-            });
-            if (response.data.message) {
-                toast.success(`${response.data.message}`, {
+            try {
+                const response = await axios.put(`${url}/hotel/facilities/${editData.id}/`, submitData, {
+                    headers: {
+                        Authorization: `Bearer ${tokenStr}`,
+                        "Content-Type": "multipart/form-data",
+                    },
+                    withCredentials: false,
+                });
+                if (response.data.message) {
+                    toast.success(`${response.data.message}`, {
+                        position: 'top-right',
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: 'colored',
+                    });
+                }
+                toggleModal('edit');
+                resetForm()
+                fetchFacilities();
+            } catch (error) {
+                toast.error(`${error.response.data.error}`, {
                     position: 'top-right',
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -245,11 +271,8 @@ const Facilities = () => {
                     theme: 'colored',
                 });
             }
-            toggleModal('edit');
-            resetForm()
-            fetchFacilities();
-        } catch (error) {
-            toast.error(`${error.response.data.error}`, {
+        } else {
+            toast.error('Please fill all required fields and select a file.', {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -258,7 +281,6 @@ const Facilities = () => {
                 draggable: true,
                 theme: 'colored',
             });
-        } finally {
         }
     };
 

@@ -168,24 +168,39 @@ const Category = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const translatedCategoryName = await translateCategory(formData.category_name);
-        let submitData = {
-            icon: selectedFile,
-            category_name: formData.category_name,
-            category_name_ar: translatedCategoryName,
-            description: formData.description,
-        }
+        if (formData.category_name && selectedFile) {
+            const translatedCategoryName = await translateCategory(formData.category_name);
+            let submitData = {
+                icon: selectedFile,
+                category_name: formData.category_name,
+                category_name_ar: translatedCategoryName,
+                description: formData.description,
+            }
 
-        try {
-            const response = await axios.post(`${url}/hotel/room-categories/`, submitData, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "multipart/form-data",
-                },
-                withCredentials: false,
-            });
-            if (response.data.message) {
-                toast.success(`${response.data.message}`, {
+            try {
+                const response = await axios.post(`${url}/hotel/room-categories/`, submitData, {
+                    headers: {
+                        Authorization: `Bearer ${tokenStr}`,
+                        "Content-Type": "multipart/form-data",
+                    },
+                    withCredentials: false,
+                });
+                if (response.data.message) {
+                    toast.success(`${response.data.message}`, {
+                        position: 'top-right',
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: 'colored',
+                    });
+                }
+                toggleModal('add')
+                resetForm()
+                fetchCategory()
+            } catch (error) {
+                toast.error(`${error.response.data.error}`, {
                     position: 'top-right',
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -195,11 +210,8 @@ const Category = () => {
                     theme: 'colored',
                 });
             }
-            toggleModal('add')
-            resetForm()
-            fetchCategory()
-        } catch (error) {
-            toast.error(`${error.response.data.error}`, {
+        } else {
+            toast.error('Please fill all required fields and select a file.', {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -208,8 +220,8 @@ const Category = () => {
                 draggable: true,
                 theme: 'colored',
             });
-        } finally {
         }
+
     };
 
     //  Edit Category
@@ -218,24 +230,39 @@ const Category = () => {
 
     const handleEdit = async (event) => {
         event.preventDefault();
-        const translatedCategoryName = await translateCategory(editData.category_name);
-        let submitData = {
-            icon: selectedFile ? selectedFile : previewUrl,
-            category_name: editData.category_name,
-            category_name_ar: translatedCategoryName,
-            description: editData.description,
-        };
+        if (editData.category_name && selectedFile || previewUrl) {
+            const translatedCategoryName = await translateCategory(editData.category_name);
+            let submitData = {
+                icon: selectedFile ? selectedFile : previewUrl,
+                category_name: editData.category_name,
+                category_name_ar: translatedCategoryName,
+                description: editData.description,
+            };
 
-        try {
-            const response = await axios.put(`${url}/hotel/room-categories/${editData.id}/`, submitData, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "multipart/form-data",
-                },
-                withCredentials: false,
-            });
-            if (response.data.message) {
-                toast.success(`${response.data.message}`, {
+            try {
+                const response = await axios.put(`${url}/hotel/room-categories/${editData.id}/`, submitData, {
+                    headers: {
+                        Authorization: `Bearer ${tokenStr}`,
+                        "Content-Type": "multipart/form-data",
+                    },
+                    withCredentials: false,
+                });
+                if (response.data.message) {
+                    toast.success(`${response.data.message}`, {
+                        position: 'top-right',
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: 'colored',
+                    });
+                }
+                toggleModal('edit');
+                resetForm()
+                fetchCategory();
+            } catch (error) {
+                toast.error(`${error.response.data.error}`, {
                     position: 'top-right',
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -245,11 +272,8 @@ const Category = () => {
                     theme: 'colored',
                 });
             }
-            toggleModal('edit');
-            resetForm()
-            fetchCategory();
-        } catch (error) {
-            toast.error(`${error.response.data.error}`, {
+        } else {
+            toast.error('Please fill all required fields and select a file.', {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -258,7 +282,6 @@ const Category = () => {
                 draggable: true,
                 theme: 'colored',
             });
-        } finally {
         }
     };
 
