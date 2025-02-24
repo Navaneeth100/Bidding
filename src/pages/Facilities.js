@@ -230,7 +230,7 @@ const Facilities = () => {
 
     const handleEdit = async (event) => {
         event.preventDefault();
-        if (editData.name && selectedFile || previewUrl) {
+        if (editData.name && selectedFile || editData.icon) {
             const translatedFacilities = await translateFacilities(editData.name);
             let submitData = {
                 name: editData.name,

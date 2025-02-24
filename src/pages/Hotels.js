@@ -772,7 +772,7 @@ const HotelPage = () => {
     const handleRoomFileSubmit = async (id) => {
         event.preventDefault();
         let submitData = {
-            files: hotelfiles
+            files: hotelfiles.filter((file) => file.id == undefined && file.id == null)
         }
 
         try {
@@ -813,7 +813,7 @@ const HotelPage = () => {
 
     const handleRemoveHotelFile = async (fileToRemove, deleteid) => {
 
-        if (!fileToRemove.file) {
+        if (!fileToRemove.id) {
             sethotelfiles(hotelfiles.filter((file) => file !== fileToRemove));
         }
         else {
@@ -836,6 +836,9 @@ const HotelPage = () => {
                         draggable: true,
                         theme: 'colored',
                     });
+                    // sethotelfiles(hotelfiles.filter((file) => file !== fileToRemove));
+                }
+                if (response.status == 204) {
                     sethotelfiles(hotelfiles.filter((file) => file !== fileToRemove));
                 }
             } catch (error) {
@@ -1440,7 +1443,7 @@ const HotelPage = () => {
 
             <Dialog
                 open={modal.edit}
-                onClose={() => toggleModal('edit')}
+                onClose={() => {toggleModal('edit'),fetchHotels(currentPage)}}
                 maxWidth="lg"
                 fullWidth
                 sx={{ padding: 2 }}
@@ -1518,16 +1521,16 @@ const HotelPage = () => {
                                         Selected Location : {selectedLocation}
                                     </Typography>
                                     {/* <LoadScript googleMapsApiKey="AIzaSyBWbDIh2SzBRw_RuV_UHwDAZb6DhEyB-3g" libraries={['places']}> */}
-                                        <GoogleMap
-                                            mapContainerStyle={{ height: '400px', width: '100%' }}
-                                            zoom={15}
-                                            center={center}
-                                        >
-                                            <Marker position={markerPosition}
-                                                draggable={true}
-                                                onDragEnd={handleMarkerDragEnd}
-                                            />
-                                        </GoogleMap>
+                                    <GoogleMap
+                                        mapContainerStyle={{ height: '400px', width: '100%' }}
+                                        zoom={15}
+                                        center={center}
+                                    >
+                                        <Marker position={markerPosition}
+                                            draggable={true}
+                                            onDragEnd={handleMarkerDragEnd}
+                                        />
+                                    </GoogleMap>
                                     {/* </LoadScript> */}
                                 </Box>
                             </Grid>
@@ -2080,7 +2083,7 @@ const HotelPage = () => {
 
             <Dialog
                 open={modal.editrooms}
-                onClose={() => toggleModal('editrooms')}
+                onClose={() => {toggleModal('editrooms'),fetchRooms(editId)}}
                 maxWidth="sm"
                 fullWidth
                 sx={{ padding: 4 }}

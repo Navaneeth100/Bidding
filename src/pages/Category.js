@@ -230,7 +230,7 @@ const Category = () => {
 
     const handleEdit = async (event) => {
         event.preventDefault();
-        if (editData.category_name && selectedFile || previewUrl) {
+        if (editData.category_name && selectedFile || editData.icon) {
             const translatedCategoryName = await translateCategory(editData.category_name);
             let submitData = {
                 icon: selectedFile ? selectedFile : previewUrl,
