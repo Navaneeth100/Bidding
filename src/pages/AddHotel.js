@@ -119,7 +119,10 @@ const AddHotel = () => {
         return completedSteps() === totalSteps();
     };
 
+    const [buttondisable, setbuttondisable] = useState(false)
+
     const handleNext = async (e) => {
+        setbuttondisable(true);
         let responseSuccess = false;
         if (activeStep === 0) {
             responseSuccess = await handleHotelSubmit(e);
@@ -143,6 +146,7 @@ const AddHotel = () => {
                     draggable: true,
                     theme: 'colored',
                 });
+                setbuttondisable(false)
                 return;
             }
 
@@ -157,6 +161,7 @@ const AddHotel = () => {
 
             setActiveStep(newActiveStep);
         }
+        setbuttondisable(false)
     };
 
     const handleBack = () => {
@@ -615,7 +620,7 @@ const AddHotel = () => {
     const handleNavigateToHotelList = () => {
         setTimeout(() => {
             navigate('/hotels/');
-        }, 2000);
+        }, 1000);
     }
 
     // Tag Adds
@@ -857,6 +862,7 @@ const AddHotel = () => {
     };
 
     const handleArabicSubmit = async (event) => {
+        setbuttondisable(true);
         event.preventDefault();
         const translatedTags = await translateTags(translatedHotelPreview.tags);
         let submitData = {
@@ -877,6 +883,7 @@ const AddHotel = () => {
         } catch (error) {
 
         } finally {
+            setbuttondisable(false);
             handleNavigateToHotelList()
         }
     };
@@ -1814,7 +1821,7 @@ const AddHotel = () => {
                                                 </Button> */}
                                                 <Box sx={{ flex: '1 1 auto' }} />
                                                 <Button
-                                                    onClick={(e) => { if (activeStep === 3) { handleArabicSubmit(e) } else { handleNext(e) } }} sx={{ mr: 1 }}>
+                                                    onClick={(e) => { if (activeStep === 3) { handleArabicSubmit(e) } else { handleNext(e) } }} sx={{ mr: 1 }} disabled={buttondisable}>
                                                     {activeStep == 3 ? "Finish" : "Next"}
                                                 </Button>
                                             </Box>

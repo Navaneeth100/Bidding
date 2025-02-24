@@ -94,12 +94,12 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
                 <Box>
                     <Typography variant="subtitle1"
                         fontWeight={600} component="label" htmlFor='email' mb="5px">Email</Typography>
-                    <CustomTextField id="email" name="email" variant="outlined" fullWidth onChange={(e) => { handleChange(e) }} />
+                    <CustomTextField id="email" name="email" variant="outlined" placeholder="Enter Email" fullWidth onChange={(e) => { handleChange(e) }} />
                 </Box>
                 <Box mt="25px">
                     <Typography variant="subtitle1"
                         fontWeight={600} component="label" htmlFor='password' mb="5px">Password</Typography>
-                    <CustomTextField id="password" name="password" type={showPassword ? 'text' : 'password'} variant="outlined" fullWidth
+                    <CustomTextField id="password" name="password" type={showPassword ? 'text' : 'password'} variant="outlined" placeholder="Enter Password" fullWidth
                         InputProps={{
                             endAdornment: (
                                 <Button className='ms-2' onClick={() => setShowPassword(!showPassword)}>
