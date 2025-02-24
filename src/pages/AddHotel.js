@@ -282,7 +282,7 @@ const AddHotel = () => {
     };
 
     const handleHotelSubmit = async (event) => {
-        if (formData.name && formData.description && formData.rating && selectedLocation) {
+        if (formData.name && formData.description && formData.rating && selectedLocation && files.length > 0) {
             event.preventDefault();
             const translatedLocationName = await translateLocationName(selectedLocation);
             let submitData = {
@@ -331,7 +331,16 @@ const AddHotel = () => {
                     return true;
                 }
             } catch (error) {
-                console.error('Error:', error);
+                // console.error('Error:', error);
+                toast.error(`${error.response.data.error}`, {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'colored',
+                });
             } finally {
             }
         }
@@ -411,7 +420,7 @@ const AddHotel = () => {
 
     const handleRoomSubmit = async (event) => {
         // const isRoomDataValid = roomData.every((room) => Object.values(room).every((value) => String(value).trim() !== ''));
-        if (roomId) {
+        if (roomId && roomData.room_name && roomData.booking_price && roomData.withbreakfast && files1.length > 0 && selectedDates.length > 0) {
             event.preventDefault();
             const translatedRoomName = await translateRoomName(roomData.room_name);
             let submitData = {
@@ -469,17 +478,17 @@ const AddHotel = () => {
             } finally {
             }
         }
-        // else {
-        //     toast.error('Please Fill the Fields Completely...', {
-        //         position: 'top-right',
-        //         autoClose: 3000,
-        //         hideProgressBar: false,
-        //         closeOnClick: true,
-        //         pauseOnHover: true,
-        //         draggable: true,
-        //         theme: 'colored',
-        //     });
-        // }
+        else {
+            toast.error('Please Fill the Fields Completely...', {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
+        }
 
     };
 
@@ -491,7 +500,7 @@ const AddHotel = () => {
     const handleOwnerDataChange = (field, value) => { setOwnerData((prev) => ({ ...prev, [field]: value })) };
 
     const handleOwnerDetailSubmit = async (event) => {
-        if (ownerData.ownername && ownerData.supportcontact && ownerData.owneremail) {
+        if (ownerData.ownername && ownerData.supportcontact && ownerData.owneremail && contactsList.length > 0) {
             event.preventDefault();
             let submitData = {
                 owner_name: ownerData.ownername,
