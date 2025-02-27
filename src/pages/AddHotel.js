@@ -293,9 +293,9 @@ const AddHotel = () => {
                 locationName: selectedLocation,
                 locationName_ar: translatedLocationName,
                 location: `${markerPosition.lat},${markerPosition.lng}`,
-                booking_price: formData.bookingPrice,
-                discount: formData.discount,
-                available_rooms: formData.availableRooms,
+                // booking_price: formData.bookingPrice,
+                // discount: formData.discount,
+                // available_rooms: formData.availableRooms,
                 h_category: categories.map(name => parseInt(categoryList.find(item => item.category_name === name)?.id)),
                 tags: tagsList,
                 propertytype: propertytype,
@@ -1107,7 +1107,7 @@ const AddHotel = () => {
                                                                     {/* </LoadScript> */}
                                                                 </Box>
                                                             </Grid>
-                                                            {[
+                                                            {/* {[
                                                                 { label: 'Booking Price', key: 'bookingPrice' },
                                                                 { label: 'Discount', key: 'discount' },
                                                                 { label: 'Available Rooms', key: 'availableRooms' },
@@ -1123,7 +1123,7 @@ const AddHotel = () => {
                                                                         }
                                                                     />
                                                                 </Grid>
-                                                            ))}
+                                                            ))} */}
                                                             <Grid item xs={6}>
                                                                 <FormControl fullWidth>
                                                                     <InputLabel>Property Type</InputLabel>
