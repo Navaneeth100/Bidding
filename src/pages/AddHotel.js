@@ -187,7 +187,7 @@ const AddHotel = () => {
 
     const fetchCategory = () => {
         axios
-            .get(`${url}/hotel/room-categories/`, {
+            .get(`${url}/hotel/room-categories/?list=list`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -195,7 +195,7 @@ const AddHotel = () => {
                 withCredentials: false,
             })
             .then((res) => {
-                setcategoryList(res.data.results);
+                setcategoryList(res.data);
             })
             .catch((error) => {
                 let refresh = String(authTokens.refresh);
@@ -207,9 +207,9 @@ const AddHotel = () => {
                         Authorization: `Bearer ${res.data.access}`,
                     };
                     axios
-                        .get(`${url}/hotel/room-categories/`, { headers: new_headers })
+                        .get(`${url}/hotel/room-categories/?list=list`, { headers: new_headers })
                         .then((res) => {
-                            setcategoryList(res.data.results);
+                            setcategoryList(res.data);
                         });
                 });
             });
@@ -221,7 +221,7 @@ const AddHotel = () => {
 
     const fetchFacilities = () => {
         axios
-            .get(`${url}/hotel/facilities/`, {
+            .get(`${url}/hotel/facilities/?list=list`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -229,7 +229,7 @@ const AddHotel = () => {
                 withCredentials: false,
             })
             .then((res) => {
-                setfacilitiesList(res.data.results);
+                setfacilitiesList(res.data);
             })
             .catch((error) => {
                 let refresh = String(authTokens.refresh);
@@ -241,9 +241,9 @@ const AddHotel = () => {
                         Authorization: `Bearer ${res.data.access}`,
                     };
                     axios
-                        .get(`${url}/hotel/facilities/`, { headers: new_headers })
+                        .get(`${url}/hotel/facilities/?list=list`, { headers: new_headers })
                         .then((res) => {
-                            setfacilitiesList(res.data.results);
+                            setfacilitiesList(res.data);
                         });
                 });
             });
