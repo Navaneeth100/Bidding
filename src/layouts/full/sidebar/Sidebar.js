@@ -1,120 +1,139 @@
-import { useMediaQuery, Box, Drawer } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { useMediaQuery, Box, Drawer, IconButton, useTheme } from '@mui/material';
+// import { Menu as MenuIcon } from '@mui/icons-material';
 import SidebarItems from './SidebarItems';
-import { Upgrade } from './Updrade';
-import { Sidebar, Logo } from 'react-mui-sidebar';
-import logo from '../../../assets/images/logos/stay.jpg'
+import { Logo } from 'react-mui-sidebar';
+import logo from '../../../assets/images/logos/stay.jpg';
 
-const MSidebar = (props) => {
+const MSidebar = ({ isSidebarOpen }) => {
+  const theme = useTheme();
+  const lgUp = useMediaQuery(theme.breakpoints.up('lg'));
+  const [collapsed, setCollapsed] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
 
-  const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
-  const sidebarWidth = '270px';
+  // Expanded width and collapsed width
+  const EXPANDED_WIDTH = '270px';
+  const COLLAPSED_WIDTH = '80px';
 
-  // Custom CSS for short scrollbar
-  const scrollbarStyles = {
-    '&::-webkit-scrollbar': {
-      width: '7px',
-
-    },
-    '&::-webkit-scrollbar-thumb': {
-      backgroundColor: '#eff2f7',
-      borderRadius: '15px',
-    },
+  // Get the current sidebar width based on state
+  const getSidebarWidth = () => {
+    if (collapsed) {
+      return isHovering ? EXPANDED_WIDTH : COLLAPSED_WIDTH;
+    }
+    return EXPANDED_WIDTH;
   };
 
+  // Toggle sidebar collapsed state
+  const toggleSidebar = () => {
+    setCollapsed(!collapsed);
+  };
 
-  if (lgUp) {
-    return (
-      <Box
-        sx={{
-          width: sidebarWidth,
-          flexShrink: 0,
+  // Handle mouse enter/leave for hover effect
+  const handleMouseEnter = () => {
+    if (collapsed) {
+      setIsHovering(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+  };
+
+  // Update main content styles using CSS variables instead of props
+  useEffect(() => {
+    const mainContent = document.querySelector('.mainContent');
+    if (mainContent) {
+      mainContent.style.width = collapsed 
+        ? `calc(100% - ${COLLAPSED_WIDTH})` 
+        : `calc(100% - ${EXPANDED_WIDTH})`;
+      mainContent.style.marginLeft = collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
+      mainContent.style.transition = 'width 0.3s ease, margin-left 0.3s ease';
+    }
+  }, [collapsed]);
+
+  return (
+    <Box 
+      sx={{ 
+        width: getSidebarWidth(), 
+        flexShrink: 0, 
+        transition: 'width 0.3s ease',
+      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <Drawer
+        anchor="left"
+        open={isSidebarOpen !== false}
+        variant="permanent"
+        PaperProps={{
+          sx: {
+            width: getSidebarWidth(),
+            boxSizing: 'border-box',
+            overflowX: 'hidden',
+            transition: 'width 0.3s ease',
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: theme.palette.background.paper,
+            boxShadow: '0 4px 20px 0 rgba(0,0,0,0.12)',
+            borderRight: `1px solid ${theme.palette.divider}`,
+          },
         }}
       >
-        {/* ------------------------------------------- */}
-        {/* Sidebar for desktop */}
-        {/* ------------------------------------------- */}
-        <Drawer
-          anchor="left"
-          open={props.isSidebarOpen}
-          variant="permanent"
-          PaperProps={{
-            sx: {
-              boxSizing: 'border-box',
-              ...scrollbarStyles,
-            },
-          }}
-        >
-          {/* ------------------------------------------- */}
-          {/* Sidebar Box */}
-          {/* ------------------------------------------- */}
-          <Box
-            sx={{
-              height: '100%',
+        {/* Header with toggle button */}
+        <Box sx={{ 
+          width: '100%', 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          p: 2,
+          borderBottom: `1px solid ${theme.palette.divider}`
+        }}>
+          {/* Logo - visible when expanded or hovering */}
+          <Box 
+            sx={{ 
+              opacity: collapsed && !isHovering ? 0 : 1,
+              transition: 'opacity 0.3s ease',
+              width: collapsed && !isHovering ? 0 : '120px',
+              overflow: 'hidden'
             }}
           >
-
-            <Sidebar
-              width={'270px'}
-              collapsewidth="80px"
-              open={props.isSidebarOpen}
-              themeColor="#262256"
-              themeSecondaryColor="#49beff"
-              showProfile={false}
-            >
-              {/* ------------------------------------------- */}
-              {/* Logo */}
-              {/* ------------------------------------------- */}
-              <Logo img={logo} />
-              <Box>
-                {/* ------------------------------------------- */}
-                {/* Sidebar Items */}
-                {/* ------------------------------------------- */}
-                <SidebarItems />
-                {/* <Upgrade /> */}
-              </Box>
-            </Sidebar >
+            <Logo img={logo} />
           </Box>
-        </Drawer >
-      </Box >
-    );
-  }
-  return (
-    <Drawer
-      anchor="left"
-      open={props.isMobileSidebarOpen}
-      onClose={props.onSidebarClose}
-      variant="temporary"
-      PaperProps={{
-        sx: {
+          
+          {/* Toggle button */}
+          <IconButton 
+            onClick={toggleSidebar} 
+            aria-label="toggle sidebar"
+            sx={{
+              backgroundColor: theme.palette.primary.light,
+              color: theme.palette.primary.main,
+              '&:hover': {
+                backgroundColor: theme.palette.primary.main,
+                color: 'white',
+              },
+            }}
+          >
+            {/* <MenuIcon /> */}
+            O
+          </IconButton>
+        </Box>
 
-          boxShadow: (theme) => theme.shadows[8],
-          ...scrollbarStyles,
-        },
-      }}
-    >
-      <Sidebar
-        width={'270px'}
-        collapsewidth="80px"
-        isCollapse={false}
-        mode="light"
-        direction="ltr"
-        themeColor="#262256"
-        themeSecondaryColor="#49beff"
-        showProfile={false}
-      >
-        {/* ------------------------------------------- */}
-        {/* Logo */}
-        {/* ------------------------------------------- */}
-
-        <Logo img={logo} />
-
-        {/* ------------------------------------------- */}
-        {/* Sidebar For Mobile */}
-        {/* ------------------------------------------- */}
-        <SidebarItems />
-        {/* <Upgrade /> */}
-      </Sidebar>
-    </Drawer>
+        {/* Sidebar Content */}
+        <Box
+          sx={{
+            flexGrow: 1,
+            width: '100%',
+            overflowX: 'hidden',
+            overflowY: 'auto',
+          }}
+        >
+          <SidebarItems 
+            collapsed={collapsed && !isHovering} 
+          />
+        </Box>
+      </Drawer>
+    </Box>
   );
 };
+
 export default MSidebar;

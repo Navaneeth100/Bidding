@@ -3,9 +3,7 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import fs from 'fs/promises';
 import svgr from '@svgr/rollup';
-// import svgr from 'vite-plugin-svgr'
 
-// https://vitejs.dev/config/
 export default defineConfig({
     resolve: {
         alias: {
@@ -36,11 +34,17 @@ export default defineConfig({
         },
     },
 
-
-    
-    // plugins: [react(),svgr({
-    //   exportAsDefault: true
-    // })],
-
     plugins: [svgr(), react()],
+
+    // ✅ Added Proxy to Fix CORS
+    server: {
+        proxy: {
+            "/api": {
+                target: "https://clocks-george-gg-brazilian.trycloudflare.com", // Your API
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api/, ""),
+                secure: false, // If API has SSL issues, set to false
+            },
+        },
+    },
 });
