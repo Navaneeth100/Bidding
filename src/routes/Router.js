@@ -23,6 +23,10 @@ const Settings = Loadable(lazy(() => import('../pages/Settings')));
 const Category = Loadable(lazy(() => import('../pages/Category')));
 const Facilities = Loadable(lazy(() => import('../pages/Facilities')));
 
+// Bidding
+
+const ServiceCategory = Loadable(lazy(() => import('../pages/Services/ServiceCategory')));
+
 const user = JSON.parse(localStorage.getItem('authTokens'));
 const Router = [
   {
@@ -39,6 +43,11 @@ const Router = [
       { path: '/settings', exact: true, element: <Settings /> },
       { path: '/category', exact: true, element: <Category /> },
       { path: '/facilities', exact: true, element: <Facilities /> },
+
+      //  Bidding
+
+      { path: '/service_category', exact: true, element: <ServiceCategory /> },
+
       // { path: '/icons', exact: true, element: <Icons /> },
       // { path: '/ui/typography', exact: true, element: <TypographyPage /> },
       // { path: '/ui/shadow', exact: true, element: <Shadow /> },

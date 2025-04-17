@@ -4,6 +4,7 @@ import { useMediaQuery, Box, Drawer, IconButton, useTheme } from '@mui/material'
 import SidebarItems from './SidebarItems';
 import { Logo } from 'react-mui-sidebar';
 import logo from '../../../assets/images/logos/stay.jpg';
+import { IconMenu2 } from '@tabler/icons-react';
 
 const MSidebar = ({ isSidebarOpen }) => {
   const theme = useTheme();
@@ -39,12 +40,35 @@ const MSidebar = ({ isSidebarOpen }) => {
     setIsHovering(false);
   };
 
+  // Auto toggle sidebar based on window width
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1200) {
+        setCollapsed(false); // Expand if window width >= 1220
+      } else {
+        setCollapsed(true); // Collapse otherwise
+      }
+    };
+
+    // Set initial state based on current window size
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   // Update main content styles using CSS variables instead of props
   useEffect(() => {
     const mainContent = document.querySelector('.mainContent');
     if (mainContent) {
-      mainContent.style.width = collapsed 
-        ? `calc(100% - ${COLLAPSED_WIDTH})` 
+      mainContent.style.width = collapsed
+        ? `calc(100% - ${COLLAPSED_WIDTH})`
         : `calc(100% - ${EXPANDED_WIDTH})`;
       mainContent.style.marginLeft = collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
       mainContent.style.transition = 'width 0.3s ease, margin-left 0.3s ease';
@@ -52,10 +76,10 @@ const MSidebar = ({ isSidebarOpen }) => {
   }, [collapsed]);
 
   return (
-    <Box 
-      sx={{ 
-        width: getSidebarWidth(), 
-        flexShrink: 0, 
+    <Box
+      sx={{
+        width: getSidebarWidth(),
+        flexShrink: 0,
         transition: 'width 0.3s ease',
       }}
       onMouseEnter={handleMouseEnter}
@@ -80,17 +104,17 @@ const MSidebar = ({ isSidebarOpen }) => {
         }}
       >
         {/* Header with toggle button */}
-        <Box sx={{ 
-          width: '100%', 
-          display: 'flex', 
-          justifyContent: 'space-between', 
+        <Box sx={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
           p: 2,
           borderBottom: `1px solid ${theme.palette.divider}`
         }}>
           {/* Logo - visible when expanded or hovering */}
-          <Box 
-            sx={{ 
+          <Box
+            sx={{
               opacity: collapsed && !isHovering ? 0 : 1,
               transition: 'opacity 0.3s ease',
               width: collapsed && !isHovering ? 0 : '120px',
@@ -99,10 +123,10 @@ const MSidebar = ({ isSidebarOpen }) => {
           >
             <Logo img={logo} />
           </Box>
-          
+
           {/* Toggle button */}
-          <IconButton 
-            onClick={toggleSidebar} 
+          <IconButton
+            onClick={toggleSidebar}
             aria-label="toggle sidebar"
             sx={{
               backgroundColor: theme.palette.primary.light,
@@ -113,8 +137,7 @@ const MSidebar = ({ isSidebarOpen }) => {
               },
             }}
           >
-            {/* <MenuIcon /> */}
-            O
+            <IconMenu2 />
           </IconButton>
         </Box>
 
@@ -127,8 +150,8 @@ const MSidebar = ({ isSidebarOpen }) => {
             overflowY: 'auto',
           }}
         >
-          <SidebarItems 
-            collapsed={collapsed && !isHovering} 
+          <SidebarItems
+            collapsed={collapsed && !isHovering}
           />
         </Box>
       </Drawer>
