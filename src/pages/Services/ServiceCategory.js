@@ -38,7 +38,9 @@ const ServiceCategory = () => {
     const [categoryList, setCategoryList] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
-    const [totalCount, setTotalCount] = useState(0);
+    const [nextPageUrl, setNextPageUrl] = useState(null);
+    const [prevPageUrl, setPrevPageUrl] = useState(null);
+    const [totalPages, setTotalPages] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [onsearchText, setonsearchText] = useState("")
     const [selectedId, setSelectedId] = useState(null)
@@ -54,7 +56,9 @@ const ServiceCategory = () => {
             })
             .then((res) => {
                 setCategoryList(res.data.results);
-                setTotalCount(res.data.count);
+                setNextPageUrl(res.data.next);
+                setPrevPageUrl(res.data.previous);
+                setTotalPages(Math.ceil(res.data.count / rowsPerPage));
                 setLoading(false);
             })
             .catch((error) => {
@@ -69,7 +73,9 @@ const ServiceCategory = () => {
                         })
                         .then((res) => {
                             setCategoryList(res.data.results);
-                            setTotalCount(res.data.count);
+                            setNextPageUrl(res.data.next);
+                            setPrevPageUrl(res.data.previous);
+                            setTotalPages(Math.ceil(res.data.count / rowsPerPage));
                             setLoading(false);
                         });
                 });
@@ -81,14 +87,10 @@ const ServiceCategory = () => {
     }, [currentPage, rowsPerPage, onsearchText]);
 
 
-    const handleChangePage = (event, newPage) => {
-        setCurrentPage(newPage);
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
     };
 
-    const handleChangeRowsPerPage = (event) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setCurrentPage(0);
-    };
 
     const resetForm = () => {
         setFormData([]);
@@ -165,15 +167,15 @@ const ServiceCategory = () => {
                 },
                 withCredentials: false,
             });
-                toast.success("Service Category Edited Successfully", {
-                    position: 'top-right',
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: 'colored',
-                });
+            toast.success("Service Category Edited Successfully", {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
             toggleModal('edit');
             resetForm()
             fetchServiceCategory()
@@ -204,17 +206,21 @@ const ServiceCategory = () => {
                 },
                 withCredentials: false,
             });
-                toast.success("Service Category Deleted Successfully", {
-                    position: 'top-right',
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: 'colored',
-                });
+            toast.success("Service Category Deleted Successfully", {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: 'colored',
+            });
             toggleModal('delete')
-            fetchServiceCategory()
+            if (categoryList.length === 1 && currentPage > 0) {
+                setCurrentPage(currentPage - 1);
+            } else {
+                fetchServiceCategory();
+            }
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -364,35 +370,37 @@ const ServiceCategory = () => {
                             </Table>
                         </TableContainer>
 
-                        <Box sx={{ borderTop: "1px solid #e5e9f2" }}>
-                            <TablePagination
-                                rowsPerPageOptions={[10, 50, 100]}
-                                component="div"
-                                count={totalCount}
-                                rowsPerPage={rowsPerPage}
-                                page={currentPage}
-                                onPageChange={handleChangePage}
-                                onRowsPerPageChange={handleChangeRowsPerPage}
-                                sx={{
-                                    ".MuiTablePagination-toolbar": {
-                                        height: "50px",
-                                        minHeight: "50px",
-                                        alignItems: "center",
-                                    },
-                                    ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
-                                        color: "#8094ae",
-                                        m: 0,
-                                    },
-                                    ".MuiTablePagination-select": { color: "#364a63" },
-                                    ".MuiTablePagination-actions": {
-                                        ml: 2,
-                                        ".MuiIconButton-root": {
-                                            padding: "4px",
-                                            "&.Mui-disabled": { opacity: 0.5 },
-                                        },
-                                    },
-                                }}
-                            />
+                        <Box sx={{ flexShrink: 0, ml: 2.5, mt: 2, display: "flex", alignItems: "center", gap: 1 }}>
+
+                            {currentPage > 1 && (
+                                <IconButton onClick={() => handlePageChange(1)} aria-label="first page">
+                                    <Typography variant="body2" sx={{ color: "#364a63" }}>First</Typography>
+                                </IconButton>
+                            )}
+
+                            {prevPageUrl && (
+                                <IconButton onClick={() => handlePageChange(currentPage - 1)} aria-label="previous page">
+                                    <Typography variant="body2" sx={{ color: "#364a63" }}>Prev</Typography>
+                                </IconButton>
+                            )}
+
+                            <Typography
+                                variant="body2"
+                                sx={{ minWidth: 60, textAlign: "center", color: "#364a63", fontWeight: "500" }}>
+                                {currentPage + 1}
+                            </Typography>
+
+                            {nextPageUrl && (
+                                <IconButton onClick={() => handlePageChange(currentPage + 1)} aria-label="next page">
+                                    <Typography variant="body2" sx={{ color: "#364a63" }}>Next</Typography>
+                                </IconButton>
+                            )}
+
+                            {currentPage !== totalPages - 1 && (
+                                <IconButton onClick={() => handlePageChange(totalPages - 1)} aria-label="last page">
+                                    <Typography variant="body2" sx={{ color: "#364a63" }}>Last</Typography>
+                                </IconButton>
+                            )}
                         </Box>
                     </Grid>
                 </Grid>

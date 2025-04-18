@@ -17,16 +17,16 @@ const Menuitems = [
     icon: IconLayoutDashboard,
     href: '/dashboard',
   },
-  {
-    navlabel: true,
-    subheader: 'Our Hotels',
-  },
-  {
-    id: uniqueId(),
-    title: 'Hotels',
-    icon: IconBuildingSkyscraper,
-    href: '/hotels',
-  },
+  // {
+  //   navlabel: true,
+  //   subheader: 'Our Hotels',
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Hotels',
+  //   icon: IconBuildingSkyscraper,
+  //   href: '/hotels',
+  // },
   // {
   //   navlabel: true,
   //   subheader: 'Our Bookings',
@@ -39,20 +39,20 @@ const Menuitems = [
   // },
   {
     navlabel: true,
-    subheader: 'My Settings',
+    subheader: 'Services',
   },
   {
     id: uniqueId(),
-    title: 'Category',
+    title: 'Service Category',
     icon: IconList,
-    href: '/category',
+    href: '/service_category',
   },
-  {
-    id: uniqueId(),
-    title: 'Facilities',
-    icon: IconBuilding,
-    href: '/facilities',
-  },
+  // {
+  //   id: uniqueId(),
+  //   title: 'Facilities',
+  //   icon: IconBuilding,
+  //   href: '/facilities',
+  // },
   {
     id: uniqueId(),
     title: 'Settings',
