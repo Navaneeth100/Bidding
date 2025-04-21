@@ -9,7 +9,7 @@ const NavGroup = ({ item }) => {
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(0),
     color: theme.palette.text.primary,
-    lineHeight: "26px",
+    lineHeight: "46px",
     padding: "3px 12px",
   }))
   return <ListSubheaderStyle>{item.subheader}</ListSubheaderStyle>

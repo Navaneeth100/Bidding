@@ -129,8 +129,8 @@ const MSidebar = ({ isSidebarOpen }) => {
             onClick={toggleSidebar}
             aria-label="toggle sidebar"
             sx={{
-              backgroundColor: theme.palette.primary.light,
-              color: theme.palette.primary.main,
+              backgroundColor: theme.palette.primary.main,
+              color: 'white',
               '&:hover': {
                 backgroundColor: theme.palette.primary.main,
                 color: 'white',

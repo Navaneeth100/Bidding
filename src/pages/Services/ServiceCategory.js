@@ -6,7 +6,7 @@ import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAle
 import axios from "axios";
 import { url } from "../../../mainurl";
 import { toast } from "react-toastify";
-
+import { useNavigate } from "react-router-dom";
 
 const ServiceCategory = () => {
 
@@ -15,6 +15,9 @@ const ServiceCategory = () => {
     const authTokens = JSON.parse(localStorage.getItem('authTokens'));
     let tokenStr = String(authTokens.access);
 
+    // Navigate
+
+    const navigate = useNavigate();
 
     // Function to toggle the modal state
 
@@ -22,6 +25,7 @@ const ServiceCategory = () => {
 
     const toggleModal = (type) => {
         setModal((prev) => ({ ...prev, [type]: !prev[type] }));
+        setAnchorEl(null)
     };
 
     // Menu Toggle
@@ -62,23 +66,28 @@ const ServiceCategory = () => {
                 setLoading(false);
             })
             .catch((error) => {
-                const refresh = String(authTokens.refresh);
-                axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
-                    localStorage.setItem("authTokens", JSON.stringify(res.data));
-                    axios
-                        .get(`${url}/auth/service-categories/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
-                            headers: {
-                                Authorization: `Bearer ${res.data.access}`,
-                            },
-                        })
-                        .then((res) => {
-                            setCategoryList(res.data.results);
-                            setNextPageUrl(res.data.next);
-                            setPrevPageUrl(res.data.previous);
-                            setTotalPages(Math.ceil(res.data.count / rowsPerPage));
-                            setLoading(false);
-                        });
-                });
+                if (error.response && error.response.status === 401) {
+                    localStorage.clear();
+                    navigate("/auth/login");
+                } else {
+                    const refresh = String(authTokens.refresh);
+                    axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
+                        localStorage.setItem("authTokens", JSON.stringify(res.data));
+                        axios
+                            .get(`${url}/auth/service-categories/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+                                headers: {
+                                    Authorization: `Bearer ${res.data.access}`,
+                                },
+                            })
+                            .then((res) => {
+                                setCategoryList(res.data.results);
+                                setNextPageUrl(res.data.next);
+                                setPrevPageUrl(res.data.previous);
+                                setTotalPages(Math.ceil(res.data.count / rowsPerPage));
+                                setLoading(false);
+                            });
+                    });
+                }
             });
     };
 
@@ -249,12 +258,12 @@ const ServiceCategory = () => {
                                 borderBottom: "1px solid #e5e9f2",
                             }}
                         >
-                            <Typography variant="h5" component="h1" sx={{ fontWeight: 600, color: "#364a63" }}>
+                            <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: "#364a63" }}>
                                 Service Category
                             </Typography>
                             <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
                                 <TextField
-                                    placeholder="Search by name"
+                                    placeholder="Search by Name"
                                     size="small"
                                     value={onsearchText}
                                     onChange={(e) => setonsearchText(e.target.value)}
@@ -271,7 +280,7 @@ const ServiceCategory = () => {
                                     variant="contained"
                                     startIcon={<IconPlus />}
                                     onClick={() => toggleModal("add")}
-                                    sx={{ bgcolor: "#7f54fb", "&:hover": { bgcolor: "#6a3ee8" }, borderRadius: 1, boxShadow: "none" }}
+                                    sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" }, borderRadius: 1, boxShadow: "none" }}
                                 >
                                     Add
                                 </Button>
@@ -279,7 +288,22 @@ const ServiceCategory = () => {
                         </Box>
 
                         <TableContainer sx={{ minHeight: '700px' }}>
-                            <Table sx={{ minWidth: { xs: 650, sm: 750 } }}>
+                            <Table size="medium"
+                                sx={{
+                                    minWidth: { xs: 650, sm: 750 },
+                                    borderCollapse: 'collapse',
+                                    '& thead th': {
+                                        backgroundColor: '#f5f5f5',
+                                        border: "1",
+                                        fontSize: "14px",
+                                        fontWeight: 700,
+                                    },
+                                    '& td': {
+                                        fontSize: "13px",
+                                        fontWeight: 500,
+                                    },
+                                }}
+                            >
                                 <TableHead>
                                     <TableRow>
                                         <TableCell align="center">
@@ -288,7 +312,7 @@ const ServiceCategory = () => {
                                         <TableCell align="center">
                                             Category
                                         </TableCell>
-                                        <TableCell align="right" sx={{ color: "#8094ae", fontWeight: 500 }}>
+                                        <TableCell align="right">
                                             Actions
                                         </TableCell>
                                     </TableRow>
@@ -314,7 +338,7 @@ const ServiceCategory = () => {
                                                 role="checkbox"
                                                 tabIndex={-1}
                                                 key={item.id}
-                                                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                                                sx={{ "& td, & th": { borderBottom: "1px solid #e0e0e0" } }}
                                             >
                                                 <TableCell align="center">
                                                     {currentPage * rowsPerPage + index + 1}
@@ -327,7 +351,7 @@ const ServiceCategory = () => {
                                                         size="small"
                                                         onClick={(e) => { handleMenuClick(e, item.id) }}
                                                     >
-                                                        <IconDots fontSize="small" />
+                                                        <IconDots fontSize="small" color="black" />
                                                     </IconButton>
                                                     {selectedId === item.id && (
                                                         <Menu
@@ -342,14 +366,15 @@ const ServiceCategory = () => {
                                                                 vertical: 'top',
                                                                 horizontal: 'right',
                                                             }}
+                                                            PaperProps={{ sx: { px: 1, } }}
                                                         >
-                                                            <MenuItem onClick={() => { setViewData(item); toggleModal("view") }}>
+                                                            {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setViewData(item); toggleModal("view") }}>
                                                                 <IconEye fontSize="small" className="me-2" /> View
-                                                            </MenuItem>
-                                                            <MenuItem onClick={() => { setEditData(item); toggleModal("edit") }}>
+                                                            </MenuItem> */}
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); toggleModal("edit") }}>
                                                                 <IconPencil fontSize="small" className="me-2" /> Edit
                                                             </MenuItem>
-                                                            <MenuItem onClick={() => { setDeleteData(item); toggleModal("delete") }}>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
                                                                 <IconTrash fontSize="small" className="me-2" /> Delete
                                                             </MenuItem>
                                                         </Menu>
@@ -370,35 +395,35 @@ const ServiceCategory = () => {
                             </Table>
                         </TableContainer>
 
-                        <Box sx={{ flexShrink: 0, ml: 2.5, mt: 2, display: "flex", alignItems: "center", gap: 1 }}>
+                        <Box sx={{ flexShrink: 0, ml: 2.5, mt: 3, display: "flex", alignItems: "center", gap: 1 }}>
 
                             {currentPage > 1 && (
                                 <IconButton onClick={() => handlePageChange(1)} aria-label="first page">
-                                    <Typography variant="body2" sx={{ color: "#364a63" }}>First</Typography>
+                                    <Typography variant="body2" sx={{ color: "black", fontWeight: "500", fontSize: "13px" }}>First</Typography>
                                 </IconButton>
                             )}
 
                             {prevPageUrl && (
                                 <IconButton onClick={() => handlePageChange(currentPage - 1)} aria-label="previous page">
-                                    <Typography variant="body2" sx={{ color: "#364a63" }}>Prev</Typography>
+                                    <Typography variant="body2" sx={{ color: "black", fontWeight: "500", fontSize: "13px" }}>Prev</Typography>
                                 </IconButton>
                             )}
 
                             <Typography
                                 variant="body2"
-                                sx={{ minWidth: 60, textAlign: "center", color: "#364a63", fontWeight: "500" }}>
+                                sx={{ minWidth: 60, textAlign: "center", color: "black", fontWeight: "500", fontSize: "13px" }}>
                                 {currentPage + 1}
                             </Typography>
 
                             {nextPageUrl && (
                                 <IconButton onClick={() => handlePageChange(currentPage + 1)} aria-label="next page">
-                                    <Typography variant="body2" sx={{ color: "#364a63" }}>Next</Typography>
+                                    <Typography variant="body2" sx={{ color: "black", fontWeight: "500", fontSize: "13px" }}>Next</Typography>
                                 </IconButton>
                             )}
 
                             {currentPage !== totalPages - 1 && (
                                 <IconButton onClick={() => handlePageChange(totalPages - 1)} aria-label="last page">
-                                    <Typography variant="body2" sx={{ color: "#364a63" }}>Last</Typography>
+                                    <Typography variant="body2" sx={{ color: "black", fontWeight: "500", fontSize: "13px" }}>Last</Typography>
                                 </IconButton>
                             )}
                         </Box>
@@ -445,7 +470,7 @@ const ServiceCategory = () => {
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" variant="contained" sx={{ bgcolor: "#7f54fb", "&:hover": { bgcolor: "#6a3ee8" } }}>
+                        <Button type="submit" variant="contained" sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" } }}>
                             Submit
                         </Button>
 
@@ -493,7 +518,7 @@ const ServiceCategory = () => {
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" variant="contained" sx={{ bgcolor: "#7f54fb", "&:hover": { bgcolor: "#6a3ee8" } }}>
+                        <Button type="submit" variant="contained" sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" } }}>
                             Submit
                         </Button>
                     </DialogActions>
@@ -542,9 +567,13 @@ const ServiceCategory = () => {
                 </DialogTitle>
                 <DialogContent sx={{ p: 3 }}>
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, p: 2, borderRadius: 1, mt: 2 }}>
-                        <IconAlertCircleFilled sx={{ color: "red", fontSize: 30 }} />
+                        <IconAlertCircleFilled size={50} style={{ color: "red" }} />
                         <Typography variant="h6" sx={{ color: "#364a63", textAlign: "center" }}>
-                            {`Are you sure you want to Delete the service category: ${deleteData.name}?`}
+                            Are you sure you want to Delete the service category:{" "}
+                            <Box component="span" sx={{ color: "red", fontWeight: 600 }}>
+                                {deleteData.name}&nbsp;
+                            </Box>
+                            ?
                         </Typography>
                     </Box>
                 </DialogContent>
@@ -559,7 +588,7 @@ const ServiceCategory = () => {
                     <Button
                         onClick={() => handleDelete()}
                         variant="contained"
-                        sx={{ bgcolor: "#e85347", "&:hover": { bgcolor: "#e42a1d" } }}
+                        sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" } }}
                     >
                         Delete
                     </Button>

@@ -19,7 +19,7 @@ const NavItem = ({ item, level, pathDirect, collapsed, onClick }) => {
     justifyContent: collapsed ? "center" : "flex-start",
     "&:hover": {
       backgroundColor: theme.palette.primary.light,
-      color: theme.palette.primary.main,
+      color: "white",
     },
     "&.Mui-selected": {
       color: "white",
