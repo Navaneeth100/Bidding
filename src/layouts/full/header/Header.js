@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 // components
 import Profile from './Profile';
-import { IconBellRinging, IconMenu } from '@tabler/icons-react';
+import { IconBell, IconMenu } from '@tabler/icons-react';
 
 const Header = (props) => {
 
@@ -29,7 +29,7 @@ const Header = (props) => {
   return (
     <AppBarStyled position="sticky" color="default">
       <ToolbarStyled>
-        <IconButton
+        {/* <IconButton
           color="inherit"
           aria-label="menu"
           onClick={props.toggleMobileSidebar}
@@ -41,7 +41,7 @@ const Header = (props) => {
           }}
         >
           <IconMenu width="20" height="20" />
-        </IconButton>
+        </IconButton> */}
 
 
         {/* <IconButton
@@ -66,6 +66,23 @@ const Header = (props) => {
           {/* <Button variant="contained" color="primary"  target="_blank" href="https://adminmart.com/product/modernize-react-mui-dashboard-template/">
             Upgrade to Pro
           </Button> */}
+          <IconButton
+            size="large"
+            aria-label="show 11 new notifications"
+            color="inherit"
+            aria-controls="msgs-menu"
+            aria-haspopup="true"
+            sx={{
+              color: 'white',
+              ...(typeof anchorEl2 === 'object' && {
+                color: 'primary.main',
+              }),
+            }}
+          >
+            <Badge variant="dot" color="light">
+              <IconBell size="25" stroke="1.5" />
+            </Badge>
+          </IconButton>
           <Profile />
         </Stack>
       </ToolbarStyled>

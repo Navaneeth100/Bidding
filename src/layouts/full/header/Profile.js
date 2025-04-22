@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Avatar,
   Box,
+  Typography,
   Menu,
   Button,
   IconButton,
@@ -45,8 +46,17 @@ const Profile = () => {
           sx={{
             width: 35,
             height: 35,
+            marginRight: 1
           }}
         />
+        <Box display="flex" flexDirection="column" alignItems="flex-start">
+          <Typography variant="body1" fontWeight="bold" color="white">
+            Admin
+          </Typography>
+          <Typography variant="caption" color="white">
+            admin@gmail.com
+          </Typography>
+        </Box>
       </IconButton>
       {/* ------------------------------------------- */}
       {/* Message Dropdown */}
@@ -65,6 +75,18 @@ const Profile = () => {
           },
         }}
       >
+        <Box display="flex" alignItems="center" p={2} pb={1}>
+          <Avatar
+            src={ProfileImg}
+            alt={ProfileImg}
+            sx={{ width: 40, height: 40, marginRight: 1 }}
+          />
+          <Box>
+            <Typography fontWeight="bold" variant="body1">
+              admin@gmail.com
+            </Typography>
+          </Box>
+        </Box>
         {/* <MenuItem>
           <ListItemIcon>
             <IconUser width={20} />
