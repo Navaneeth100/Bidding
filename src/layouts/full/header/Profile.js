@@ -50,10 +50,10 @@ const Profile = () => {
           }}
         />
         <Box display="flex" flexDirection="column" alignItems="flex-start">
-          <Typography variant="body1" fontWeight="bold" color="white">
+          <Typography variant="body1" fontWeight="bold" color="black">
             Admin
           </Typography>
-          <Typography variant="caption" color="white">
+          <Typography variant="caption" color="black">
             admin@gmail.com
           </Typography>
         </Box>

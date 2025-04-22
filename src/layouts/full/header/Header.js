@@ -14,7 +14,7 @@ const Header = (props) => {
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
     boxShadow: 'none',
-    background: "#478774",
+    background: "white",
     justifyContent: 'center',
     backdropFilter: 'blur(4px)',
     [theme.breakpoints.up('lg')]: {
@@ -73,14 +73,15 @@ const Header = (props) => {
             aria-controls="msgs-menu"
             aria-haspopup="true"
             sx={{
-              color: 'white',
+              color: 'black',
+              border: '1px solid #ccc',
               ...(typeof anchorEl2 === 'object' && {
                 color: 'primary.main',
               }),
             }}
           >
             <Badge variant="dot" color="light">
-              <IconBell size="25" stroke="1.5" />
+              <IconBell size="23" stroke="1.5" />
             </Badge>
           </IconButton>
           <Profile />

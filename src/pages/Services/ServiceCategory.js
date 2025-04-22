@@ -246,12 +246,15 @@ const ServiceCategory = () => {
 
     return (
         <PageContainer title="Service Category" description="Service Category">
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: "#364a63" , marginBottom:"25px" }}>
+            Service Category
+            </Typography>
             <DashboardCard>
                 <Grid container spacing={3}>
                     <Grid item sm={12} lg={12}>
                         <Box
                             sx={{
-                                p: 3,
+                                p: 2,
                                 display: "flex",
                                 justifyContent: "space-between",
                                 alignItems: "center",
@@ -259,7 +262,7 @@ const ServiceCategory = () => {
                             }}
                         >
                             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: "#364a63" }}>
-                                Service Category
+
                             </Typography>
                             <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
                                 <TextField
@@ -338,7 +341,10 @@ const ServiceCategory = () => {
                                                 role="checkbox"
                                                 tabIndex={-1}
                                                 key={item.id}
-                                                sx={{ "& td, & th": { borderBottom: "1px solid #e0e0e0" } }}
+                                                sx={{
+                                                    "& td, & th": { borderBottom: "1px solid #e0e0e0" },
+                                                    backgroundColor: index % 2 === 1 ? "#f9f9f9" : "white",
+                                                }}
                                             >
                                                 <TableCell align="center">
                                                     {currentPage * rowsPerPage + index + 1}
