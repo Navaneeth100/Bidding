@@ -1,26 +1,38 @@
-import React from 'react';
-import { Box, AppBar, Toolbar, styled, Stack, IconButton, Badge, Button } from '@mui/material';
+import React, { useState } from 'react';
+import {
+  Box,
+  AppBar,
+  Toolbar,
+  styled,
+  Stack,
+  IconButton,
+  Badge,
+  useTheme,
+} from '@mui/material';
 import PropTypes from 'prop-types';
-
-// components
+import { IconBell, IconMenu, IconSun, IconMoon } from '@tabler/icons-react';
 import Profile from './Profile';
-import { IconBell, IconMenu } from '@tabler/icons-react';
 
 const Header = (props) => {
+  const theme = useTheme();
+  const [mode, setMode] = useState('light');
 
-  // const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
-  // const lgDown = useMediaQuery((theme) => theme.breakpoints.down('lg'));
-
+  const toggleTheme = () => {
+    const newMode = mode === 'light' ? 'dark' : 'light';
+    setMode(newMode);
+    document.body.setAttribute('data-theme', newMode); // Optional: depends on your theme logic
+  };
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
     boxShadow: 'none',
-    background: "white",
+    background: 'white',
     justifyContent: 'center',
     backdropFilter: 'blur(4px)',
     [theme.breakpoints.up('lg')]: {
       minHeight: '70px',
     },
   }));
+
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
     width: '100%',
     color: theme.palette.text.secondary,
@@ -63,27 +75,41 @@ const Header = (props) => {
         </IconButton> */}
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
-          {/* <Button variant="contained" color="primary"  target="_blank" href="https://adminmart.com/product/modernize-react-mui-dashboard-template/">
-            Upgrade to Pro
-          </Button> */}
+          {/* Theme Toggle Button */}
           <IconButton
             size="large"
-            aria-label="show 11 new notifications"
+            aria-label="toggle theme"
+            onClick={toggleTheme}
+            sx={{
+              backgroundColor: mode === 'light' ? '#fff' : '#000',
+              border: '1px solid #ccc',
+              '&:hover': {
+                backgroundColor: mode === 'light' ? '#f5f5f5' : '#222',
+              },
+            }}
+          >
+            {mode === 'light' ? (
+              <IconSun size="22" stroke="1.5" color="orange" />
+            ) : (
+              <IconMoon size="22" stroke="1.5" color="#fff" />
+            )}
+          </IconButton>
+
+          {/* Notifications */}
+          <IconButton
+            size="large"
+            aria-label="notifications"
             color="inherit"
-            aria-controls="msgs-menu"
-            aria-haspopup="true"
             sx={{
               color: 'black',
               border: '1px solid #ccc',
-              ...(typeof anchorEl2 === 'object' && {
-                color: 'primary.main',
-              }),
             }}
           >
-            <Badge variant="dot" color="light">
+            <Badge variant="dot" color="primary">
               <IconBell size="23" stroke="1.5" />
             </Badge>
           </IconButton>
+
           <Profile />
         </Stack>
       </ToolbarStyled>
