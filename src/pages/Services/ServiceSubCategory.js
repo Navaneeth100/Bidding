@@ -14,7 +14,6 @@ const ServiceCategory = () => {
 
     const authTokens = JSON.parse(localStorage.getItem('authTokens'));
     let tokenStr = String(authTokens.access);
-    const inputHeight = '56px'; // or your desired height
 
     // Navigate
 
@@ -50,11 +49,10 @@ const ServiceCategory = () => {
     const [onsearchText, setonsearchText] = useState("")
     const [selectedId, setSelectedId] = useState(null)
 
-    const fetchServiceCategory = () => {
+    const fetchSubServiceCategory = () => {
         setLoading(true);
         axios
-            .get(`${url}/auth/service-categories/?data=sub
-&?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+            .get(`${url}/auth/service-categories/?data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -76,8 +74,7 @@ const ServiceCategory = () => {
                     axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
                         localStorage.setItem("authTokens", JSON.stringify(res.data));
                         axios
-                            .get(`${url}/auth/service-categories/?data=sub
-&?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+                            .get(`${url}/auth/service-categories/?data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                                 headers: {
                                     Authorization: `Bearer ${res.data.access}`,
                                 },
@@ -95,7 +92,7 @@ const ServiceCategory = () => {
     };
 
     useEffect(() => {
-        fetchServiceCategory();
+        fetchSubServiceCategory();
     }, [currentPage, rowsPerPage, onsearchText]);
 
 
@@ -109,16 +106,19 @@ const ServiceCategory = () => {
         setEditData([]);
         setDeleteData([]);
         setAnchorEl(null)
+        setselectedcategory([])
     };
 
     // get  category
+
     const MenuProps = { PaperProps: { style: { maxHeight: 200, overflowY: 'auto' } } };
+
     const [categoryList, setcategoryList] = useState([])
-    const [categoryfilter, setcategoryfilter] = useState([])
+    const [selectedcategory, setselectedcategory] = useState([])
+
     const fetchCategory = () => {
         axios
-            .get(`${url}/auth/service-categories/?data=list
-`, {
+            .get(`${url}/auth/service-categories/?data=list`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -126,6 +126,7 @@ const ServiceCategory = () => {
                 withCredentials: false,
             })
             .then((res) => {
+
                 setcategoryList(res.data);
             })
             .catch((error) => {
@@ -138,9 +139,9 @@ const ServiceCategory = () => {
                         Authorization: `Bearer ${res.data.access}`,
                     };
                     axios
-                        .get(`${url}/auth/service-categories/?data=list
-`, { headers: new_headers })
+                        .get(`${url}/auth/service-categories/?data=list`, { headers: new_headers })
                         .then((res) => {
+
                             setcategoryList(res.data);
                         });
                 });
@@ -156,19 +157,19 @@ const ServiceCategory = () => {
         event.preventDefault();
 
         let submitData = {
-            name: formData.category,
+            name: formData.sub_category,
+            parent: selectedcategory?.id
         }
 
         try {
-            const response = await axios.post(`${url}/auth/service-categories/?data=sub
-`, submitData, {
+            const response = await axios.post(`${url}/auth/service-categories/?data=sub`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "multipart/form-data",
                 },
                 withCredentials: false,
             });
-            toast.success("Service Category Added Successfully", {
+            toast.success("Service Sub Category Added Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -180,7 +181,7 @@ const ServiceCategory = () => {
 
             toggleModal('add')
             resetForm()
-            fetchServiceCategory()
+            fetchSubServiceCategory()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -208,8 +209,7 @@ const ServiceCategory = () => {
         };
 
         try {
-            const response = await axios.put(`${url}/auth/service-categories/?data=sub
-${selectedId}/`, submitData, {
+            const response = await axios.put(`${url}/auth/service-categories/?data=sub${selectedId}/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "multipart/form-data",
@@ -227,7 +227,7 @@ ${selectedId}/`, submitData, {
             });
             toggleModal('edit');
             resetForm()
-            fetchServiceCategory()
+            fetchSubServiceCategory()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -248,8 +248,7 @@ ${selectedId}/`, submitData, {
 
     const handleDelete = async () => {
         try {
-            const response = await axios.delete(`${url}/auth/service-categories/?data=sub
-${selectedId}/`, {
+            const response = await axios.delete(`${url}/auth/service-categories/?data=sub${selectedId}/`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -269,7 +268,7 @@ ${selectedId}/`, {
             if (SubcategoryList.length === 1 && currentPage > 0) {
                 setCurrentPage(currentPage - 1);
             } else {
-                fetchServiceCategory();
+                fetchSubServiceCategory();
             }
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
@@ -492,14 +491,7 @@ ${selectedId}/`, {
                 maxWidth="xl"
                 PaperProps={{ sx: { width: { xs: "95%", sm: "80%", md: "50%" }, maxHeight: "90vh", borderRadius: 2 } }}
             >
-                <DialogTitle
-                    sx={{
-                        borderBottom: "1px solid #e5e9f2",
-                        p: 3,
-                        color: "#364a63",
-                        fontWeight: 600,
-                    }}
-                >
+                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600 }}>
                     Setup Service Category
                 </DialogTitle>
 
@@ -508,127 +500,54 @@ ${selectedId}/`, {
                 <form onSubmit={handleSubmit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3} alignItems="flex-end">
+
                             {/* Category Select */}
+
                             <Grid item xs={6}>
                                 <FormControl fullWidth>
-                                    <InputLabel
-                                        id="category-label"
-                                        sx={{
-                                            backgroundColor: 'white',
-                                            px: 0.5,
-                                            mx: 1,
-                                            color: 'black',
-                                            fontSize: '0.875rem',
-                                        }}
-                                    >
-                                        Category*
-                                    </InputLabel>
+                                    <InputLabel>Category</InputLabel>
                                     <Select
-                                        labelId="category-label"
-                                        value={categoryfilter}
-                                        onChange={(e) => setcategoryfilter(e.target.value)}
+                                        value={selectedcategory}
+                                        onChange={(e) => setselectedcategory(e.target.value)}
                                         onOpen={fetchCategory}
-                                        displayEmpty
-                                        fullWidth
-                                        label="Category*"
-                                        MenuProps={MenuProps}
-                                        sx={{
-                                            height: '56px',
-                                            alignItems: 'center',
-                                            '& .MuiSelect-select': {
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                height: '56px',
-                                            },
-                                        }}
-                                        renderValue={(selected) =>
-                                            selected ? (
-                                                <span>{selected}</span>
-                                            ) : (
-                                                <span style={{ color: '#9e9e9e' }}>Select a Category</span>
-                                            )
-                                        }
-                                    >
-                                        <MenuItem disabled value="">
-                                            <em>Select a Category</em>
-                                        </MenuItem>
+                                        label="Category"
+                                        MenuProps={MenuProps}>
                                         {categoryList.map((item) => (
-                                            <MenuItem key={item.name} value={item.name}>
-                                                {item.name}
-                                            </MenuItem>
+                                            <MenuItem key={item.id} value={item}>{item.name}</MenuItem>
                                         ))}
                                     </Select>
                                 </FormControl>
                             </Grid>
 
                             {/* Sub Category TextField */}
+
                             <Grid item xs={6}>
                                 <TextField
                                     required
                                     fullWidth
                                     name="category"
                                     label="Sub Category Name"
-                                    value={formData.category || ''}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, category: e.target.value })
-                                    }
-                                    sx={{
-                                        '& .MuiInputBase-root': {
-                                            height: '56px',
-                                            alignItems: 'center',
-                                        },
-                                    }}
-                                    InputProps={{
-                                        sx: {
-                                            '& input::placeholder': {
-                                                color: 'black',
-                                                opacity: 1,
-                                            },
-                                        },
-                                    }}
-                                    InputLabelProps={{
-                                        sx: {
-                                            color: 'black',
-                                            fontSize: '0.875rem',
-                                        },
-                                    }}
+                                    type="text"
+                                    value={formData.sub_category || ''}
+                                    placeholder="Enter Category Name"
+                                    onChange={(e) => { setFormData({ ...formData, sub_category: e.target.value }) }}
                                 />
                             </Grid>
                         </Grid>
                     </DialogContent>
-
-                    {/* Action Buttons */}
-                    <DialogActions
-                        sx={{
-                            p: 3,
-                            borderTop: '1px solid #e5e9f2',
-                            gap: 1,
-                        }}
-                    >
+                    <DialogActions sx={{ p: 3, borderTop: "1px solid #e5e9f2", gap: 1 }}>
                         <Button
-                            onClick={() => toggleModal('add')}
+                            onClick={() => toggleModal("add")}
                             variant="outlined"
                             sx={{
-                                borderColor: '#e5e9f2',
-                                color: '#364a63',
-                                '&:hover': {
-                                    borderColor: '#6e82a5',
-                                    backgroundColor: '#f5f6fa',
-                                },
+                                borderColor: "#e5e9f2",
+                                color: "#364a63",
+                                "&:hover": { borderColor: "#6e82a5", backgroundColor: "#f5f6fa" },
                             }}
                         >
                             Cancel
                         </Button>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            sx={{
-                                bgcolor: '#519380',
-                                '&:hover': {
-                                    bgcolor: '#7DAA8D',
-                                },
-                            }}
-                        >
+                        <Button type="submit" variant="contained" sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" } }}>
                             Submit
                         </Button>
                     </DialogActions>
