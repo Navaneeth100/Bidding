@@ -1,7 +1,38 @@
-// theme/CustomThemes.js
 import { createTheme } from '@mui/material/styles';
 import typography from '../../../theme/Typography';
 import { shadows } from '../../../theme/Shadows';
+
+// Shared pagination label variants
+const getPaginationTypographyVariants = (textColor, highlightColor) => ([
+  {
+    props: { variant: 'paginationLabel' },
+    style: {
+      color: textColor,
+      fontSize: '13px',
+      fontWeight: 500,
+    },
+  },
+  {
+    props: { variant: 'paginationLabelActive' },
+    style: {
+      color: highlightColor,
+      fontSize: '13px',
+      fontWeight: 600,
+    },
+  },
+]);
+
+// Shared IconButton styles
+const getIconButtonStyles = (defaultColor, hoverColor, hoverBg) => ({
+  root: {
+    color: defaultColor,
+    '&:hover': {
+      color: hoverColor,
+      backgroundColor: hoverBg,
+    },
+  },
+});
+
 // 🌞 Light Theme
 export const baseLightTheme = createTheme({
   direction: 'ltr',
@@ -67,39 +98,57 @@ export const baseLightTheme = createTheme({
   },
   typography,
   shadows,
+  components: {
+    MuiTypography: {
+      variants: getPaginationTypographyVariants('#2A3547', '#49BEFF'),
+    },
+    MuiIconButton: {
+      styleOverrides: getIconButtonStyles('#5A6A85', '#ffffff', '#7DAA8D'),
+    },
+  },
 });
 
-// 🌙 Dark Theme (Dark Blue)////////////////////////////////////////////////////////////////////////////////////////////////
+// 🌙 Dark Theme
 export const darkBlueTheme = createTheme({
   direction: 'ltr',
   palette: {
     mode: 'dark',
     primary: {
-      main: '#1e3a8a', // Deep navy
-      light: '#3f51b5',
-      dark: '#1e3a8a',
+      main: '#478774',
+      light: 'rgb(0, 196, 159);',
+      dark: '#519380',
     },
     secondary: {
       main: '#60a5fa',
       light: '#93c5fd',
       dark: '#2563eb',
     },
-
     background: {
-      default: '#0f172a', // App background
-      paper: '#1e293b',   // Cards, tables
+      default: '#0f172a',
+      paper: '#1e293b',
     },
     text: {
-      primary: '#ffffff',   // General text
-      secondary: '#94a3b8', // Muted text
+      primary: '#ffffff',
+      secondary: '#94a3b8',
     },
-    divider: '#334155',     // Line dividers
+    divider: '#334155',
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
     fontSize: 14,
-    button: {
-      textTransform: 'none',
+    h1: {
+      fontSize: '2rem',
+      fontWeight: 600,
+      color: '#ffffff',
+    },
+    h4: {
+      fontSize: '1.5rem',
+      fontWeight: 500,
+      color: '#e2e8f0',
+    },
+    body1: {
+      fontSize: '0.95rem',
+      color: '#e2e8f0',
     },
   },
   shadows: Array(25).fill('none'),
@@ -115,7 +164,7 @@ export const darkBlueTheme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: '#0c1a35', // Dark top nav
+          backgroundColor: '#0c1a35',
           color: '#ffffff',
         },
       },
@@ -123,177 +172,54 @@ export const darkBlueTheme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          backgroundColor: '#1e293b', // Sidebar
+          backgroundColor: '#1e293b',
           color: '#ffffff',
         },
       },
     },
-    typography: {
-      fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-      fontSize: 14,
-      fontWeightLight: 300,
-      fontWeightRegular: 400,
-      fontWeightMedium: 500,
-      fontWeightBold: 600,
-      h1: {
-        fontSize: '2.5rem',
-        fontWeight: 600,
-        color: '#ffffff', // Bright white
-      },
-      h2: {
-        fontSize: '2rem',
-        fontWeight: 600,
-        color: '#ffffff',
-      },
-      h3: {
-        fontSize: '1.75rem',
-        fontWeight: 600,
-        color: '#ffffff',
-      },
-      h4: {
-        fontSize: '1.5rem',
-        fontWeight: 500,
-        color: '#e2e8f0', // Slightly muted for mid-headers
-      },
-      h5: {
-        fontSize: '1.25rem',
-        fontWeight: 500,
-        color: '#e2e8f0',
-      },
-      h6: {
-        fontSize: '1rem',
-        fontWeight: 500,
-        color: '#e2e8f0',
-      },
-      subtitle1: {
-        fontSize: '1rem',
-        fontWeight: 400,
-        color: '#cbd5e1', // Slightly lower contrast
-      },
-      subtitle2: {
-        fontSize: '0.875rem',
-        fontWeight: 400,
-        color: '#94a3b8',
-      },
-      body1: {
-        fontSize: '0.95rem',
-        fontWeight: 400,
-        color: '#e2e8f0',
-      },
-      body2: {
-        fontSize: '0.875rem',
-        fontWeight: 400,
-        color: '#cbd5e1',
-      },
-      caption: {
-        fontSize: '0.75rem',
-        color: '#94a3b8',
-      },
-      overline: {
-        fontSize: '0.75rem',
-        fontWeight: 500,
-        letterSpacing: '0.1em',
-        textTransform: 'uppercase',
-        color: '#64748b',
-      },
-      button: {
-        fontSize: '0.875rem',
-        fontWeight: 500,
-        color: '#ffffff',
-        textTransform: 'none',
-      },
-    },
-    MuiTable: {
-      styleOverrides: {
-        root: {
-          borderCollapse: 'separate',
-          borderSpacing: '0 8px', // Space between rows
-        },
-      },
-    },
-    MuiTableCell: {
-      styleOverrides: {
-        head: {
-          backgroundColor: '#0c1a35 !important',  // dark navy header background
-          color: '#ffffff',            // white header text
-          fontWeight: 600,             // bold for visibility
-          borderBottom: '1px solid #334155',
-        },
-        root: {
-          backgroundColor: '#1e293b',  // base row bg for body
-          color: '#e2e8f0',
-          borderBottom: 'none',
-        },
-      },
-    },
-
     MuiPaper: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1e293b', // Ensure all paper (incl. TableContainer) is dark
+          backgroundColor: '#1e293b',
           color: '#e2e8f0',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
         },
       },
     },
     MuiTableContainer: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1e293b', // Explicitly force table container background
+          backgroundColor: '#1e293b',
         },
       },
     },
-
+    MuiTable: {
+      styleOverrides: {
+        root: {
+          borderCollapse: 'separate',
+          borderSpacing: '0 8px',
+        },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        head: {
+          backgroundColor: '#0c1a35 !important',
+          color: '#ffffff',
+          fontWeight: 600,
+          borderBottom: '1px solid #334155',
+        },
+        root: {
+          backgroundColor: '#1e293b',
+          color: '#e2e8f0',
+          borderBottom: 'none',
+        },
+      },
+    },
     MuiTableRow: {
       styleOverrides: {
         root: {
           '&:hover': {
-            backgroundColor: '#273449', // Subtle blue-gray for hover
-          },
-        },
-      },
-    },
-    MuiTablePagination: {
-      styleOverrides: {
-        root: {
-          color: '#ffffff', // Pagination text
-          backgroundColor: '#1e293b',
-        },
-        toolbar: {
-          color: '#ffffff',
-        },
-        selectIcon: {
-          color: '#ffffff',
-        },
-      },
-    },
-    MuiSelect: {
-      styleOverrides: {
-        icon: {
-          color: '#ffffff',
-        },
-      },
-    },
-    MuiInputBase: {
-      styleOverrides: {
-        root: {
-          color: '#ffffff',
-        },
-      },
-    },
-    MuiAvatar: {
-      styleOverrides: {
-        root: {
-          width: 40,
-          height: 40,
-        },
-      },
-    },
-    MuiIconButton: {
-      styleOverrides: {
-        root: {
-          color: '#94a3b8',
-          '&:hover': {
-            color: '#ffffff',
             backgroundColor: '#273449',
           },
         },
@@ -302,7 +228,7 @@ export const darkBlueTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1e3a8a',
+          backgroundColor: '#478774',
           color: '#ffffff',
           '&:hover': {
             backgroundColor: '#2c4995',
@@ -310,53 +236,11 @@ export const darkBlueTheme = createTheme({
         },
       },
     },
-    MuiTabs: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#1e293b',
-        },
-        indicator: {
-          backgroundColor: '#60a5fa',
-        },
-      },
+    MuiTypography: {
+      variants: getPaginationTypographyVariants('#e2e8f0', '#60a5fa'),
     },
-    MuiTab: {
-      styleOverrides: {
-        root: {
-          color: '#94a3b8',
-          '&.Mui-selected': {
-            color: '#ffffff',
-          },
-        },
-      },
-    },
-    MuiListItem: {
-      styleOverrides: {
-        root: {
-          '&.Mui-selected': {
-            backgroundColor: '#273449',
-            color: '#ffffff',
-          },
-          '&.Mui-selected:hover': {
-            backgroundColor: '#334155',
-          },
-        },
-      },
-    },
-    MuiTooltip: {
-      styleOverrides: {
-        tooltip: {
-          backgroundColor: '#334155',
-          color: '#ffffff',
-        },
-      },
-    },
-    MuiDivider: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#334155',
-        },
-      },
+    MuiIconButton: {
+      styleOverrides: getIconButtonStyles('#94a3b8', '#ffffff', '#273449'),
     },
   },
 });

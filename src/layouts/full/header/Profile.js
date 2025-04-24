@@ -1,16 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Avatar,
-  Box,
-  Typography,
-  Menu,
-  Button,
-  IconButton,
-  MenuItem,
-  ListItemIcon,
-  ListItemText
-} from '@mui/material';
+import { Avatar, Box, Typography, Menu, Button, IconButton, MenuItem, ListItemIcon, ListItemText, useTheme } from '@mui/material';
 
 import { IconListCheck, IconMail, IconUser } from '@tabler/icons-react';
 
@@ -24,7 +14,7 @@ const Profile = () => {
   const handleClose2 = () => {
     setAnchorEl2(null);
   };
-
+  const theme = useTheme();
   return (
     <Box>
       <IconButton
@@ -37,6 +27,10 @@ const Profile = () => {
           ...(typeof anchorEl2 === 'object' && {
             color: 'primary.main',
           }),
+          '&:hover': {
+            backgroundColor: 'transparent',
+            color: 'inherit',
+          }
         }}
         onClick={handleClick2}
       >
@@ -50,10 +44,10 @@ const Profile = () => {
           }}
         />
         <Box display="flex" flexDirection="column" alignItems="flex-start">
-          <Typography variant="body1" fontWeight="bold" color="black">
+          <Typography variant="body1" fontWeight="bold" sx={{ color: theme.palette.text.primary, }} >
             Admin
           </Typography>
-          <Typography variant="caption" color="black">
+          <Typography variant="caption" sx={{ color: theme.palette.text.primary, }}>
             admin@gmail.com
           </Typography>
         </Box>
