@@ -38,47 +38,73 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
 
     const handleSubmit = async () => {
         try {
-            const response = await axios.post(`${url}/auth/admin/login/`, {
-                email: formData.email,
-                password: formData.password,
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (response.status === 200) {
-                const data = response.data;
-                toast.success('Login successful !', {
-                    position: 'top-right',
-                    autoClose: 1500,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: 'colored',
-                });
-                localStorage.setItem('authTokens', JSON.stringify(data));
-                setTimeout(() => {
-                    navigate("/dashboard")
-                }, 1500);
+          const response = await axios.post(
+            `${url}/auth/admin/login/`,
+            {
+              email: formData.email,
+              password: formData.password,
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
             }
-        } catch (err) {
-            toast.error(`${err.response.data.error}`, {
-                position: 'top-right',
-                autoClose: 1500,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: 'colored',
+          );
+      
+          if (response.status === 200) {
+            const data = response.data;
+      
+            toast.success('Login successful !', {
+              position: 'top-right',
+              autoClose: 1500,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              theme: 'colored',
             });
+      
+            // ✅ Save tokens to localStorage
+            localStorage.setItem('authTokens', JSON.stringify(data));
+      
+            // ✅ Handle mode: use backend's or preserve existing
+            const previousMode = localStorage.getItem('mode');
+            const loginMode = data.mode !== undefined ? data.mode.toString() : previousMode || '0';
+      
+            localStorage.setItem('mode', loginMode);
+      
+            // ✅ Sync theme if needed — only after login success
+            const currentTheme = window.__themeMode; // from App.js
+            const targetTheme = loginMode === '1' ? 'dark' : 'light';
+      
+            if (currentTheme && currentTheme !== targetTheme) {
+              window.__toggleTheme?.();
+            }
+      
+            // ✅ Navigate after short delay
+            setTimeout(() => {
+              navigate('/dashboard');
+            }, 1500);
+          }
+        } catch (err) {
+          toast.error(`${err.response.data.error}`, {
+            position: 'top-right',
+            autoClose: 1500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: 'colored',
+          });
+        } finally {
+          // Optional: fallback navigation (currently commented out)
+          // setTimeout(() => {
+          //     navigate("/dashboard")
+          // }, 2000);
         }
-        finally {
-            // setTimeout(() => {
-            //     navigate("/dashboard")
-            // }, 2000);
-        }
-    };
+      };
+      
+      
 
     return (
         <>

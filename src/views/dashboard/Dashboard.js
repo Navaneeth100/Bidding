@@ -106,10 +106,10 @@ const fetchDashboardData = () => {
           { name: "Tablet", value: 10 },
         ],
         recentTransactions: [
-          { id: 1, customer: "John Doe", amount: 350, status: "Completed", date: "2023-10-15" },
-          { id: 2, customer: "Jane Smith", amount: 120, status: "Pending", date: "2023-10-14" },
-          { id: 3, customer: "Robert Johnson", amount: 750, status: "Completed", date: "2023-10-13" },
-          { id: 4, customer: "Emily Davis", amount: 250, status: "Failed", date: "2023-10-12" },
+          { id: 1, customer: "John Doe", status: "Completed", date: "2023-10-15" },
+          { id: 2, customer: "Jane Smith", status: "Pending", date: "2023-10-14" },
+          { id: 3, customer: "Robert Johnson", status: "Completed", date: "2023-10-13" },
+          { id: 4, customer: "Emily Davis", status: "Failed", date: "2023-10-12" },
           { id: 5, customer: "Michael Brown", amount: 540, status: "Completed", date: "2023-10-11" },
         ],
         tasks: [
@@ -467,7 +467,7 @@ export default function Dashboard() {
                         }
                       />
                       <Typography variant="body1" fontWeight="medium" sx={{ ml: 2 }}>
-                        ${transaction.amount.toLocaleString()}
+                        {/* ${transaction.amount.toLocaleString()} */}
                       </Typography>
                     </ListItem>
                     <Divider variant="inset" component="li" />
