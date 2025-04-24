@@ -1,31 +1,17 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  AppBar,
-  Toolbar,
-  styled,
-  Stack,
-  IconButton,
-  Badge,
-  useTheme,
-} from '@mui/material';
+import React from 'react';
+import { Box, AppBar, Toolbar, styled, Stack, IconButton, Badge, useTheme, } from '@mui/material';
 import PropTypes from 'prop-types';
-import { IconBell, IconMenu, IconSun, IconMoon } from '@tabler/icons-react';
+import {
+  IconBell, IconMenu, IconSun, IconMoon
+} from '@tabler/icons-react';
 import Profile from './Profile';
-
 const Header = (props) => {
   const theme = useTheme();
-  const [mode, setMode] = useState('light');
-
-  const toggleTheme = () => {
-    const newMode = mode === 'light' ? 'dark' : 'light';
-    setMode(newMode);
-    document.body.setAttribute('data-theme', newMode); // Optional: depends on your theme logic
-  };
+  const { mode, toggleTheme } = props;
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
     boxShadow: 'none',
-    background: 'white',
+    background: theme.palette.background.paper,
     justifyContent: 'center',
     backdropFilter: 'blur(4px)',
     [theme.breakpoints.up('lg')]: {
@@ -41,6 +27,7 @@ const Header = (props) => {
   return (
     <AppBarStyled position="sticky" color="default">
       <ToolbarStyled>
+        {/* Optional sidebar toggle icon */}
         {/* <IconButton
           color="inherit"
           aria-label="menu"
@@ -55,25 +42,8 @@ const Header = (props) => {
           <IconMenu width="20" height="20" />
         </IconButton> */}
 
-
-        {/* <IconButton
-          size="large"
-          aria-label="show 11 new notifications"
-          color="inherit"
-          aria-controls="msgs-menu"
-          aria-haspopup="true"
-          sx={{
-            ...(typeof anchorEl2 === 'object' && {
-              color: 'primary.main',
-            }),
-          }}
-        >
-          <Badge variant="dot" color="primary">
-            <IconBellRinging size="21" stroke="1.5" />
-          </Badge>
-
-        </IconButton> */}
         <Box flexGrow={1} />
+
         <Stack spacing={1} direction="row" alignItems="center">
           {/* Theme Toggle Button */}
           <IconButton
@@ -101,7 +71,7 @@ const Header = (props) => {
             aria-label="notifications"
             color="inherit"
             sx={{
-              color: 'black',
+              color: theme.palette.text.primary,
               border: '1px solid #ccc',
             }}
           >
@@ -119,6 +89,8 @@ const Header = (props) => {
 
 Header.propTypes = {
   sx: PropTypes.object,
+  toggleTheme: PropTypes.func.isRequired,
+  mode: PropTypes.string.isRequired,
 };
 
 export default Header;
