@@ -213,9 +213,9 @@ const Header = ({ mode, toggleTheme }) => {
             color="inherit"
             sx={{ color: theme.palette.text.primary, border: '1px solid #ccc' }}
           >
-            <Badge variant="dot" color="primary">
+            {/* <Badge variant="dot" color="primary"> */}
               <IconBell size="23" stroke="1.5" />
-            </Badge>
+            {/* </Badge> */}
           </IconButton>
 
           {/* 👤 User Profile */}

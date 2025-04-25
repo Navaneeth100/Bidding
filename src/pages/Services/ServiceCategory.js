@@ -14,6 +14,7 @@ const ServiceCategory = () => {
     // AuthTokens
 
     const authTokens = JSON.parse(localStorage.getItem('authTokens'));
+    const mode = JSON.parse(localStorage.getItem('mode'));
     let tokenStr = String(authTokens.access);
     const theme = useTheme();
     // Navigate
@@ -272,7 +273,7 @@ const ServiceCategory = () => {
                                     placeholder="Search by Name"
                                     size="small"
                                     value={onsearchText}
-                                    onChange={(e) => setonsearchText(e.target.value)}
+                                    onChange={(e) => {setonsearchText(e.target.value),setCurrentPage(0)}}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
@@ -345,8 +346,8 @@ const ServiceCategory = () => {
                                                 tabIndex={-1}
                                                 key={item.id}
                                                 sx={{
-                                                    "& td, & th": { borderBottom: "1px solid #e0e0e0" },
-                                                    backgroundColor: index % 2 === 1 ? "#f9f9f9" : "white",
+                                                    "& td, & th": { borderBottom: mode == 0 ? "1px solid #e0e0e0" : "1px solid rgb(85, 83, 83)" },
+                                                    backgroundColor: mode === 0 ? (index % 2 ? "#f9f9f9" : "white") : (index % 2 ? "#2a2a2a" : "#1e1e1e"),
                                                 }}
                                             >
                                                 <TableCell align="center">

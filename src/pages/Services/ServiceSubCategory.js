@@ -13,8 +13,10 @@ const ServiceCategory = () => {
     // AuthTokens
 
     const authTokens = JSON.parse(localStorage.getItem('authTokens'));
+    const mode = JSON.parse(localStorage.getItem('mode'));
     let tokenStr = String(authTokens.access);
     const inputHeight = '56px'; // or your desired height
+    const theme = useTheme();
 
     // Navigate
 
@@ -107,7 +109,6 @@ const ServiceCategory = () => {
         setEditData([]);
         setDeleteData([]);
         setAnchorEl(null)
-        setselectedcategory([])
     };
 
     // get  category
@@ -115,7 +116,6 @@ const ServiceCategory = () => {
     const MenuProps = { PaperProps: { style: { maxHeight: 200, overflowY: 'auto' } } };
 
     const [categoryList, setcategoryList] = useState([])
-    const [selectedcategory, setselectedcategory] = useState([])
 
     const fetchCategory = () => {
         axios
@@ -159,7 +159,7 @@ const ServiceCategory = () => {
 
         let submitData = {
             name: formData.sub_category,
-            parent: selectedcategory?.id
+            parent: formData.category_id
         }
 
         try {
@@ -206,11 +206,12 @@ const ServiceCategory = () => {
         event.preventDefault();
 
         let submitData = {
-            name: editData.category,
+            name: editData.sub_category || editData.name,
+            parent:editData.category_id || editData?.parent?.id
         };
 
         try {
-            const response = await axios.put(`${url}/auth/service-categories/?data=sub${selectedId}/`, submitData, {
+            const response = await axios.put(`${url}/auth/service-categories/${selectedId}/?data=sub`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "multipart/form-data",
@@ -249,7 +250,7 @@ const ServiceCategory = () => {
 
     const handleDelete = async () => {
         try {
-            const response = await axios.delete(`${url}/auth/service-categories/?data=sub${selectedId}/`, {
+            const response = await axios.delete(`${url}/auth/service-categories/${selectedId}/?data=sub`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -310,7 +311,7 @@ const ServiceCategory = () => {
                                     placeholder="Search by Name"
                                     size="small"
                                     value={onsearchText}
-                                    onChange={(e) => setonsearchText(e.target.value)}
+                                    onChange={(e) => { setonsearchText(e.target.value), setCurrentPage(0) }}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
@@ -386,8 +387,8 @@ const ServiceCategory = () => {
                                                 tabIndex={-1}
                                                 key={item.id}
                                                 sx={{
-                                                    "& td, & th": { borderBottom: "1px solid #e0e0e0" },
-                                                    backgroundColor: index % 2 === 1 ? "#f9f9f9" : "white",
+                                                    "& td, & th": { borderBottom: mode == 0 ? "1px solid #e0e0e0" : "1px solid rgb(85, 83, 83)" },
+                                                    backgroundColor: mode === 0 ? (index % 2 ? "#f9f9f9" : "white") : (index % 2 ? "#2a2a2a" : "#1e1e1e"),
                                                 }}
                                             >
                                                 <TableCell align="center">
@@ -431,7 +432,7 @@ const ServiceCategory = () => {
                                                             {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setViewData(item); toggleModal("view") }}>
                                                                 <IconEye fontSize="small" className="me-2" /> View
                                                             </MenuItem> */}
-                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); toggleModal("edit") }}>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); fetchCategory(); toggleModal("edit") }}>
                                                                 <IconPencil fontSize="small" className="me-2" /> Edit
                                                             </MenuItem>
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
@@ -558,15 +559,8 @@ const ServiceCategory = () => {
                 maxWidth="xl"
                 PaperProps={{ sx: { width: { xs: "95%", sm: "80%", md: "50%" }, maxHeight: "90vh", borderRadius: 2 } }}
             >
-                <DialogTitle
-                    sx={{
-                        borderBottom: "1px solid #e5e9f2",
-                        p: 3,
-                        color: "#364a63",
-                        fontWeight: 600,
-                    }}
-                >
-                    Setup Service Category
+                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
+                    Setup Service Sub Category
                 </DialogTitle>
 
 
@@ -581,13 +575,13 @@ const ServiceCategory = () => {
                                 <FormControl fullWidth>
                                     <InputLabel>Category</InputLabel>
                                     <Select
-                                        value={selectedcategory}
-                                        onChange={(e) => setselectedcategory(e.target.value)}
+                                        value={formData.category_id || ""}
+                                        onChange={(e) => setFormData((prev) => ({ ...prev, category_id: e.target.value}))}
                                         onOpen={fetchCategory}
                                         label="Category"
                                         MenuProps={MenuProps}>
                                         {categoryList.map((item) => (
-                                            <MenuItem key={item.id} value={item}>{item.name}</MenuItem>
+                                            <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
                                         ))}
                                     </Select>
                                 </FormControl>
@@ -640,21 +634,44 @@ const ServiceCategory = () => {
                 PaperProps={{ sx: { width: { xs: "95%", sm: "80%", md: "50%" }, maxHeight: "90vh", borderRadius: 2 } }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary }}>
-                    Edit Service Category
+                    Edit Service Sub Category
                 </DialogTitle>
                 <form onSubmit={handleEdit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={12}>
+
+                            {/* Category Select */}
+
+                            <Grid item xs={6}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Category</InputLabel>
+                                    <Select
+                                        value={editData.category_id || editData?.parent?.id}
+                                        onChange={(e) => setEditData((prev) => ({ ...prev, category_id: e.target.value }))}
+                                        onOpen={fetchCategory}
+                                        label="Category"
+                                        MenuProps={MenuProps}
+                                    >
+                                        {categoryList.map((item) => (
+                                            <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+
+
+                            {/* Sub Category TextField */}
+
+                            <Grid item xs={6}>
                                 <TextField
                                     required
                                     fullWidth
                                     name="category"
-                                    label="Category Name"
+                                    label="Sub Category Name"
                                     type="text"
                                     placeholder="Enter Category Name"
-                                    defaultValue={editData.name}
-                                    onChange={(e) => { setEditData({ ...editData, category: e.target.value }) }}
+                                    defaultValue={editData.name || ''}
+                                    onChange={(e) => { setEditData({ ...editData, sub_category: e.target.value }) }}
                                 />
                             </Grid>
                         </Grid>
