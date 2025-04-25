@@ -57,7 +57,25 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
                     draggable: true,
                     theme: 'colored',
                 });
+
+                  // ✅ Save tokens to localStorage
                 localStorage.setItem('authTokens', JSON.stringify(data));
+
+                  // ✅ Handle mode: use backend's or preserve existing
+                  const previousMode = localStorage.getItem('mode');
+                  const loginMode = data.mode !== undefined ? data.mode.toString() : previousMode || '0';
+
+                  localStorage.setItem('mode', loginMode);
+
+                  // ✅ Sync theme if needed — only after login success
+                  const currentTheme = window.__themeMode; // from App.js
+                  const targetTheme = loginMode === '1' ? 'dark' : 'light';
+
+                  if (currentTheme && currentTheme !== targetTheme) {
+                    window.__toggleTheme?.();
+                  }
+
+                  // ✅ Navigate after short delay
                 setTimeout(() => {
                     navigate("/dashboard")
                 }, 1500);

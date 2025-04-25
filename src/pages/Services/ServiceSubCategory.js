@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress } from "@mui/material"
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme } from "@mui/material"
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled } from '@tabler/icons-react';
@@ -7,13 +7,14 @@ import axios from "axios";
 import { url } from "../../../mainurl";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-
+import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
 const ServiceCategory = () => {
 
     // AuthTokens
 
     const authTokens = JSON.parse(localStorage.getItem('authTokens'));
     let tokenStr = String(authTokens.access);
+    const inputHeight = '56px'; // or your desired height
 
     // Navigate
 
@@ -286,7 +287,7 @@ const ServiceCategory = () => {
 
     return (
         <PageContainer title="Service Sub Category" description="Service Sub Category">
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: "#364a63", marginBottom: "25px" }}>
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
                 Service Sub Category
             </Typography>
             <DashboardCard>
@@ -402,8 +403,15 @@ const ServiceCategory = () => {
                                                     <IconButton
                                                         size="small"
                                                         onClick={(e) => { handleMenuClick(e, item.id) }}
+                                                        sx={{
+                                                            color: 'text.secondary', // or 'text.primary' if you want white
+                                                            '&:hover': {
+                                                                color: 'text.primary',
+                                                                backgroundColor: 'rgba(255, 255, 255, 0.08)', // subtle hover
+                                                            },
+                                                        }}
                                                     >
-                                                        <IconDots fontSize="small" color="black" />
+                                                        <IconDots fontSize="small" />
                                                     </IconButton>
                                                     {selectedId === item.id && (
                                                         <Menu
@@ -446,39 +454,98 @@ const ServiceCategory = () => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-
-                        <Box sx={{ flexShrink: 0, ml: 2.5, mt: 3, display: "flex", alignItems: "center", gap: 1 }}>
-
+                        <Box
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                border: "1px solid #e0e0e0",
+                                maxWidth: "220px",
+                                borderRadius: 2,
+                                marginTop: "20px",
+                                marginLeft: "auto",
+                                p: 0.5,
+                                gap: 0.5,
+                            }}
+                        >
                             {currentPage > 1 && (
                                 <IconButton onClick={() => handlePageChange(1)} aria-label="first page">
-                                    <Typography variant="body2" sx={{ color: "black", fontWeight: "500", fontSize: "13px" }}>First</Typography>
+                                    <FirstPage />
                                 </IconButton>
                             )}
 
                             {prevPageUrl && (
-                                <IconButton onClick={() => handlePageChange(currentPage - 1)} aria-label="previous page">
-                                    <Typography variant="body2" sx={{ color: "black", fontWeight: "500", fontSize: "13px" }}>Prev</Typography>
+                                <IconButton
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    aria-label="previous page"
+                                >
+                                    <ChevronLeft />
                                 </IconButton>
                             )}
 
                             <Typography
                                 variant="body2"
+                                sx={{
+                                    minWidth: 30,
+                                    textAlign: "center",
+                                    fontWeight: "500",
+                                    fontSize: "14px",
+                                    px: 1,
+                                    color: theme.palette.text.primary,
+                                }}
+                            >
+                                {currentPage + 1}
+                            </Typography>
+
+                            {nextPageUrl && (
+                                <IconButton
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    aria-label="next page"
+                                >
+                                    <ChevronRight />
+                                </IconButton>
+                            )}
+
+                            {currentPage !== totalPages - 1 && (
+                                <IconButton
+                                    onClick={() => handlePageChange(totalPages - 1)}
+                                    aria-label="last page"
+                                >
+                                    <LastPage />
+                                </IconButton>
+                            )}
+                        </Box>
+                        {/* <Box sx={{ flexShrink: 0, ml: 2.5, mt: 3, display: "flex", alignItems: "center", gap: 1 }}>
+
+                            {currentPage > 1 && (
+                                <IconButton onClick={() => handlePageChange(1)} aria-label="first page">
+                                    <Typography variant="paginationLabel" >First</Typography>
+                                </IconButton>
+                            )}
+
+                            {prevPageUrl && (
+                                <IconButton onClick={() => handlePageChange(currentPage - 1)} aria-label="previous page">
+                                    <Typography variant="paginationLabel" >Prev</Typography>
+                                </IconButton>
+                            )}
+
+                            <Typography
+                                variant="paginationLabel"
                                 sx={{ minWidth: 60, textAlign: "center", color: "black", fontWeight: "500", fontSize: "13px" }}>
                                 {currentPage + 1}
                             </Typography>
 
                             {nextPageUrl && (
                                 <IconButton onClick={() => handlePageChange(currentPage + 1)} aria-label="next page">
-                                    <Typography variant="body2" sx={{ color: "black", fontWeight: "500", fontSize: "13px" }}>Next</Typography>
+                                    <Typography variant="paginationLabel" >Next</Typography>
                                 </IconButton>
                             )}
 
                             {currentPage !== totalPages - 1 && (
                                 <IconButton onClick={() => handlePageChange(totalPages - 1)} aria-label="last page">
-                                    <Typography variant="body2" sx={{ color: "black", fontWeight: "500", fontSize: "13px" }}>Last</Typography>
+                                    <Typography variant="paginationLabel" >Last</Typography>
                                 </IconButton>
                             )}
-                        </Box>
+                        </Box> */}
                     </Grid>
                 </Grid>
             </DashboardCard>
@@ -491,7 +558,14 @@ const ServiceCategory = () => {
                 maxWidth="xl"
                 PaperProps={{ sx: { width: { xs: "95%", sm: "80%", md: "50%" }, maxHeight: "90vh", borderRadius: 2 } }}
             >
-                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600 }}>
+                <DialogTitle
+                    sx={{
+                        borderBottom: "1px solid #e5e9f2",
+                        p: 3,
+                        color: "#364a63",
+                        fontWeight: 600,
+                    }}
+                >
                     Setup Service Category
                 </DialogTitle>
 
@@ -565,7 +639,7 @@ const ServiceCategory = () => {
                 maxWidth="xl"
                 PaperProps={{ sx: { width: { xs: "95%", sm: "80%", md: "50%" }, maxHeight: "90vh", borderRadius: 2 } }}
             >
-                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600 }}>
+                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary }}>
                     Edit Service Category
                 </DialogTitle>
                 <form onSubmit={handleEdit}>
@@ -613,7 +687,7 @@ const ServiceCategory = () => {
                 fullWidth
                 PaperProps={{ sx: { borderRadius: 2 } }}
             >
-                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, display: "flex", alignItems: "center", gap: 2 }}>
+                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, display: "flex", alignItems: "center", gap: 2, color: theme.palette.text.primary }}>
                 </DialogTitle>
                 <DialogContent sx={{ p: 3, mt: 2 }}>
                     <Grid container spacing={3}>
@@ -639,15 +713,15 @@ const ServiceCategory = () => {
                 fullWidth
                 PaperProps={{ sx: { borderRadius: 2 } }}
             >
-                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3 }}>
-                    <Typography variant="h6" sx={{ color: "#364a63", fontWeight: 600 }}>
+                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: theme.palette.text.primary }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
                         Delete Service Category
                     </Typography>
                 </DialogTitle>
                 <DialogContent sx={{ p: 3 }}>
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, p: 2, borderRadius: 1, mt: 2 }}>
                         <IconAlertCircleFilled size={50} style={{ color: "red" }} />
-                        <Typography variant="h6" sx={{ color: "#364a63", textAlign: "center" }}>
+                        <Typography variant="h6" sx={{ color: theme.palette.text.primary, textAlign: "center" }}>
                             Are you sure you want to Delete the service category:{" "}
                             <Box component="span" sx={{ color: "red", fontWeight: 600 }}>
                                 {deleteData.name}&nbsp;
