@@ -193,7 +193,7 @@ const Category = () => {
                         closeOnClick: true,
                         pauseOnHover: true,
                         draggable: true,
-                        theme: 'colored',
+                        
                     });
                 }
                 toggleModal('add')
@@ -207,7 +207,7 @@ const Category = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
         } else {
@@ -218,7 +218,7 @@ const Category = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
 
@@ -255,7 +255,7 @@ const Category = () => {
                         closeOnClick: true,
                         pauseOnHover: true,
                         draggable: true,
-                        theme: 'colored',
+                        
                     });
                 }
                 toggleModal('edit');
@@ -269,7 +269,7 @@ const Category = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
         } else {
@@ -280,7 +280,7 @@ const Category = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
@@ -307,7 +307,7 @@ const Category = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
             toggleModal('delete')

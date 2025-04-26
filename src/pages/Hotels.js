@@ -389,7 +389,7 @@ const HotelPage = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
             toggleModal('edit');
@@ -402,7 +402,7 @@ const HotelPage = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         } finally {
         }
@@ -430,7 +430,7 @@ const HotelPage = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
             fetchHotels(currentPage);
         } catch (error) {
@@ -441,7 +441,7 @@ const HotelPage = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
@@ -594,7 +594,7 @@ const HotelPage = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
             toggleModal('editrooms');
@@ -610,7 +610,7 @@ const HotelPage = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         } finally {
         }
@@ -637,7 +637,7 @@ const HotelPage = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
             toggleModal('deleterooms')
@@ -650,7 +650,7 @@ const HotelPage = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
@@ -697,7 +697,7 @@ const HotelPage = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
             setFiles([])
@@ -711,7 +711,7 @@ const HotelPage = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         } finally {
         }
@@ -740,7 +740,7 @@ const HotelPage = () => {
                         closeOnClick: true,
                         pauseOnHover: true,
                         draggable: true,
-                        theme: 'colored',
+                        
                     });
                 }
                 // toggleModal('editrooms')
@@ -754,7 +754,7 @@ const HotelPage = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
         }
@@ -791,7 +791,7 @@ const HotelPage = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
             sethotelfiles([])
@@ -805,7 +805,7 @@ const HotelPage = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         } finally {
         }
@@ -834,7 +834,7 @@ const HotelPage = () => {
                         closeOnClick: true,
                         pauseOnHover: true,
                         draggable: true,
-                        theme: 'colored',
+                        
                     });
                     // sethotelfiles(hotelfiles.filter((file) => file !== fileToRemove));
                 }
@@ -849,7 +849,7 @@ const HotelPage = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
         }
@@ -918,7 +918,7 @@ const HotelPage = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
             setnewroomfiles([])
@@ -930,7 +930,7 @@ const HotelPage = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         } finally {
         }
@@ -1019,7 +1019,7 @@ const HotelPage = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
                 setNewRoomData([])
                 setSelectedNewRoomDates([])
@@ -1038,7 +1038,7 @@ const HotelPage = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             } finally {
             }
@@ -1051,7 +1051,7 @@ const HotelPage = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
 

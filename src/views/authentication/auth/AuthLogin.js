@@ -55,7 +55,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
 
                   // ✅ Save tokens to localStorage
@@ -88,7 +88,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
         finally {

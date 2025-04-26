@@ -144,7 +144,7 @@ const AddHotel = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
                 setbuttondisable(false)
                 return;
@@ -325,7 +325,7 @@ const AddHotel = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
                 if (response.status === 201) {
                     return true;
@@ -339,7 +339,7 @@ const AddHotel = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             } finally {
             }
@@ -352,7 +352,7 @@ const AddHotel = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
@@ -455,7 +455,7 @@ const AddHotel = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
                 setRoomData([])
                 setSelectedDates([])
@@ -473,7 +473,7 @@ const AddHotel = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             } finally {
             }
@@ -486,7 +486,7 @@ const AddHotel = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
 
@@ -528,7 +528,7 @@ const AddHotel = () => {
                         closeOnClick: true,
                         pauseOnHover: true,
                         draggable: true,
-                        theme: 'colored',
+                        
                     });
                     return true;
                 }
@@ -540,7 +540,7 @@ const AddHotel = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
         }
@@ -552,7 +552,7 @@ const AddHotel = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
 

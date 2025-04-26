@@ -102,7 +102,13 @@ const Header = ({ mode, toggleTheme }) => {
       toast.success(`Mode updated to ${newMode === 1 ? 'Dark' : 'Light'}`, {
         position: 'top-right',
         autoClose: 3000,
-        theme: 'colored',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+       
       });
 
       // Use passed toggleTheme or fallback to global toggle
@@ -115,7 +121,6 @@ const Header = ({ mode, toggleTheme }) => {
       toast.error(`Failed to update mode: ${error.response?.data?.error || error.message}`, {
         position: 'top-right',
         autoClose: 3000,
-        theme: 'colored',
       });
     }
   };

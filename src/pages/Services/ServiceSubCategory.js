@@ -177,7 +177,7 @@ const ServiceSubCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
 
             toggleModal('add')
@@ -191,7 +191,7 @@ const ServiceSubCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
@@ -225,7 +225,7 @@ const ServiceSubCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
             toggleModal('edit');
             resetForm()
@@ -238,7 +238,7 @@ const ServiceSubCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
@@ -264,7 +264,7 @@ const ServiceSubCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
             toggleModal('delete')
             if (SubcategoryList.length === 1 && currentPage > 0) {
@@ -280,7 +280,7 @@ const ServiceSubCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
@@ -490,6 +490,7 @@ const ServiceSubCategory = () => {
                                     textAlign: "center",
                                     fontWeight: "500",
                                     fontSize: "14px",
+                                    padding:"8px",
                                     px: 1,
                                     color: theme.palette.text.primary,
                                 }}

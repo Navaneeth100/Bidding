@@ -185,7 +185,7 @@ const Customer = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
 
             toggleModal('add')
@@ -199,7 +199,7 @@ const Customer = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
@@ -233,7 +233,7 @@ const Customer = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
             toggleModal('edit');
             resetForm()
@@ -246,7 +246,7 @@ const Customer = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
@@ -272,7 +272,7 @@ const Customer = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
             toggleModal('delete')
             if (Customer.length === 1 && currentPage > 0) {
@@ -288,7 +288,7 @@ const Customer = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
@@ -517,6 +517,7 @@ const Customer = () => {
                                     textAlign: "center",
                                     fontWeight: "500",
                                     fontSize: "14px",
+                                    padding:"8px",
                                     px: 1,
                                     color: theme.palette.text.primary,
                                 }}

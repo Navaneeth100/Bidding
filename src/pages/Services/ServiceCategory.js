@@ -138,7 +138,7 @@ const ServiceCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
 
             toggleModal('add')
@@ -152,7 +152,7 @@ const ServiceCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
@@ -185,7 +185,7 @@ const ServiceCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
             toggleModal('edit');
             resetForm()
@@ -198,7 +198,7 @@ const ServiceCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
@@ -224,7 +224,7 @@ const ServiceCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
             toggleModal('delete')
             if (categoryList.length === 1 && currentPage > 0) {
@@ -240,7 +240,7 @@ const ServiceCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
@@ -447,6 +447,7 @@ const ServiceCategory = () => {
                                     textAlign: "center",
                                     fontWeight: "500",
                                     fontSize: "14px",
+                                    padding:"8px",
                                     px: 1,
                                     color: theme.palette.text.primary,
                                 }}

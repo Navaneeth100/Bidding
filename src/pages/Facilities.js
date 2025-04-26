@@ -182,7 +182,7 @@ const Customers = () => {
                         closeOnClick: true,
                         pauseOnHover: true,
                         draggable: true,
-                        theme: 'colored',
+                        
                     });
                 }
                 toggleModal('add')
@@ -196,7 +196,7 @@ const Customers = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
         } else {
@@ -207,7 +207,7 @@ const Customers = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
 
@@ -244,7 +244,7 @@ const Customers = () => {
                         closeOnClick: true,
                         pauseOnHover: true,
                         draggable: true,
-                        theme: 'colored',
+                        
                     });
                 }
                 toggleModal('edit');
@@ -258,7 +258,7 @@ const Customers = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
         } else {
@@ -269,7 +269,7 @@ const Customers = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
@@ -296,7 +296,7 @@ const Customers = () => {
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
-                    theme: 'colored',
+                    
                 });
             }
             toggleModal('delete')
@@ -309,7 +309,7 @@ const Customers = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                theme: 'colored',
+                
             });
         }
     };
