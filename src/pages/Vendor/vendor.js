@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react"
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme } from "@mui/material"
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, Modal } from "@mui/material"
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
-import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled } from '@tabler/icons-react';
+import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled, IconCheck, IconX } from '@tabler/icons-react';
 import axios from "axios";
 import { url } from "../../../mainurl";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
-const ServiceSubCategory = () => {
+const Vendor = () => {
 
     // AuthTokens
 
@@ -42,7 +42,7 @@ const ServiceSubCategory = () => {
 
     // Get  Service Sub Category
 
-    const [SubcategoryList, setSubCategoryList] = useState([]);
+    const [Vendor, setVendor] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
     const [nextPageUrl, setNextPageUrl] = useState(null);
@@ -52,17 +52,17 @@ const ServiceSubCategory = () => {
     const [onsearchText, setonsearchText] = useState("")
     const [selectedId, setSelectedId] = useState(null)
 
-    const fetchSubServiceCategory = () => {
+    const fetchSubVendor = () => {
         setLoading(true);
         axios
-            .get(`${url}/auth/service-categories/?data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+            .get(`${url}/auth/vendor-customer/?user_type=Vendor&data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
             })
             .then((res) => {
-                setSubCategoryList(res.data.results);
+                setVendor(res.data.results);
                 setNextPageUrl(res.data.next);
                 setPrevPageUrl(res.data.previous);
                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -77,13 +77,13 @@ const ServiceSubCategory = () => {
                     axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
                         localStorage.setItem("authTokens", JSON.stringify(res.data));
                         axios
-                            .get(`${url}/auth/service-categories/?data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+                            .get(`${url}/auth/vendor-customer/?user_type=Vendor&data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                                 headers: {
                                     Authorization: `Bearer ${res.data.access}`,
                                 },
                             })
                             .then((res) => {
-                                setSubCategoryList(res.data.results);
+                                setVendor(res.data.results);
                                 setNextPageUrl(res.data.next);
                                 setPrevPageUrl(res.data.previous);
                                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -95,7 +95,7 @@ const ServiceSubCategory = () => {
     };
 
     useEffect(() => {
-        fetchSubServiceCategory();
+        fetchSubVendor();
     }, [currentPage, rowsPerPage, onsearchText]);
 
 
@@ -114,39 +114,47 @@ const ServiceSubCategory = () => {
     // get  category
 
     const MenuProps = { PaperProps: { style: { maxHeight: 200, overflowY: 'auto' } } };
-
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
     const [categoryList, setcategoryList] = useState([])
+    const [open, setOpen] = useState(false);
+    const [category, setCategory] = useState(null);
+    const [categoryId, setCategoryId] = useState('');
 
-    const fetchCategory = () => {
+    const fetchCategoryById = (id) => {
         axios
-            .get(`${url}/auth/service-categories/?data=list`, {
+            .get(`${url}/auth/vendor-customer/`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "application/json",
+                    'Content-Type': 'application/json',
                 },
                 withCredentials: false,
+                params: {
+                    user_type: 'Vendor',
+                    id: id
+                }
             })
             .then((res) => {
-
-                setcategoryList(res.data);
+                setCategory(res.data);
             })
             .catch((error) => {
-                let refresh = String(authTokens.refresh);
-                axios.post(`${url}/api/token/refresh/`, { refresh: refresh }).then((res) => {
-                    localStorage.setItem("authTokens", JSON.stringify(res.data));
-                    //   setNewAuthTokens(JSON.stringify(res.data));
+                if (error.response) {
+                    const status = error.response.status;
+                    const message = error.response.data?.detail || error.response.data?.message || 'An unexpected error occurred';
 
-                    const new_headers = {
-                        Authorization: `Bearer ${res.data.access}`,
-                    };
-                    axios
-                        .get(`${url}/auth/service-categories/?data=list`, { headers: new_headers })
-                        .then((res) => {
-
-                            setcategoryList(res.data);
-                        });
-                });
+                    toast.error(`Error ${status}: ${message}`);
+                } else if (error.request) {
+                    toast.error('No response from server. Please check your connection.');
+                } else {
+                    toast.error('Error setting up request: ' + error.message);
+                }
             });
+    };
+
+    const handleFetch = () => {
+        if (categoryId) {
+            fetchCategoryById(categoryId);
+        }
     };
 
     // Add Service Sub Category
@@ -182,7 +190,7 @@ const ServiceSubCategory = () => {
 
             toggleModal('add')
             resetForm()
-            fetchSubServiceCategory()
+            fetchSubVendor()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -229,7 +237,7 @@ const ServiceSubCategory = () => {
             });
             toggleModal('edit');
             resetForm()
-            fetchSubServiceCategory()
+            fetchSubVendor()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -267,10 +275,10 @@ const ServiceSubCategory = () => {
                 theme: 'colored',
             });
             toggleModal('delete')
-            if (SubcategoryList.length === 1 && currentPage > 0) {
+            if (Vendor.length === 1 && currentPage > 0) {
                 setCurrentPage(currentPage - 1);
             } else {
-                fetchSubServiceCategory();
+                fetchSubVendor();
             }
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
@@ -289,8 +297,7 @@ const ServiceSubCategory = () => {
     return (
         <PageContainer title="Service Sub Category" description="Service Sub Category">
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
-                Service Sub Category
-            </Typography>
+                Vendor List            </Typography>
             <DashboardCard>
                 <Grid container spacing={3}>
                     <Grid item sm={12} lg={12}>
@@ -351,24 +358,24 @@ const ServiceSubCategory = () => {
                             >
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell align="center">
-                                            SN
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            Category
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            Sub Category
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            Actions
-                                        </TableCell>
+                                        <TableCell align="center">SN</TableCell>
+                                        <TableCell align="center">Profile Picture</TableCell>
+                                        <TableCell align="center">Name</TableCell>
+                                        {/* New Header Fields Added */}
+                                        <TableCell align="center">Username</TableCell>
+                                        <TableCell align="center">Email</TableCell>
+                                        {/* <TableCell align="center">First Name</TableCell>
+                                        <TableCell align="center">Last Name</TableCell> */}
+                                        <TableCell align="center">Mobile</TableCell>
+                                        <TableCell align="center">Phone Verified</TableCell>
+                                        <TableCell align="center"> Status</TableCell>
+                                        <TableCell align="right">Actions</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {loading ? (
                                         <TableRow>
-                                            <TableCell colSpan={8} align="center">
+                                            <TableCell colSpan={12} align="center">
                                                 <Box
                                                     display="flex"
                                                     justifyContent="center"
@@ -379,8 +386,8 @@ const ServiceSubCategory = () => {
                                                 </Box>
                                             </TableCell>
                                         </TableRow>
-                                    ) : SubcategoryList && SubcategoryList.length > 0 ? (
-                                        SubcategoryList.map((item, index) => (
+                                    ) : Vendor && Vendor.length > 0 ? (
+                                        Vendor.map((item, index) => (
                                             <TableRow
                                                 hover
                                                 role="checkbox"
@@ -391,24 +398,44 @@ const ServiceSubCategory = () => {
                                                     backgroundColor: mode === 0 ? (index % 2 ? "#f9f9f9" : "white") : (index % 2 ? "#2a2a2a" : "#1e1e1e"),
                                                 }}
                                             >
+                                                <TableCell align="center">{currentPage * rowsPerPage + index + 1}</TableCell>
                                                 <TableCell align="center">
-                                                    {currentPage * rowsPerPage + index + 1}
+                                                    <Box display="flex" justifyContent="center">
+                                                        <Avatar
+                                                            src={item.profile?.profile_picture ? `${url}${item.profile.profile_picture}` : ""}
+                                                            alt=""
+                                                            variant="rounded"
+                                                            sx={{ width: 50, height: 50, cursor: 'pointer' }}
+                                                        />
+                                                    </Box>
+                                                </TableCell>
+                                                <TableCell align="center">{item.first_name} {item.last_name}</TableCell>
+                                                <TableCell align="center">{item.username}</TableCell>
+                                                <TableCell align="center">{item.email}</TableCell>
+                                                <TableCell align="center">{item.phone_number}</TableCell>
+                                                <TableCell align="center">
+                                                    {item.is_phone_verified ? (
+                                                        <IconCheck size={18} style={{ color: 'green' }} />
+                                                    ) : (
+                                                        <IconX size={18} style={{ color: 'red' }} />
+                                                    )}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {item.parent.name}
-                                                </TableCell>
-                                                <TableCell align="center">
-                                                    {item.name}
+                                                    {item.is_active ? (
+                                                        <span style={{ color: 'green', fontWeight: 'bold' }}>Active</span>
+                                                    ) : (
+                                                        <span style={{ color: 'red', fontWeight: 'bold' }}>Inactive</span>
+                                                    )}
                                                 </TableCell>
                                                 <TableCell align="right">
                                                     <IconButton
                                                         size="small"
                                                         onClick={(e) => { handleMenuClick(e, item.id) }}
                                                         sx={{
-                                                            color: 'text.secondary', // or 'text.primary' if you want white
+                                                            color: 'text.secondary',
                                                             '&:hover': {
                                                                 color: 'text.primary',
-                                                                backgroundColor: 'rgba(255, 255, 255, 0.08)', // subtle hover
+                                                                backgroundColor: 'rgba(255, 255, 255, 0.08)',
                                                             },
                                                         }}
                                                     >
@@ -427,14 +454,14 @@ const ServiceSubCategory = () => {
                                                                 vertical: 'top',
                                                                 horizontal: 'right',
                                                             }}
-                                                            PaperProps={{ sx: { px: 1, } }}
+                                                            PaperProps={{ sx: { px: 1 } }}
                                                         >
-                                                            {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setViewData(item); toggleModal("view") }}>
-                                                                <IconEye fontSize="small" className="me-2" /> View
-                                                            </MenuItem> */}
-                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); fetchCategory(); toggleModal("edit") }}>
+                                                            {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); fetchCategory(); toggleModal("edit") }}>
                                                                 <IconPencil fontSize="small" className="me-2" /> Edit
-                                                            </MenuItem>
+                                                            </MenuItem> */}
+                                                            <Button variant="contained" onClick={() => fetchCategoryById(item.id)}>
+                                                                View Details
+                                                            </Button>
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
                                                                 <IconTrash fontSize="small" className="me-2" /> Delete
                                                             </MenuItem>
@@ -445,7 +472,7 @@ const ServiceSubCategory = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={8} align="center" sx={{ py: 10 }}>
+                                            <TableCell colSpan={12} align="center" sx={{ py: 10 }}>
                                                 <Typography variant="subtitle2" fontWeight={600}>
                                                     No Data to Display
                                                 </Typography>
@@ -577,7 +604,7 @@ const ServiceSubCategory = () => {
                                     <Select
                                         value={formData.category_id || ""}
                                         onChange={(e) => setFormData((prev) => ({ ...prev, category_id: e.target.value }))}
-                                        onOpen={fetchCategory}
+                                        // onOpen={fetchCategory}
                                         label="Category"
                                         MenuProps={MenuProps}>
                                         {categoryList.map((item) => (
@@ -648,7 +675,7 @@ const ServiceSubCategory = () => {
                                     <Select
                                         value={editData.category_id || editData?.parent?.id}
                                         onChange={(e) => setEditData((prev) => ({ ...prev, category_id: e.target.value }))}
-                                        onOpen={fetchCategory}
+                                        // onOpen={fetchCategory}
                                         label="Category"
                                         MenuProps={MenuProps}
                                     >
@@ -764,8 +791,42 @@ const ServiceSubCategory = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <Modal open={open} onClose={handleClose}>
+                <Box sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 400,
+                    bgcolor: 'background.paper',
+                    border: '2px solid #000',
+                    boxShadow: 24,
+                    p: 4,
+                }}>
+                    <Typography variant="h6" component="h2">
+                        Enter Category ID
+                    </Typography>
+                    <TextField
+                        fullWidth
+                        margin="normal"
+                        label="Category ID"
+                        value={categoryId}
+                        onChange={(e) => setCategoryId(e.target.value)}
+                    />
+                    <Button variant="contained" onClick={handleFetch}>
+                        Fetch
+                    </Button>
+
+                    {category && (
+                        <Box mt={2}>
+                            <Typography variant="body1">Fetched Data:</Typography>
+                            <pre>{JSON.stringify(category, null, 2)}</pre>
+                        </Box>
+                    )}
+                </Box>
+            </Modal>
         </PageContainer >
     );
 };
 
-export default ServiceSubCategory;
+export default Vendor;

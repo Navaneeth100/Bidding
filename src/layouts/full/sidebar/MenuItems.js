@@ -1,6 +1,6 @@
 import {
-  IconAperture, IconCopy, IconLayoutDashboard, IconLogin, IconMoodHappy, IconTypography, IconUserPlus, IconBuildingSkyscraper,IconSettings,
-  IconList,IconBuilding,IconLiveView,IconListCheck
+  IconAperture, IconCopy, IconLayoutDashboard, IconLogin, IconMoodHappy, IconTypography, IconUserPlus, IconBuildingSkyscraper, IconSettings,
+  IconList, IconBuilding, IconLiveView, IconListCheck
 } from '@tabler/icons-react';
 
 import { uniqueId } from 'lodash';
@@ -52,6 +52,22 @@ const Menuitems = [
     title: 'Service Sub Category',
     icon: IconListCheck,
     href: '/service_Sub_category',
+  },
+  {
+    navlabel: true,
+    subheader: 'Vendor-Customer',
+  },
+  {
+    id: uniqueId(),
+    title: 'Vendor',
+    icon: IconList,
+    href: '/Vendor',
+  },
+  {
+    id: uniqueId(),
+    title: 'Customer',
+    icon: IconList,
+    href: '/customer',
   },
   // {
   //   id: uniqueId(),
