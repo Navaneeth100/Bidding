@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState,useCallback } from "react"
+
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, Modal } from "@mui/material"
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
@@ -121,35 +122,47 @@ const Vendor = () => {
     const [category, setCategory] = useState(null);
     const [categoryId, setCategoryId] = useState('');
 
-    const fetchCategoryById = (id) => {
-        axios
-            .get(`${url}/auth/vendor-customer/`, {
+    const fetchCategoryById = useCallback(
+        async (id) => {
+          try {
+            const { data } = await axios.get(
+              `${url}/auth/vendor-customer/${id}/`,
+              {
                 headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    'Content-Type': 'application/json',
+                  Authorization: `Bearer ${tokenStr}`,
+                  'Content-Type': 'application/json',
                 },
                 withCredentials: false,
-                params: {
-                    user_type: 'Vendor',
-                    id: id
-                }
-            })
-            .then((res) => {
-                setCategory(res.data);
-            })
-            .catch((error) => {
-                if (error.response) {
-                    const status = error.response.status;
-                    const message = error.response.data?.detail || error.response.data?.message || 'An unexpected error occurred';
-
-                    toast.error(`Error ${status}: ${message}`);
-                } else if (error.request) {
-                    toast.error('No response from server. Please check your connection.');
-                } else {
-                    toast.error('Error setting up request: ' + error.message);
-                }
-            });
-    };
+              }
+            );
+            setCategory(data);
+          } catch (error) {
+            handleAxiosError(error);
+          }
+        },
+        [url, tokenStr] // re-create only if url or tokenStr change
+      );
+      
+      const handleAxiosError = (error) => {
+        if (axios.isAxiosError(error)) {
+          if (error.response) {
+            const { status, data } = error.response;
+            const msg =
+              data?.detail ||
+              data?.message ||
+              'An unexpected error occurred';
+            toast.error(`Error ${status}: ${msg}`);
+          } else if (error.request) {
+            toast.error(
+              'No response from server. Please check your connection.'
+            );
+          } else {
+            toast.error('Request setup error: ' + error.message);
+          }
+        } else {
+          toast.error('An unexpected non-Axios error occurred.');
+        }
+      };
 
     const handleFetch = () => {
         if (categoryId) {
@@ -295,7 +308,7 @@ const Vendor = () => {
 
 
     return (
-        <PageContainer title="Service Sub Category" description="Service Sub Category">
+        <PageContainer title="Vendor List" description="Vendor List">
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
                 Vendor List            </Typography>
             <DashboardCard>

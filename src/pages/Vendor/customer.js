@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState ,useCallback  } from "react"
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, Modal } from "@mui/material"
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
@@ -121,35 +121,26 @@ const Customer = () => {
     const [category, setCategory] = useState(null);
     const [categoryId, setCategoryId] = useState('');
 
-    const fetchCategoryById = (id) => {
-        axios
-            .get(`${url}/auth/Customer-customer/`, {
+    const fetchCategoryById = useCallback(
+        async (id) => {
+          try {
+            const { data } = await axios.get(
+              `${url}/auth/vendor-customer/${id}/`,
+              {
                 headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    'Content-Type': 'application/json',
+                  Authorization: `Bearer ${tokenStr}`,
+                  'Content-Type': 'application/json',
                 },
                 withCredentials: false,
-                params: {
-                    user_type: 'Customer',
-                    id: id
-                }
-            })
-            .then((res) => {
-                setCategory(res.data);
-            })
-            .catch((error) => {
-                if (error.response) {
-                    const status = error.response.status;
-                    const message = error.response.data?.detail || error.response.data?.message || 'An unexpected error occurred';
-
-                    toast.error(`Error ${status}: ${message}`);
-                } else if (error.request) {
-                    toast.error('No response from server. Please check your connection.');
-                } else {
-                    toast.error('Error setting up request: ' + error.message);
-                }
-            });
-    };
+              }
+            );
+            setCategory(data);
+          } catch (error) {
+            handleAxiosError(error);
+          }
+        },
+        [url, tokenStr] // re-create only if url or tokenStr change
+      );
 
     const handleFetch = () => {
         if (categoryId) {
