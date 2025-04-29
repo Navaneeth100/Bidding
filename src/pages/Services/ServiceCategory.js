@@ -107,7 +107,24 @@ const ServiceCategory = () => {
         setFormData([]);
         setEditData([]);
         setDeleteData([]);
+        setselectedFile("");
+        setPreview(null);
         setAnchorEl(null)
+    };
+
+
+    // File Upload
+
+    const [selectedFile, setselectedFile] = useState("");
+    const [preview, setPreview] = useState(null);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setselectedFile(file);
+            const imageUrl = URL.createObjectURL(file);
+            setPreview(imageUrl);
+        }
     };
 
 
@@ -121,6 +138,7 @@ const ServiceCategory = () => {
 
         let submitData = {
             name: formData.category,
+            image: selectedFile
         }
 
         try {
@@ -138,7 +156,7 @@ const ServiceCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
 
             toggleModal('add')
@@ -152,7 +170,7 @@ const ServiceCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
         }
     };
@@ -168,6 +186,7 @@ const ServiceCategory = () => {
 
         let submitData = {
             name: editData.category,
+            image: selectedFile || preview
         };
 
         try {
@@ -185,7 +204,7 @@ const ServiceCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
             toggleModal('edit');
             resetForm()
@@ -198,7 +217,7 @@ const ServiceCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
         }
     };
@@ -224,7 +243,7 @@ const ServiceCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
             toggleModal('delete')
             if (categoryList.length === 1 && currentPage > 0) {
@@ -240,7 +259,7 @@ const ServiceCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
         }
     };
@@ -249,7 +268,7 @@ const ServiceCategory = () => {
     return (
         <PageContainer title="Service Category" description="Service Category"  >
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
-            Service Category
+                Service Category
             </Typography>
             <DashboardCard>
                 <Grid container>
@@ -273,7 +292,7 @@ const ServiceCategory = () => {
                                     placeholder="Search by Name"
                                     size="small"
                                     value={onsearchText}
-                                    onChange={(e) => {setonsearchText(e.target.value),setCurrentPage(0)}}
+                                    onChange={(e) => { setonsearchText(e.target.value), setCurrentPage(0) }}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
@@ -317,6 +336,9 @@ const ServiceCategory = () => {
                                             SN
                                         </TableCell>
                                         <TableCell align="center">
+                                            Icon
+                                        </TableCell>
+                                        <TableCell align="center">
                                             Category
                                         </TableCell>
                                         <TableCell align="right">
@@ -352,6 +374,9 @@ const ServiceCategory = () => {
                                             >
                                                 <TableCell align="center">
                                                     {currentPage * rowsPerPage + index + 1}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Avatar src={item.image ? `${url}${item.image}` : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     {item.name}
@@ -447,7 +472,7 @@ const ServiceCategory = () => {
                                     textAlign: "center",
                                     fontWeight: "500",
                                     fontSize: "14px",
-                                    padding:"8px",
+                                    padding: "8px",
                                     px: 1,
                                     color: theme.palette.text.primary,
                                 }}
@@ -523,7 +548,30 @@ const ServiceCategory = () => {
                 <form onSubmit={handleSubmit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={12}>
+                            <Grid item xs={5} md={5}>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    <Avatar
+                                        src={preview ? preview : ""}
+                                        alt=""
+                                        sx={{ width: 100, height: 100, margin: "0 auto" }}
+                                    />
+                                </Box>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    <input
+                                        accept="image/*"
+                                        id="file-upload"
+                                        type="file"
+                                        style={{ display: "none" }}
+                                        onChange={(e) => { handleFileChange(e) }}
+                                    />
+                                    <label htmlFor="file-upload">
+                                        <Button variant="contained" component="span">
+                                            Choose File
+                                        </Button>
+                                    </label>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={7} md={7}>
                                 <TextField
                                     required
                                     fullWidth
@@ -532,6 +580,7 @@ const ServiceCategory = () => {
                                     type="text"
                                     placeholder="Enter Category Name"
                                     onChange={(e) => { setFormData({ ...formData, category: e.target.value }) }}
+                                    sx={{ mt: 5 }}
                                 />
                             </Grid>
                         </Grid>
@@ -570,7 +619,30 @@ const ServiceCategory = () => {
                 <form onSubmit={handleEdit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={12}>
+                            <Grid item xs={5} md={5}>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    <Avatar
+                                        src={preview ? preview : `${url}${editData.image}`}
+                                        alt=""
+                                        sx={{ width: 100, height: 100, margin: "0 auto" }}
+                                    />
+                                </Box>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    <input
+                                        accept="image/*"
+                                        id="file-upload"
+                                        type="file"
+                                        style={{ display: "none" }}
+                                        onChange={(e) => { handleFileChange(e) }}
+                                    />
+                                    <label htmlFor="file-upload">
+                                        <Button variant="contained" component="span">
+                                            Choose File
+                                        </Button>
+                                    </label>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={7} md={7}>
                                 <TextField
                                     required
                                     fullWidth
@@ -580,6 +652,7 @@ const ServiceCategory = () => {
                                     placeholder="Enter Category Name"
                                     defaultValue={editData.name}
                                     onChange={(e) => { setEditData({ ...editData, category: e.target.value }) }}
+                                    sx={{ mt: 5 }}
                                 />
                             </Grid>
                         </Grid>
