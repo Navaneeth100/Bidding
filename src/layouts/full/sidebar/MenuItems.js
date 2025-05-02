@@ -1,6 +1,6 @@
 import {
   IconAperture, IconCopy, IconLayoutDashboard, IconLogin, IconMoodHappy, IconTypography, IconUserPlus, IconBuildingSkyscraper, IconSettings,
-  IconList, IconBuilding, IconLiveView, IconListCheck
+  IconList, IconBuilding, IconLiveView, IconListCheck,IconBrandUpwork
 } from '@tabler/icons-react';
 
 import { uniqueId } from 'lodash';
@@ -52,6 +52,18 @@ const Menuitems = [
     title: 'Service Sub Category',
     icon: IconListCheck,
     href: '/service_Sub_category',
+  },
+  {
+    id: uniqueId(),
+    title: 'Services',
+    icon: IconList,
+    href: '/services',
+  },
+  {
+    id: uniqueId(),
+    title: 'Service Jobs',
+    icon: IconBrandUpwork,
+    href: '/service-jobs',
   },
   {
     navlabel: true,

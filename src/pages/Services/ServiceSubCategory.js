@@ -55,7 +55,7 @@ const ServiceSubCategory = () => {
     const fetchSubServiceCategory = () => {
         setLoading(true);
         axios
-            .get(`${url}/auth/service-categories/?data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+            .get(`${url}/auth/service-categories/?data=sub`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -77,7 +77,7 @@ const ServiceSubCategory = () => {
                     axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
                         localStorage.setItem("authTokens", JSON.stringify(res.data));
                         axios
-                            .get(`${url}/auth/service-categories/?data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+                            .get(`${url}/auth/service-categories/?data=sub`, {
                                 headers: {
                                     Authorization: `Bearer ${res.data.access}`,
                                 },
