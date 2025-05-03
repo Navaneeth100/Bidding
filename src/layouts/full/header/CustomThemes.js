@@ -114,8 +114,8 @@ export const darkBlueTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#478774',
-      light: 'rgb(0, 196, 159);',
+      main: 'rgb(0, 139, 114);',
+      light: '#478774',
       dark: '#519380',
     },
     secondary: {
