@@ -55,7 +55,7 @@ const ServiceSubCategory = () => {
     const fetchSubServiceCategory = () => {
         setLoading(true);
         axios
-            .get(`${url}/auth/service-categories/?data=sub`, {
+            .get(`${url}/auth/service-categories/?data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -77,7 +77,7 @@ const ServiceSubCategory = () => {
                     axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
                         localStorage.setItem("authTokens", JSON.stringify(res.data));
                         axios
-                            .get(`${url}/auth/service-categories/?data=sub`, {
+                            .get(`${url}/auth/service-categories/?data=sub&?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                                 headers: {
                                     Authorization: `Bearer ${res.data.access}`,
                                 },
@@ -108,6 +108,8 @@ const ServiceSubCategory = () => {
         setFormData([]);
         setEditData([]);
         setDeleteData([]);
+        setselectedFile("");
+        setPreview(null);
         setAnchorEl(null)
     };
 
@@ -149,6 +151,21 @@ const ServiceSubCategory = () => {
             });
     };
 
+    // File Upload
+
+    const [selectedFile, setselectedFile] = useState("");
+    const [preview, setPreview] = useState(null);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setselectedFile(file);
+            const imageUrl = URL.createObjectURL(file);
+            setPreview(imageUrl);
+        }
+    };
+
+
     // Add Service Sub Category
 
     const [formData, setFormData] = useState([])
@@ -159,7 +176,8 @@ const ServiceSubCategory = () => {
 
         let submitData = {
             name: formData.sub_category,
-            parent: formData.category_id
+            parent: formData.category_id,
+            image: selectedFile
         }
 
         try {
@@ -177,7 +195,7 @@ const ServiceSubCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
 
             toggleModal('add')
@@ -191,7 +209,7 @@ const ServiceSubCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
         }
     };
@@ -207,7 +225,8 @@ const ServiceSubCategory = () => {
 
         let submitData = {
             name: editData.sub_category || editData.name,
-            parent: editData.category_id || editData?.parent?.id
+            parent: editData.category_id || editData?.parent?.id,
+            image: selectedFile || preview
         };
 
         try {
@@ -225,7 +244,7 @@ const ServiceSubCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
             toggleModal('edit');
             resetForm()
@@ -238,7 +257,7 @@ const ServiceSubCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
         }
     };
@@ -264,7 +283,7 @@ const ServiceSubCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
             toggleModal('delete')
             if (SubcategoryList.length === 1 && currentPage > 0) {
@@ -280,7 +299,7 @@ const ServiceSubCategory = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
         }
     };
@@ -355,6 +374,9 @@ const ServiceSubCategory = () => {
                                             SN
                                         </TableCell>
                                         <TableCell align="center">
+                                            Icon
+                                        </TableCell>
+                                        <TableCell align="center">
                                             Category
                                         </TableCell>
                                         <TableCell align="center">
@@ -393,6 +415,9 @@ const ServiceSubCategory = () => {
                                             >
                                                 <TableCell align="center">
                                                     {currentPage * rowsPerPage + index + 1}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Avatar src={item.image ? `${url}${item.image}` : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     {item.parent.name}
@@ -490,7 +515,7 @@ const ServiceSubCategory = () => {
                                     textAlign: "center",
                                     fontWeight: "500",
                                     fontSize: "14px",
-                                    padding:"8px",
+                                    padding: "8px",
                                     px: 1,
                                     color: theme.palette.text.primary,
                                 }}
@@ -570,6 +595,32 @@ const ServiceSubCategory = () => {
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3} alignItems="flex-end">
 
+                            {/* File Upload */}
+
+                            <Grid item xs={12} md={12}>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    <Avatar
+                                        src={preview ? preview : ""}
+                                        alt=""
+                                        sx={{ width: 100, height: 100, margin: "0 auto" }}
+                                    />
+                                </Box>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    <input
+                                        accept="image/*"
+                                        id="file-upload"
+                                        type="file"
+                                        style={{ display: "none" }}
+                                        onChange={(e) => { handleFileChange(e) }}
+                                    />
+                                    <label htmlFor="file-upload">
+                                        <Button variant="contained" component="span">
+                                            Choose File
+                                        </Button>
+                                    </label>
+                                </Box>
+                            </Grid>
+
                             {/* Category Select */}
 
                             <Grid item xs={6}>
@@ -640,6 +691,32 @@ const ServiceSubCategory = () => {
                 <form onSubmit={handleEdit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3}>
+
+                            {/* File Upload */}
+
+                            <Grid item xs={12} md={12}>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    <Avatar
+                                        src={preview ? preview : `${url}${editData.image}`}
+                                        alt=""
+                                        sx={{ width: 100, height: 100, margin: "0 auto" }}
+                                    />
+                                </Box>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    <input
+                                        accept="image/*"
+                                        id="file-upload"
+                                        type="file"
+                                        style={{ display: "none" }}
+                                        onChange={(e) => { handleFileChange(e) }}
+                                    />
+                                    <label htmlFor="file-upload">
+                                        <Button variant="contained" component="span">
+                                            Choose File
+                                        </Button>
+                                    </label>
+                                </Box>
+                            </Grid>
 
                             {/* Category Select */}
 

@@ -31,6 +31,7 @@ const Services = Loadable(lazy(() => import('../pages/Services/Services')));
 const Vendor = Loadable(lazy(() => import('../pages/Vendor/vendor')));
 const Customer = Loadable(lazy(() => import('../pages/Vendor/customer')));
 const ServiceJobs = Loadable(lazy(() => import('../pages/Services/ServicesJobs')));
+const ServiceBookMarks = Loadable(lazy(() => import('../pages/Services/ServiceBookMarks')));
 const user = JSON.parse(localStorage.getItem('authTokens'));
 const Router = [
   {
@@ -54,6 +55,7 @@ const Router = [
       { path: '/service_Sub_category', exact: true, element: <ServiceSubCategory /> },
       { path: '/services', exact: true, element: <Services /> },
       { path: '/service-Jobs', exact: true, element: <ServiceJobs /> },
+      { path: '/service-bookmarks', exact: true, element: <ServiceBookMarks /> },
       { path: '/vendor', exact: true, element: <Vendor /> },
       { path: '/customer', exact: true, element: <Customer /> },
       // { path: '/icons', exact: true, element: <Icons /> },
