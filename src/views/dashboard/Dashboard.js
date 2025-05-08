@@ -63,7 +63,7 @@ const fetchDashboardData = () => {
     setTimeout(() => {
       resolve({
         user: {
-          name: "Alex Johnson",
+          name: "Admin",
           role: "Product Manager",
           avatar: "/placeholder.svg?height=128&width=128",
           email: "alex.johnson@example.com",
@@ -75,7 +75,6 @@ const fetchDashboardData = () => {
           users: 1250,
           usersIncrease: 18.2,
           orders: 520,
-          ordersIncrease: -5.4,
           conversion: 28.6,
           conversionIncrease: 4.6,
         },
@@ -329,7 +328,7 @@ export default function Dashboard() {
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
-            title="Total Revenue"
+            title="Total Service Revenue"
             value={dashboardData.stats.revenue}
             increase={dashboardData.stats.revenueIncrease}
             icon={<AttachMoney />}
@@ -338,7 +337,7 @@ export default function Dashboard() {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
-            title="Total Users"
+            title="Total Vendors"
             value={dashboardData.stats.users}
             increase={dashboardData.stats.usersIncrease}
             icon={<People />}
@@ -347,7 +346,7 @@ export default function Dashboard() {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
-            title="New Orders"
+            title="New Service Categories"
             value={dashboardData.stats.orders}
             increase={dashboardData.stats.ordersIncrease}
             icon={<BarChartIcon />}
@@ -356,7 +355,7 @@ export default function Dashboard() {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
-            title="Conversion Rate"
+            title="Service Completion Rate"
             value={`${dashboardData.stats.conversion}%`}
             increase={dashboardData.stats.conversionIncrease}
             icon={<TrendingUp />}
@@ -370,8 +369,8 @@ export default function Dashboard() {
         <Grid item xs={12} md={8}>
           <Card sx={{ height: "100%" }}>
             <CardHeader
-              title="Revenue Overview"
-              subheader="Monthly revenue for the current year"
+              title="Service Revenue Overview"
+              subheader="Monthly service revenue for the current year"
               action={
                 <IconButton aria-label="settings" onClick={handleMenuClick}>
                   <MoreVert />
@@ -405,7 +404,7 @@ export default function Dashboard() {
         </Grid>
         <Grid item xs={12} md={4}>
           <Card sx={{ height: "100%" }}>
-            <CardHeader title="Traffic Sources" subheader="Where your visitors come from" />
+            <CardHeader title="Service Categories" subheader="Distribution of service categories" />
             <Divider />
             <CardContent sx={{ height: 300, display: "flex", justifyContent: "center", alignItems: "center" }}>
               <ResponsiveContainer width="100%" height="100%">
@@ -437,8 +436,8 @@ export default function Dashboard() {
         <Grid item xs={12} lg={8}>
           <Card>
             <CardHeader
-              title="Recent Transactions"
-              subheader="Your latest financial activities"
+              title="Recent Service Requests"
+              subheader="Your latest service activities"
               action={
                 <Button size="small" endIcon={<FilterList />}>
                   Filter
@@ -476,22 +475,22 @@ export default function Dashboard() {
               </List>
             </Box>
             <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
-              <Button color="primary">View All Transactions</Button>
+              <Button color="primary">View All Service Requests</Button>
             </Box>
           </Card>
         </Grid>
         <Grid item xs={12} lg={4}>
           <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-            <CardHeader title="Performance Metrics" subheader="Key performance indicators" />
+            <CardHeader title="Vendor Performance Metrics" subheader="Key vendor performance indicators" />
             <Divider />
             <CardContent sx={{ flexGrow: 1 }}>
-              <PerformanceIndicator label="Sales Performance" value={dashboardData.performance.sales} />
-              <PerformanceIndicator label="Marketing ROI" value={dashboardData.performance.marketing} />
-              <PerformanceIndicator label="Customer Support" value={dashboardData.performance.support} />
-              <PerformanceIndicator label="Development Progress" value={dashboardData.performance.development} />
+              <PerformanceIndicator label="Vendor Performance" value={dashboardData.performance.sales} />
+              <PerformanceIndicator label="Service Quality" value={dashboardData.performance.marketing} />
+              <PerformanceIndicator label="Customer Satisfaction" value={dashboardData.performance.support} />
+              <PerformanceIndicator label="Service Delivery" value={dashboardData.performance.development} />
             </CardContent>
             <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
-              <Button color="primary">View Detailed Report</Button>
+              <Button color="primary">View Vendor Detailed Report</Button>
             </Box>
           </Card>
         </Grid>
@@ -501,7 +500,7 @@ export default function Dashboard() {
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Card>
-            <CardHeader title="Device Distribution" subheader="User device preferences" />
+            <CardHeader title="Service Subcategory Distribution" subheader="Service subcategory breakdown" />
             <Divider />
             <CardContent>
               <Box sx={{ height: 300 }}>

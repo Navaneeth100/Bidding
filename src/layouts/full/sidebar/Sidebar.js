@@ -121,7 +121,7 @@ const MSidebar = ({ isSidebarOpen }) => {
               overflow: 'hidden'
             }}
           >
-            <Logo img={logo} />
+            {/* <Logo img={logo} /> */}
           </Box>
 
           {/* Toggle button */}

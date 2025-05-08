@@ -9,6 +9,8 @@
     IconSettings,
     IconMoodHappy,
     IconCopy,
+    IconListDetails,
+    IconBookmark,
   } from '@tabler/icons-react';
   import { uniqueId } from 'lodash';
   
@@ -50,7 +52,7 @@
         {
           id: uniqueId(),
           title: 'Service Sub Category',
-          icon: IconListCheck,
+          icon: IconListDetails ,
           href: '/service_Sub_category',
         },
         {
@@ -64,6 +66,12 @@
           title: 'Service Jobs',
           icon: IconBrandUpwork,
           href: '/service-jobs',
+        },
+        {
+          id: uniqueId(),
+          title: 'Service Bookmarks',
+          icon: IconBookmark,
+          href: '/service-bookmarks',
         },
       ],
     },

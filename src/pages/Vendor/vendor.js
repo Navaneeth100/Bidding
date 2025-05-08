@@ -5,7 +5,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled, IconCheck, IconX } from '@tabler/icons-react';
 import axios from "axios";
-import { url } from "../../../mainurl";
+import { imgurl, url } from "../../../mainurl";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
@@ -415,7 +415,7 @@ const Vendor = () => {
                                                 <TableCell align="center">
                                                     <Box display="flex" justifyContent="center">
                                                         <Avatar
-                                                            src={item.profile?.profile_picture ? `${url}${item.profile.profile_picture}` : ""}
+                                                            src={item.profile?.profile_picture ? `${imgurl}${item.profile.profile_picture}` : ""}
                                                             alt=""
                                                             variant="rounded"
                                                             sx={{ width: 50, height: 50, cursor: 'pointer' }}

@@ -4,7 +4,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled } from '@tabler/icons-react';
 import axios from "axios";
-import { url } from "../../../mainurl";
+import { imgurl, url } from "../../../mainurl";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { styled } from '@mui/material/styles';
@@ -430,9 +430,9 @@ const ServiceBookMarks = () => {
     }));
 
     return (
-        <PageContainer title="Bookmarks" description="Bookmarks">
+        <PageContainer title="Service Bookmarks" description="Service Bookmarks">
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
-                Bookmarks
+                Service Bookmarks
             </Typography>
             <DashboardCard>
                 <Grid container spacing={3}>
@@ -547,7 +547,7 @@ const ServiceBookMarks = () => {
                                                     {currentPage * rowsPerPage + index + 1}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    <Avatar src={item.bookmark && item?.bookmark?.images.length > 0 ? item?.bookmark?.images[0]?.image : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
+                                                    <Avatar src={item.bookmark && item?.bookmark?.images.length > 0 ? `${imgurl}${item?.bookmark?.images[0]?.image}` : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
                                                 </TableCell>
                                                 <TableCell
                                                     align="center"
@@ -999,7 +999,7 @@ const ServiceBookMarks = () => {
                         <Grid item xs={12} md={4}>
                             <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
                                 <Avatar
-                                    src={`${url}${viewData.bookmark?.images?.[0]?.image}`}
+                                    src={`${imgurl}${viewData.bookmark?.images?.[0]?.image}`}
                                     alt="Profile"
                                     sx={{ width: 120, height: 120 }}
                                 />
