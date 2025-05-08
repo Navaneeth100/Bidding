@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme } from "@mui/material"
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, alpha, } from "@mui/material"
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled } from '@tabler/icons-react';
@@ -583,7 +583,20 @@ const ServiceSubCategory = () => {
                 open={modal.add}
                 onClose={() => toggleModal("add")}
                 maxWidth="xl"
-                PaperProps={{ sx: { width: { xs: "95%", sm: "80%", md: "50%" }, maxHeight: "90vh", borderRadius: 2 } }}
+                PaperProps={{
+                    sx: {
+                        borderRadius: 4,
+                        p: 0,
+                        backdropFilter: 'blur(8px)',
+                        boxShadow: 24
+                    }
+                }}
+                BackdropProps={{
+                    sx: {
+                        backdropFilter: 'blur(4px)',
+                        bgcolor: alpha(theme.palette.background.default, 0.8)
+                    }
+                }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
                     Setup Service Sub Category
@@ -683,7 +696,20 @@ const ServiceSubCategory = () => {
                 open={modal.edit}
                 onClose={() => toggleModal("edit")}
                 maxWidth="xl"
-                PaperProps={{ sx: { width: { xs: "95%", sm: "80%", md: "50%" }, maxHeight: "90vh", borderRadius: 2 } }}
+                PaperProps={{
+                    sx: {
+                        borderRadius: 4,
+                        p: 0,
+                        backdropFilter: 'blur(8px)',
+                        boxShadow: 24
+                    }
+                }}
+                BackdropProps={{
+                    sx: {
+                        backdropFilter: 'blur(4px)',
+                        bgcolor: alpha(theme.palette.background.default, 0.8)
+                    }
+                }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary }}>
                     Edit Service Sub Category
@@ -780,7 +806,20 @@ const ServiceSubCategory = () => {
                 onClose={() => toggleModal("view")}
                 maxWidth="md"
                 fullWidth
-                PaperProps={{ sx: { borderRadius: 2 } }}
+                PaperProps={{
+                    sx: {
+                        borderRadius: 4,
+                        p: 0,
+                        backdropFilter: 'blur(8px)',
+                        boxShadow: 24
+                    }
+                }}
+                BackdropProps={{
+                    sx: {
+                        backdropFilter: 'blur(4px)',
+                        bgcolor: alpha(theme.palette.background.default, 0.8)
+                    }
+                }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, display: "flex", alignItems: "center", gap: 2, color: theme.palette.text.primary }}>
                 </DialogTitle>
@@ -806,7 +845,20 @@ const ServiceSubCategory = () => {
                 onClose={() => toggleModal("delete")}
                 maxWidth="sm"
                 fullWidth
-                PaperProps={{ sx: { borderRadius: 2 } }}
+                PaperProps={{
+                    sx: {
+                        borderRadius: 4,
+                        p: 0,
+                        backdropFilter: 'blur(8px)',
+                        boxShadow: 24
+                    }
+                }}
+                BackdropProps={{
+                    sx: {
+                        backdropFilter: 'blur(4px)',
+                        bgcolor: alpha(theme.palette.background.default, 0.8)
+                    }
+                }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: theme.palette.text.primary }}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
