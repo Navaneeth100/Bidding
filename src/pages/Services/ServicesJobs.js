@@ -436,9 +436,9 @@ const ServiceJobs = () => {
     }));
 
     return (
-        <PageContainer title="Services Jobs" description="Services Jobs">
+        <PageContainer title="Job Posts" description="Job Posts">
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
-                Services Jobs
+                Job Posts
             </Typography>
             <DashboardCard>
                 <Grid container spacing={3}>

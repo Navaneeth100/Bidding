@@ -57,13 +57,13 @@
         },
         {
           id: uniqueId(),
-          title: 'Services',
+          title: 'Service Posts',
           icon: IconList,
           href: '/services',
         },
         {
           id: uniqueId(),
-          title: 'Service Jobs',
+          title: 'Job Posts',
           icon: IconBrandUpwork,
           href: '/service-jobs',
         },
