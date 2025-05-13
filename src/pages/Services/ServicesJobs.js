@@ -4,7 +4,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled } from '@tabler/icons-react';
 import axios from "axios";
-import { url } from "../../../mainurl";
+import { imgurl, url } from "../../../mainurl";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { styled } from '@mui/material/styles';
@@ -737,6 +737,44 @@ const ServiceJobs = () => {
                                                 }}>
                                                     <Typography variant="body2">{ServiceID.location || '—'}</Typography>
                                                 </Box>
+                                            </Box>
+
+                                            {/* Images */}
+                                           <Box mb={2}>
+                                                <Typography variant="subtitle2" gutterBottom>
+                                                Images
+                                                </Typography>
+                                                {ServiceID.images?.length > 0 ? (
+                                                <Box display="flex" gap={1} mt={1}>
+                                                    {ServiceID.images.map((imgUrl, idx) => (
+                                                    <Box
+                                                        key={idx}
+                                                        component="img"
+                                                        src={`${imgurl}${imgUrl.image}`}
+                                                        alt={`Service Image ${idx + 1}`}
+                                                        sx={{
+                                                        width: 150,
+                                                        height: 150,
+                                                        borderRadius: 2,
+                                                        border: '1px solid',
+                                                        borderColor: 'divider'
+                                                        }}
+                                                    />
+                                                    ))}
+                                                </Box>
+                                                ) : (
+                                                <Box
+                                                    sx={{
+                                                    p: 1.5,
+                                                    borderRadius: 2,
+                                                    border: '1px solid',
+                                                    borderColor: 'divider',
+                                                    bgcolor: 'background.default'
+                                                    }}
+                                                >
+                                                    <Typography variant="body2">—</Typography>
+                                                </Box>
+                                                )}
                                             </Box>
 
                                             <Box mb={2}>

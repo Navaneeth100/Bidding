@@ -4,7 +4,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled } from '@tabler/icons-react';
 import axios from "axios";
-import { url } from "../../../mainurl";
+import { imgurl, url } from "../../../mainurl";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { styled } from '@mui/material/styles';
@@ -419,6 +419,11 @@ const Services = () => {
         color: theme.palette.text.secondary,
     }));
 
+    //  Select Images 
+    
+    const [selectedIndex, setSelectedIndex] = useState(0);
+
+
     return (
         <PageContainer title="Services" description="Services">
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
@@ -533,7 +538,7 @@ const Services = () => {
                                                 <TableCell align="center">{currentPage * rowsPerPage + index + 1}</TableCell>
                                                 <TableCell
                                                     align="center"
-                                                    onClick={() => handleNameClick(item)}
+                                                    onClick={() => {handleNameClick(item) , setSelectedIndex(0)}}
                                                     sx={{ cursor: 'pointer', color: 'primary.main' }}
                                                 >
                                                     {`${item.user.first_name} ${item.user.last_name}`}
@@ -959,11 +964,11 @@ const Services = () => {
                 <Box
                   key={idx}
                   component="img"
-                  src={imgUrl}
+                  src={`${imgurl}${imgUrl.image}`}
                   alt={`Service Image ${idx + 1}`}
                   sx={{
-                    width: 80,
-                    height: 80,
+                    width: 150,
+                    height: 150,
                     borderRadius: 2,
                     border: '1px solid',
                     borderColor: 'divider'
@@ -1017,6 +1022,44 @@ const Services = () => {
                             <DialogTitle>Service Details</DialogTitle>
                             <DialogContent dividers>
                                 {selectedItem && (
+                                <>
+                                    {selectedItem.images && selectedItem.images.length > 0 && (
+                                        <Box sx={{ padding: 2 }}>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={8}>
+                                                <Box
+                                                    component="img"
+                                                    src={selectedItem.images.length > 0  && `${imgurl}${selectedItem.images[selectedIndex].image}`}
+                                                    alt=""
+                                                    sx={{
+                                                        width: '100%',
+                                                        height: '40vh',
+                                                        borderRadius: 2,
+                                                    }}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                                <Box sx={{ height: '40vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                                                    {selectedItem.images.length > 0 && selectedItem?.images?.map((item, index) => (
+                                                        <Box
+                                                            key={index}
+                                                            component="img"
+                                                            src={`${imgurl}${item.image}`}
+                                                            alt=""
+                                                            onClick={() => setSelectedIndex(index)}
+                                                            sx={{
+                                                                width: '100%',
+                                                                height: '19vh',
+                                                                borderRadius: 2,
+                                                                marginBottom: 2
+                                                            }}
+                                                        />
+                                                    ))}
+                                                </Box>
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+                                    )}
                                     <DetailsGrid>
                                         <Box>
                                             <Label>First Name</Label>
@@ -1080,7 +1123,7 @@ const Services = () => {
                                             <Value> {format(new Date(selectedItem.created_at), 'HH:mm dd MMMM yyyy')}</Value>
                                         </Box>
                                     </DetailsGrid>
-                                )}
+                                </>)}
                             </DialogContent>
                             <DialogActions>
                                 <Button onClick={handleDetailsClose}>Close</Button>
