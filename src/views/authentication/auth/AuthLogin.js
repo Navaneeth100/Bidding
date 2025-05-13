@@ -128,12 +128,12 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
                         onChange={(e) => { handleChange(e) }} onKeyDown={handleKeyDown} />
                 </Box>
                 <Stack justifyContent="space-between" direction="row" alignItems="center" my={2}>
-                    <FormGroup>
+                    {/* <FormGroup>
                         <FormControlLabel
                             control={<Checkbox defaultChecked />}
                             label="Remeber this Device"
                         />
-                    </FormGroup>
+                    </FormGroup> */}
                     {/* <Typography
                     component={Link}
                     to="/"

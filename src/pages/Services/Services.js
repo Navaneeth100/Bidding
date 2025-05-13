@@ -484,6 +484,7 @@ const Services = () => {
                             >
                                 <TableHead>
                                     <TableRow>
+                                        <TableCell align="center">SN</TableCell>
                                         <TableCell align="center">Name</TableCell>
                                         <TableCell align="center">Email</TableCell>
                                         <TableCell align="center">Service Category</TableCell>
@@ -529,6 +530,7 @@ const Services = () => {
                                                                 : '#1e1e1e',
                                                 }}
                                             >
+                                                <TableCell align="center">{currentPage * rowsPerPage + index + 1}</TableCell>
                                                 <TableCell
                                                     align="center"
                                                     onClick={() => handleNameClick(item)}
