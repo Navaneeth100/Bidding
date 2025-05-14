@@ -11,6 +11,7 @@
     IconCopy,
     IconListDetails,
     IconBookmark,
+    IconClipboardText,
   } from '@tabler/icons-react';
   import { uniqueId } from 'lodash';
   
@@ -69,10 +70,16 @@
         },
         {
           id: uniqueId(),
-          title: 'Service Bookmarks',
-          icon: IconBookmark,
-          href: '/service-bookmarks',
+          title: 'Proposals',
+          icon: IconClipboardText,
+          href: '/proposals',
         },
+        // {
+        //   id: uniqueId(),
+        //   title: 'Service Bookmarks',
+        //   icon: IconBookmark,
+        //   href: '/service-bookmarks',
+        // },
       ],
     },
   
