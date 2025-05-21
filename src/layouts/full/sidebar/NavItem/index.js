@@ -42,9 +42,10 @@ const StyledItem = styled(ListItem, {
 
     /* extra left indent for children (open sidebar) */
     ...(level > 0 && !collapsed && {
-      paddingLeft: theme.spacing(4),                  // 32 px
+      paddingLeft: theme.spacing(3),     
+                   // 32 px
     }),
-
+  
     borderRadius: theme.shape.borderRadius * 2,
     justifyContent: collapsed ? 'center' : 'flex-start',
 
@@ -52,6 +53,7 @@ const StyledItem = styled(ListItem, {
     ...(level === 0 && {
       backgroundColor: parentBg,
       color: highlight,
+      marginTop:"9px"
     }),
 
     /* -------- child rows -------- */
@@ -59,7 +61,8 @@ const StyledItem = styled(ListItem, {
       backgroundColor: 'transparent',
       color: active ? highlight : muted,
       '& .MuiTypography-root': {
-        fontSize: theme.typography.body2.fontSize,    // smaller font
+        fontSize: theme.typography.body2.fontSize, 
+           // smaller font
       },
     }),
 
@@ -73,7 +76,8 @@ const StyledItem = styled(ListItem, {
     ...(collapsed &&
       level === 0 && {
         '&:first-of-type': {
-          marginTop: theme.spacing(2),                // 32 px space above the first icon
+          marginTop: theme.spacing(2),  
+                        // 32 px space above the first icon
         },
       }),
   };

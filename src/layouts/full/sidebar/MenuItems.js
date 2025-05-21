@@ -25,7 +25,7 @@
    */
   const Menuitems = [
     /* ── HOME ─────────────────────────────────────────────── */
-    { navlabel: true, subheader: 'Home' },
+    { navlabel: true, subheader: 'Bid App by TriRed' },
   
     {
       id: uniqueId(),
@@ -35,7 +35,7 @@
     },
   
     /* ── SERVICES ─────────────────────────────────────────── */
-    { navlabel: true, subheader: 'Services' },
+    // { navlabel: true, subheader: '---------------------------------------' },
   
     {
       id: uniqueId(),
