@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { styled } from '@mui/material/styles';
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { format } from 'date-fns';
-const ServiceJobs = () => {
+const employees = () => {
 
     // AuthTokens
 
@@ -55,22 +55,17 @@ const [mainImgIdx, setMainImgIdx] = useState(0);
     const [selectedId, setSelectedId] = useState(null)
 
     const fetchService = () => {
+     
         setLoading(true);
-
-        axios.get(`${url}/service/jobpost`, {
-            params: {
-                request: 'id,user,title,location_name,payment_type,created_at',
-                search: onsearchText,
-                page: currentPage + 1,
-                page_size: rowsPerPage,
-            },
-            headers: {
-                Authorization: `Bearer ${tokenStr}`,
-                'Content-Type': 'application/json',
-            },
-        })
+        axios
+            .get(`${url}/auth/employees/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+            })
             .then((res) => {
-                setserviceList(res.data.results);
+                setSubCategoryList(res.data.results);
                 setNextPageUrl(res.data.next);
                 setPrevPageUrl(res.data.previous);
                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -79,34 +74,25 @@ const [mainImgIdx, setMainImgIdx] = useState(0);
             .catch((error) => {
                 if (error.response && error.response.status === 401) {
                     localStorage.clear();
-                    navigate('/auth/login');
+                    navigate("/auth/login");
                 } else {
                     const refresh = String(authTokens.refresh);
-                    axios
-                        .post(`${url}/api/token/refresh/`, { refresh })
-                        .then((res) => {
-                            localStorage.setItem('authTokens', JSON.stringify(res.data));
-                            const newToken = res.data.access; // grab the refreshed access token
-                            axios.get(`${url}/service/jobpost`, {
-                                params: {
-                                    request: 'id,user,title,location_name,payment_type,created_at',
-                                    search: onsearchText,
-                                    page: currentPage + 1,
-                                    page_size: rowsPerPage,
-                                },
+                    axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
+                        localStorage.setItem("authTokens", JSON.stringify(res.data));
+                        axios
+                            .get(`${url}/auth/employees/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                                 headers: {
-                                    Authorization: `Bearer ${newToken}`,
-                                    'Content-Type': 'application/json',
+                                    Authorization: `Bearer ${res.data.access}`,
                                 },
                             })
-                                .then((res) => {
-                                    setSubCategoryList(res.data.results);
-                                    setNextPageUrl(res.data.next);
-                                    setPrevPageUrl(res.data.previous);
-                                    setTotalPages(Math.ceil(res.data.count / rowsPerPage));
-                                    setLoading(false);
-                                });
-                        });
+                            .then((res) => {
+                                setSubCategoryList(res.data.results);
+                                setNextPageUrl(res.data.next);
+                                setPrevPageUrl(res.data.previous);
+                                setTotalPages(Math.ceil(res.data.count / rowsPerPage));
+                                setLoading(false);
+                            });
+                    });
                 }
             });
     };
@@ -142,7 +128,7 @@ const [mainImgIdx, setMainImgIdx] = useState(0);
         console.log(id);
 
         axios
-            .get(`${url}/service/jobpost/${id}`, {
+            .get(`${url}/auth/employees/${id}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -160,7 +146,7 @@ const [mainImgIdx, setMainImgIdx] = useState(0);
                         Authorization: `Bearer ${res.data.access}`,
                     };
                     axios
-                        .get(`${url}/auth/service/jobpost/${id}`, { headers: new_headers })
+                        .get(`${url}/auth/auth/employees/${id}`, { headers: new_headers })
                         .then((res) => {
                             SetServiceID(res.data);
                         });
@@ -294,7 +280,7 @@ const [mainImgIdx, setMainImgIdx] = useState(0);
     //  Edit Services
 
     const [GetData, SetGetData] = useState([])
-    console.log("GetData", GetData);
+     
 
 
     const handleEdit = async (event) => {
@@ -624,7 +610,7 @@ const [mainImgIdx, setMainImgIdx] = useState(0);
                             </Table>
                         </TableContainer>
 
-                     <Dialog
+<Dialog
   open={openService}
   onClose={() => setService(false)}
   maxWidth="lg"
@@ -654,7 +640,7 @@ const [mainImgIdx, setMainImgIdx] = useState(0);
       fontSize: theme.typography.h5.fontSize,
     }}
   >
-    Service Job Info
+    Service JOEY
   </DialogTitle>
   <DialogContent sx={{
           position: 'relative',
@@ -686,75 +672,59 @@ const [mainImgIdx, setMainImgIdx] = useState(0);
     <Grid item xs={12} md={6}>
 
    <Box display="flex" alignItems="flex-start" justifyContent="center">
-
-    
-<Box
-  sx={{
-    width: 72,
-    maxHeight: 350,
-    overflowY: 'auto',
-    overflowX: 'hidden',
-    pr: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 1,
-    borderRadius: 2,
-    borderColor: 'divider',
-    // bgcolor: 'background.paper',
-    mr: 2,
-
-    // Hide scrollbars in Chrome/Safari/Edge
-    '&::-webkit-scrollbar': { display: 'none' },
-    // Hide scrollbars in Firefox
-    scrollbarWidth: 'none',
-    // Hide scrollbars in IE/Edge
-    msOverflowStyle: 'none',
-  }}
->
-  {ServiceID.images?.length > 0 ? ServiceID.images.map((imgUrl, idx) => (
-    <Box
-      key={idx}
-  onClick={() => setMainImgIdx(idx)}
-  sx={{
-    width: 60,
-    height: 60,
-    cursor: "pointer",
-    borderRadius: 1.5,
-    overflow: "hidden",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    border: mainImgIdx === idx ? "2px solid rgb(16, 131, 247)" : "none", // Blue border if selected
-    boxShadow: mainImgIdx === idx ? "0 4px 16px rgba(25, 118, 210, 0.2)" : "none", // Shadow if selected
-    // bgcolor: "#f8f8f8",
-    transition: "border 0.2s, box-shadow 0.2s", // Smooth transition
-      }}
-    >
-      <img
-        src={`${imgurl}${imgUrl.image}`}
-        alt={`Thumbnail ${idx + 1}`}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          borderRadius: 8,
-        }}
-      />
-    </Box>
-  )) : (
-    <Box sx={{
-      width: 60,
-      height: 60,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      bgcolor: "#f1f1f1",
+  <Box
+    sx={{
+      width: 72,
+      maxHeight: 350,
+      overflowY: 'auto',
+      pr: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 1,
       borderRadius: 2,
-    }}>
-      <Typography sx={{color:"black" , fontSize:"8px"}} variant="body2">No Image</Typography>
-    </Box>
-  )}
-</Box>
+      border: '1px solid',
+      borderColor: 'divider',
+    //   bgcolor: 'background.paper',
+      mr: 2,
+    }}
+  >
+    {ServiceID.images?.length > 0 ? ServiceID.images.map((imgUrl, idx) => (
+      <Box
+        key={idx}
+        onClick={() => setMainImgIdx(idx)}
+        sx={{
+          width: 60,
+          height: 60,
+          cursor: "pointer",
+          borderRadius: 1.5,
+          border: mainImgIdx === idx ? "2px solid #1976d2" : "1px solidrgb(255, 255, 255)",
+          overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "#f8f8f8"
+        }}
+      >
+        <img
+          src={`${imgurl}${imgUrl.image}`}
+          alt={`Thumbnail ${idx + 1}`}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            borderRadius: 8,
+          }}
+        />
+      </Box>
+    )) : (
+      <Box sx={{
+        width: 60, height: 60, display: "flex", alignItems: "center", justifyContent: "center",
+        bgcolor: "#f1f1f1", borderRadius: 2
+      }}>
+        <Typography variant="body2">No Image</Typography>
+      </Box>
+    )}
+  </Box>
   <Box
     sx={{
       width: 350,
@@ -945,17 +915,9 @@ const [mainImgIdx, setMainImgIdx] = useState(0);
     )}
   </DialogContent>
   <DialogActions sx={{ p: 3 }}>
-<Button
-  variant="contained"
-  size="large"
-  onClick={() => {
-    setService(false);
-    setMainImgIdx(0);
-  }}
->
-  Close
-</Button>
-
+    <Button variant="contained" size="large" onClick={() => setService(false)}>
+      Close
+    </Button>
   </DialogActions>
 </Dialog>
                         <Dialog
@@ -1474,4 +1436,4 @@ const [mainImgIdx, setMainImgIdx] = useState(0);
     );
 };
 
-export default ServiceJobs;
+export default employees;

@@ -33,6 +33,7 @@ const StyledItem = styled(ListItem, {
   const { highlight, parentBg, muted } = getColours(theme);
 
   return {
+    transition: 'none !important',
     /* -------- layout spacing -------- */
     whiteSpace: 'nowrap',
     marginBottom: collapsed ? theme.spacing(0.25)        // 16 px gap when collapsed
