@@ -123,7 +123,7 @@ const NavItem = ({
           justifyContent: 'center',
         }}
       >
-        <Icon size="1.25rem" stroke={1.5} />
+        {React.isValidElement(item.icon) ? item.icon : <item.icon size="1.25rem" stroke={1.5} />}
       </ListItemIcon>
 
       {!collapsed && (

@@ -63,7 +63,7 @@ const Router = [
       // { path: '/icons', exact: true, element: <Icons /> },
       // { path: '/ui/typography', exact: true, element: <TypographyPage /> },
       // { path: '/ui/shadow', exact: true, element: <Shadow /> },
-      // { path: '*', element: <Navigate to="/auth/404" /> },
+      { path: '*', element: <Navigate to="/auth/404" replace /> },
     ],
   },
   {
@@ -73,7 +73,7 @@ const Router = [
       { path: '404', element: <Error /> },
       { path: '/auth/register', element: <Register /> },
       { path: '/auth/login', element: <Login /> },
-      // { path: '*', element: <Navigate to="/auth/404" /> },
+      { path: '*', element: <Navigate to="/auth/404" replace /> },
     ],
   },
 ];
