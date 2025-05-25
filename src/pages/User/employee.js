@@ -1,5 +1,9 @@
-import { useEffect, useState } from "react"
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, List, ListItem, ListItemText, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, alpha } from "@mui/material"
+import { useEffect, useState } from "react";
+import {
+  Box, Table, TableBody, TableCell, TableContainer, TableHead, List, ListItem, ListItemText, TableRow, Paper, Checkbox,
+  Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel,
+  Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, alpha
+} from "@mui/material";
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled, IconH6 } from '@tabler/icons-react';
@@ -10,1430 +14,780 @@ import { useNavigate } from "react-router-dom";
 import { styled } from '@mui/material/styles';
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { format } from 'date-fns';
-const employees = () => {
 
-    // AuthTokens
+const Employees = () => {
+  // Auth & Theme
+  const authTokens = JSON.parse(localStorage.getItem('authTokens'));
+  const mode = JSON.parse(localStorage.getItem('mode'));
+  const tokenStr = String(authTokens.access);
+  const theme = useTheme();
 
-    const authTokens = JSON.parse(localStorage.getItem('authTokens'));
-    const mode = JSON.parse(localStorage.getItem('mode'));
-    let tokenStr = String(authTokens.access);
-    const inputHeight = '56px'; // or your desired height
-    const theme = useTheme();
-const [mainImgIdx, setMainImgIdx] = useState(0);
-    // Navigate
+  // Navigation
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  // States
+  const [mainImgIdx, setMainImgIdx] = useState(0);
+  const [modal, setModal] = useState({ add: false, view: false, edit: false, delete: false });
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [employeeList, setEmployeeList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [nextPageUrl, setNextPageUrl] = useState(null);
+  const [prevPageUrl, setPrevPageUrl] = useState(null);
+  const [totalPages, setTotalPages] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [onsearchText, setonsearchText] = useState("");
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [openDetailsModal, setOpenDetailsModal] = useState(false);
+  const [deleteData, setDeleteData] = useState({});
+  const [selectedId, setSelectedId] = useState(null);
+    const [eitdata, setEitData] = useState({});
+  const [ServiceID, SetServiceID] = useState(null);
+  const [openService, setService] = useState(false);
+console.log("eitdata",eitdata);
 
-    // Function to toggle the modal state
+  // Add/Edit States
 
-    const [modal, setModal] = useState({ add: false, view: false, edit: false, delete: false });
 
-    const toggleModal = (type) => {
-        setModal((prev) => ({ ...prev, [type]: !prev[type] }));
-        setAnchorEl(null)
-    };
+  // Edit
+  const [editData, setEditData] = useState({
+    email: "", username: "", password: "", first_name: "", last_name: "",
+    phone_number: "", employee_role: "", desig: "", languages: "", dob: "", experience: ""
+  });
+  console.log(editData);
+  
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    // Menu Toggle
+  // Fetch employees (with pagination, search)
+  const fetchService = () => {
+    setLoading(true);
+    axios.get(`${url}/auth/employees/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+      headers: { Authorization: `Bearer ${tokenStr}`, "Content-Type": "application/json" },
+    })
+      .then(res => {
+        setEmployeeList(res.data.results);
+        setNextPageUrl(res.data.next);
+        setPrevPageUrl(res.data.previous);
+        setTotalPages(Math.ceil(res.data.count / rowsPerPage));
+        setLoading(false);
+      })
+      .catch(error => {
+        if (error.response && error.response.status === 401) {
+          localStorage.clear();
+          navigate("/auth/login");
+        } else {
+          const refresh = String(authTokens.refresh);
+          axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
+            localStorage.setItem("authTokens", JSON.stringify(res.data));
+            axios
+              .get(`${url}/auth/employees/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+                headers: { Authorization: `Bearer ${res.data.access}` },
+              })
+              .then((res) => {
+                setEmployeeList(res.data.results);
+                setNextPageUrl(res.data.next);
+                setPrevPageUrl(res.data.previous);
+                setTotalPages(Math.ceil(res.data.count / rowsPerPage));
+                setLoading(false);
+              });
+          });
+        }
+      });
+  };
 
-    const [anchorEl, setAnchorEl] = useState(null)
+  useEffect(() => {
+    fetchService();
+    // eslint-disable-next-line
+  }, [currentPage, rowsPerPage, onsearchText]);
 
-    const handleMenuClick = (event, id) => {
-        setAnchorEl(event.currentTarget)
-        setSelectedId(id)
+  const handlePageChange = (page) => setCurrentPage(page);
+
+  // Get single employee for details (for ServiceID dialog & edit)
+  const fetchServiceIDById = async (id, forEdit = false) => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${url}/auth/employees/${id}`, {
+        headers: {
+          Authorization: `Bearer ${tokenStr}`,
+          "Content-Type": "application/json",
+        },
+      });
+      SetServiceID(res.data);
+      setLoading(false);
+
+      if (forEdit) {
+        setEditData({
+          email: res.data.email || "",
+          username: res.data.username || "",
+          password: "", // Leave blank for security
+          first_name: res.data.first_name || "",
+          last_name: res.data.last_name || "",
+          phone_number: res.data.phone_number || "",
+          employee_role: res.data.employee_role || "",
+          desig: res.data.profile.desig || "",
+          languages: res.data.profile.languages || "",
+          dob: res.data.profile.dob ? res.data.profile.dob.split("T")[0] : "",
+          experience: res.data.profile.experience || "",
+        });
+        setSelectedId(res.data.id);
+        setIsEditModalOpen(true);
+      }
+
+    } catch (error) {
+      setLoading(false);
+      toast.error("Failed to fetch details.");
     }
+  };
 
-    // Get  Services
-    const [serviceList, setserviceList] = useState([]);
-    const [SubcategoryList, setSubCategoryList] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [currentPage, setCurrentPage] = useState(0);
-    const [nextPageUrl, setNextPageUrl] = useState(null);
-    const [prevPageUrl, setPrevPageUrl] = useState(null);
-    const [totalPages, setTotalPages] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [onsearchText, setonsearchText] = useState("")
-    const [selectedId, setSelectedId] = useState(null)
-
-    const fetchService = () => {
-     
-        setLoading(true);
-        axios
-            .get(`${url}/auth/employees/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "application/json",
-                },
-            })
-            .then((res) => {
-                setSubCategoryList(res.data.results);
-                setNextPageUrl(res.data.next);
-                setPrevPageUrl(res.data.previous);
-                setTotalPages(Math.ceil(res.data.count / rowsPerPage));
-                setLoading(false);
-            })
-            .catch((error) => {
-                if (error.response && error.response.status === 401) {
-                    localStorage.clear();
-                    navigate("/auth/login");
-                } else {
-                    const refresh = String(authTokens.refresh);
-                    axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
-                        localStorage.setItem("authTokens", JSON.stringify(res.data));
-                        axios
-                            .get(`${url}/auth/employees/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
-                                headers: {
-                                    Authorization: `Bearer ${res.data.access}`,
-                                },
-                            })
-                            .then((res) => {
-                                setSubCategoryList(res.data.results);
-                                setNextPageUrl(res.data.next);
-                                setPrevPageUrl(res.data.previous);
-                                setTotalPages(Math.ceil(res.data.count / rowsPerPage));
-                                setLoading(false);
-                            });
-                    });
-                }
-            });
-    };
-
-
-    useEffect(() => {
-        fetchService();
-    }, [currentPage, rowsPerPage, onsearchText]);
-
-
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-    };
-
-
-    const resetForm = () => {
-        setFormData([]);
-        setEditData([]);
-        setDeleteData([]);
-        setAnchorEl(null)
-    };
-
-    // get  category
-
-    const MenuProps = { PaperProps: { style: { maxHeight: 200, overflowY: 'auto' } } };
-
-    const [editData, seteditData] = useState([])
-    const [categoryList, setcategoryList] = useState([])
-    const [ServiceID, SetServiceID] = useState([]);
-    const [openService, setService] = useState(false);
-
-    const fetchServiceIDById = (id) => {
-        console.log(id);
-
-        axios
-            .get(`${url}/auth/employees/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "application/json",
-                },
-                withCredentials: false,
-            })
-            .then((res) => {
-                SetServiceID(res.data);
-            })
-            .catch((error) => {
-                let refresh = String(JSON.parse(localStorage.getItem("authTokens")).refresh);
-                axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
-                    localStorage.setItem("authTokens", JSON.stringify(res.data));
-                    const new_headers = {
-                        Authorization: `Bearer ${res.data.access}`,
-                    };
-                    axios
-                        .get(`${url}/auth/auth/employees/${id}`, { headers: new_headers })
-                        .then((res) => {
-                            SetServiceID(res.data);
-                        });
-                });
-            });
-    };
-    const handleSelect = (e) => {
-        const id = e.target.value;
-        if (id) fetchServiceIDById(id);
-
-    };
-
-
-    const fetchSubServiceCategory = () => {
-        setLoading(true);
-        axios
-            .get(`${url}/auth/service-categories/?data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "application/json",
-                },
-            })
-            .then((res) => {
-                setSubCategoryList(res.data.results);
-                setNextPageUrl(res.data.next);
-                setPrevPageUrl(res.data.previous);
-                setTotalPages(Math.ceil(res.data.count / rowsPerPage));
-                setLoading(false);
-            })
-            .catch((error) => {
-                if (error.response && error.response.status === 401) {
-                    localStorage.clear();
-                    navigate("/auth/login");
-                } else {
-                    const refresh = String(authTokens.refresh);
-                    axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
-                        localStorage.setItem("authTokens", JSON.stringify(res.data));
-                        axios
-                            .get(`${url}/auth/service-categories/?data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
-                                headers: {
-                                    Authorization: `Bearer ${res.data.access}`,
-                                },
-                            })
-                            .then((res) => {
-                                setSubCategoryList(res.data.results);
-                                setNextPageUrl(res.data.next);
-                                setPrevPageUrl(res.data.previous);
-                                setTotalPages(Math.ceil(res.data.count / rowsPerPage));
-                                setLoading(false);
-                            });
-                    });
-                }
-            });
-    };
-
-
-
-
-
-    // Add Services
-
-    const [formData, setFormData] = useState({
-        title: "",                     // ← Title
-        description: "",               // ← Description
-        service_category: "",          // ← Category
-        service_subcategories: [],     // ← Subcategories
-        location_name: "",             // ← Location Name
-        location: "",                  // ← Coordinates
-        additional_note: "",           // ← Note
-        base_price: "",                // ← Base Price
-        currency: "",                  // ← Currency
-        files: [],                     // ← Uploaded files
+  // Add Employee
+  const [formData, setFormData] = useState({
+        email: "",
+        username: "",
+        password: "",
+        first_name: "",
+        last_name: "",
+        phone_number: "",
+        employeeRole: "",
+        desig: "",
+        languages: "",
+        dob: "",
+        experience: "",
     });
-
-    // handler for file input
-    const onFileChange = (e) =>
-        setFormData(p => ({ ...p, files: Array.from(e.target.files) }));
-
-    // submit handler
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const data = new FormData();
-
-        // append simple fields
-        data.append("title", formData.title);
-        data.append("description", formData.description);
-        data.append("service_category", formData.service_category);
-        data.append("location_name", formData.location_name);
-        data.append("location", formData.location);
-        data.append("additional_note", formData.additional_note);
-        data.append("base_price", formData.base_price);
-        data.append("currency", formData.currency);
-
-        // append subcategories array
-        formData.service_subcategories.forEach(id =>
-            data.append("service_subcategories", id)
-        );
-
-        // append files
-        formData.files.forEach(file =>
-            data.append("files[]", file)
-        );
-
-        try {
-            await axios.post(`${url}/auth/service/services/`, data, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-            toast.success("Service Request Submitted Successfully");
-            toggleModal("add");
-            // reset form
-            setFormData({
-                title: "",
-                description: "",
-                service_category: "",
-                service_subcategories: [],
-                location_name: "",
-                location: "",
-                additional_note: "",
-                base_price: "",
-                currency: "",
-                files: [],
-            });
-            refetch();
-        } catch (err) {
-            toast.error(err.response?.data?.error || "Failed to submit service request");
-        }
-    };
-    //  Edit Services
-
-    const [GetData, SetGetData] = useState([])
-     
-
-
-    const handleEdit = async (event) => {
-
-        event.preventDefault();
-
-        let submitData = {
-            name: editData.sub_category || editData.name,
-            parent: editData.category_id || editData?.parent?.id
-        };
-
-        try {
-            const response = await axios.put(`${url}/service/services/${selectedId}/`, submitData, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "multipart/form-data",
-                },
-                withCredentials: false,
-            });
-            toast.success("Service Category Edited Successfully", {
-                position: 'top-right',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-
-            });
-            toggleModal('edit');
-            resetForm()
-            fetchSubServiceCategory()
-        } catch (error) {
-            toast.error(`${error.response.data.error}`, {
-                position: 'top-right',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-
-            });
-        }
-    };
-
-
-    // Delete Services
-
-    const [deleteData, setDeleteData] = useState([])
-
-    const handleDelete = async () => {
-        try {
-            const response = await axios.delete(`${url}/service/services/${selectedId}/`, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "application/json",
-                },
-                withCredentials: false,
-            });
-            toast.success("Service Category Deleted Successfully", {
-                position: 'top-right',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-
-            });
-            toggleModal('delete')
-            if (SubcategoryList.length === 1 && currentPage > 0) {
-                setCurrentPage(currentPage - 1);
-            } else {
-                fetchSubServiceCategory();
-            }
-        } catch (error) {
-            toast.error(`${error.response.data.error}`, {
-                position: 'top-right',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-
-            });
-        }
-    };
-
-    const [selectedItem, setSelectedItem] = useState(null);
-    const [openDetailsModal, setOpenDetailsModal] = useState(false);
-    const handleNameClick = (item) => {
-        setSelectedItem(item);
-        setOpenDetailsModal(true);
-    };
-
-    const handleDetailsClose = () => {
-        setOpenDetailsModal(false);
-        setSelectedItem(null);
-    };
-
-    const handleMenusClick = (e, id) => {
-        setAnchorEl(e.currentTarget);
-        setSelectedId(id);
-    };
-
-    const handleMenuClose = () => {
-        setAnchorEl(null);
-        setSelectedId(null);
-    };
-
-    const StyledList = styled(List)(({ theme }) => ({
-        backgroundColor: theme.palette.background.paper,
-        borderRadius: theme.shape.borderRadius,
-        boxShadow: theme.shadows[1],
-        // zero out default padding
-        padding: 0,
-        // you can even set a maxHeight + scroll if you want:
-        // maxHeight: 400,
-        // overflow: 'auto',
-    }));
-
-    const DetailsGrid = styled(Box)(({ theme }) => ({
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: theme.spacing(2),
-        backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing(2),
-        borderRadius: theme.shape.borderRadius,
-        boxShadow: theme.shadows[1],
-    }));
-
-    const Label = styled(Typography)(({ theme }) => ({
-        ...theme.typography.subtitle2,
-        color: theme.palette.text.primary,
-        marginBottom: theme.spacing(0.5),
-    }));
-
-    const Value = styled(Typography)(({ theme }) => ({
-        ...theme.typography.body2,
-        color: theme.palette.text.secondary,
-    }));
-
-    return (
-        <PageContainer title="Job Posts" description="Job Posts">
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
-                Job Posts
-            </Typography>
-            <DashboardCard>
-                <Grid container spacing={3}>
-                    <Grid item sm={12} lg={12}>
-                        <Box
-                            sx={{
-                                p: 2,
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                borderBottom: "1px solid #e5e9f2",
-                            }}
-                        >
-                            <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: "#364a63" }}>
-
-                            </Typography>
-                            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                                <TextField
-                                    placeholder="Search by Name"
-                                    size="small"
-                                    value={onsearchText}
-                                    onChange={(e) => { setonsearchText(e.target.value), setCurrentPage(0) }}
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <IconSearch fontSize="small" />
-                                            </InputAdornment>
-                                        ),
-                                        sx: { borderRadius: 1 },
-                                    }}
-                                />
-                                {/* <Button
-                                    variant="contained"
-                                    startIcon={<IconPlus />}
-                                    onClick={() => toggleModal("add")}
-                                    sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" }, borderRadius: 1, boxShadow: "none" }}
-                                >
-                                    Add
-                                </Button> */}
-                            </Box>
-                        </Box>
-
-                        <TableContainer sx={{ minHeight: '700px' }}>
-                            <Table
-                                size="medium"
-                                sx={{
-                                    minWidth: { xs: 650, sm: 750 },
-                                    borderCollapse: 'collapse',
-                                    '& thead th': {
-                                        backgroundColor: '#f5f5f5',
-                                        fontSize: '14px',
-                                        fontWeight: 700,
-                                    },
-                                    '& td': {
-                                        fontSize: '13px',
-                                        fontWeight: 500,
-                                    },
-                                }}
-                            >
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell align="center">SN</TableCell>
-                                        <TableCell align="center">User</TableCell>
-                                        <TableCell align="center">Title</TableCell>
-                                        <TableCell align="center">Location</TableCell>
-                                        <TableCell align="center">Payment Type</TableCell>
-                                        <TableCell align="center">Created At</TableCell>
-                                        <TableCell align="right">Actions</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {loading ? (
-                                        <TableRow>
-                                            <TableCell colSpan={6} align="center">
-                                                <Box
-                                                    display="flex"
-                                                    justifyContent="center"
-                                                    alignItems="center"
-                                                    sx={{ height: '540px', fontWeight: 'bolder', fontSize: '15px' }}
-                                                >
-                                                    <CircularProgress className="me-2" color="primary" size={25} /> Loading Details
-                                                </Box>
-                                            </TableCell>
-                                        </TableRow>
-                                    ) : serviceList && serviceList.length > 0 ? (
-                                        serviceList.map((item, index) => (
-                                            <TableRow
-                                                key={item.id}
-                                                hover
-                                                role="checkbox"
-                                                tabIndex={-1}
-                                                sx={{
-                                                    '& td, & th': {
-                                                        borderBottom:
-                                                            mode === 0
-                                                                ? '1px solid #e0e0e0'
-                                                                : '1px solid rgb(85,83,83)',
-                                                    },
-                                                    backgroundColor:
-                                                        mode === 0
-                                                            ? index % 2
-                                                                ? '#f9f9f9'
-                                                                : 'white'
-                                                            : index % 2
-                                                                ? '#2a2a2a'
-                                                                : '#1e1e1e',
-                                                }}
-                                            >
-                                                <TableCell align="center">{currentPage * rowsPerPage + index + 1}</TableCell>
-                                                <TableCell
-                                                    align="center"
-                                                    onClick={() => handleNameClick(item)}
-                                                    sx={{ cursor: 'pointer', color: 'primary.main' }}
-                                                >
-                                                    {`${item.user.first_name} ${item.user.last_name}`}
-                                                </TableCell>
-                                                <TableCell align="center">{item.title}</TableCell>
-                                                <TableCell align="center">{item.location_name}</TableCell>
-                                                <TableCell align="center">{item.payment_type}</TableCell>
-                                                <TableCell align="center">{new Date(item.created_at).toLocaleString()}</TableCell>
-                                                <TableCell align="right">
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={(e) => handleMenusClick(e, item.id)}
-                                                        sx={{
-                                                            color: 'text.secondary',
-                                                            '&:hover': {
-                                                                color: 'text.primary',
-                                                                backgroundColor: 'rgba(255,255,255,0.08)',
-                                                            },
-                                                        }}
-                                                    >
-                                                        <IconDots fontSize="small" />
-                                                    </IconButton>
-                                                    {selectedId === item.id && (
-                                                        <Menu
-                                                            anchorEl={anchorEl}
-                                                            open={Boolean(anchorEl)}
-                                                            onClose={() => setSelectedId(null)}
-                                                            anchorOrigin={{
-                                                                vertical: 'bottom',
-                                                                horizontal: 'right',
-                                                            }}
-                                                            transformOrigin={{
-                                                                vertical: 'top',
-                                                                horizontal: 'right',
-                                                            }}
-                                                            PaperProps={{ sx: { px: 1, } }}
-                                                        >
-                                                            {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setViewData(item); toggleModal("view") }}>
-                                                                <IconEye fontSize="small" className="me-2" /> View
-                                                            </MenuItem> */}
-                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {
-                                                                console.log(item.id);
-
-                                                                fetchServiceIDById(item.id);          // your existing call
-                                                                SetGetData(item);          // stash the item
-                                                                // fetchCategory();           // load categories
-                                                                // toggleModal("edit");       // open the modal
-                                                                setService(true)
-
-                                                            }}>
-                                                                <IconPencil fontSize="small" className="me-2" /> View
-                                                            </MenuItem>
-                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
-                                                                <IconTrash fontSize="small" className="me-2" /> Delete
-                                                            </MenuItem>
-                                                        </Menu>
-                                                    )}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                    ) : (
-                                        <TableRow>
-                                            <TableCell colSpan={6} align="center" sx={{ py: 10 }}>
-                                                <Typography variant="subtitle2" fontWeight={600}>
-                                                    No Data to Display
-                                                </Typography>
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-
-<Dialog
-  open={openService}
-  onClose={() => setService(false)}
-  maxWidth="lg"
-  fullWidth
-  PaperProps={{
-    sx: {
-      borderRadius: 4,
-      backdropFilter: 'blur(8px)',
-      boxShadow: 24,
-      overflow: 'hidden',
-      bgcolor: 'background.default'
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const data = new FormData();
+    Object.entries(formData).forEach(([key, value]) => data.append(key, value));
+    try {
+      await axios.post(`${url}/auth/employees/`, data, {
+        headers: { Authorization: `Bearer ${tokenStr}`, "Content-Type": "multipart/form-data" },
+      });
+      toast.success("Request Submitted Successfully");
+      setModal((prev) => ({ ...prev, add: false }));
+      setFormData({
+        email: "",
+        username: "",
+        password: "",
+        first_name: "",
+        last_name: "",
+        phone_number: "",
+        employeeRole: "",
+        desig: "",
+        languages: "",
+        dob: "",
+        experience: "",
+      });
+      fetchService();
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Failed to submit request");
     }
-  }}
-  BackdropProps={{
-    sx: {
-      backdropFilter: 'blur(4px)',
-      bgcolor: alpha(theme.palette.background.default, 0.8)
-    }
-  }}
->
-  <DialogTitle
-    sx={{
-      bgcolor: theme.palette.primary.main,
-      color: theme.palette.primary.contrastText,
-      px: 4,
-      py: 3,
-      fontSize: theme.typography.h5.fontSize,
-    }}
-  >
-    Service JOEY
-  </DialogTitle>
-  <DialogContent sx={{
-          position: 'relative',
-          p: 6,
-          // Safari needs its own property
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          backgroundColor: alpha(
-            theme.palette.background.default,
-            0.25           // <-- lower alpha so the blur can shine through
-          ),
-        }}>
-    {!ServiceID ? (
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        sx={{ height: 200 }}
-      >
-        <CircularProgress color="primary" />
-        <Typography variant="body1" mt={2} color="text.secondary">
-          Loading service details...
-        </Typography>
-      </Box>
-    ) : (
-      <Grid container spacing={6} sx={{ marginTop:1 }}>
+  };
 
-    <Grid item xs={12} md={6}>
+  // Edit Employee (PUT)
+const handleEdit = async (e,) => {
+  e.preventDefault();
 
-   <Box display="flex" alignItems="flex-start" justifyContent="center">
-  <Box
-    sx={{
-      width: 72,
-      maxHeight: 350,
-      overflowY: 'auto',
-      pr: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 1,
-      borderRadius: 2,
-      border: '1px solid',
-      borderColor: 'divider',
-    //   bgcolor: 'background.paper',
-      mr: 2,
-    }}
-  >
-    {ServiceID.images?.length > 0 ? ServiceID.images.map((imgUrl, idx) => (
-      <Box
-        key={idx}
-        onClick={() => setMainImgIdx(idx)}
-        sx={{
-          width: 60,
-          height: 60,
-          cursor: "pointer",
-          borderRadius: 1.5,
-          border: mainImgIdx === idx ? "2px solid #1976d2" : "1px solidrgb(255, 255, 255)",
-          overflow: "hidden",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "#f8f8f8"
-        }}
-      >
-        <img
-          src={`${imgurl}${imgUrl.image}`}
-          alt={`Thumbnail ${idx + 1}`}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            borderRadius: 8,
-          }}
-        />
-      </Box>
-    )) : (
-      <Box sx={{
-        width: 60, height: 60, display: "flex", alignItems: "center", justifyContent: "center",
-        bgcolor: "#f1f1f1", borderRadius: 2
-      }}>
-        <Typography variant="body2">No Image</Typography>
-      </Box>
-    )}
-  </Box>
-  <Box
-    sx={{
-      width: 350,
-      height: 350,
-    //   bgcolor: "#f8f8f8",
-      borderRadius: 3,
-      border: '1px solid',
-      borderColor: 'divider',
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    }}
-  >
-    {ServiceID.images?.[mainImgIdx] ? (
-      <img
-        src={`${imgurl}${ServiceID.images[mainImgIdx].image}`}
-        alt={`Service Image ${mainImgIdx + 1}`}
-        style={{
-          maxWidth: "95%",
-          maxHeight: "95%",
-          borderRadius: 12,
-          objectFit: "contain",
-        }}
-      />
-    ) : (
-      <Typography variant="h6" color="text.secondary">
-        No Image
-      </Typography>
-    )}
-  </Box>
-</Box>
-<Box
-  sx={{
-    bgcolor: 'background.paper',
-    borderRadius: 3,
-    p: 4,
-    boxShadow: 1,
-    minWidth: 350,
-    mt: 2
-  }}
->
-  <Typography fontWeight={600} fontSize={18} mb={3}>
-    Service Information
-  </Typography>
-  <Grid container spacing={2}>
-    <Grid item xs={12} sm={6}>
-      <Typography variant="caption" color="text.secondary">
-        Title
-      </Typography>
-      <Typography variant="body1">
-        {ServiceID.title || '—'}
-      </Typography>
-    </Grid>
-    <Grid item xs={12} sm={6}>
-      <Typography variant="caption" color="text.secondary">
-        Category
-      </Typography>
-      <Typography variant="body1">
-        {ServiceID.service_category?.name || '—'}
-      </Typography>
-    </Grid>
-    <Grid item xs={12} sm={6}>
-      <Typography variant="caption" color="text.secondary">
-        Payment Type
-      </Typography>
-      <Typography variant="body1">
-        {ServiceID.payment_type || '—'}
-      </Typography>
-    </Grid>
-{ServiceID.service_subcategories?.length > 0 && (
-    <Grid item xs={12} sm={6}>
-      <Typography variant="caption" color="text.secondary">
-        Subcategories
-      </Typography>
-      {ServiceID.service_subcategories.map(sc => (
-            <Typography key={sc.id} variant="body2">
-              {sc.name}
-            </Typography>
-          ))}
-    </Grid>
-  )}
-    <Grid item xs={12}>
-      <Typography variant="caption" color="text.secondary">
-        Description
-      </Typography>
-      <Typography variant="body1">
-        {ServiceID.description || '—'}
-      </Typography>
-    </Grid>
-      <Grid item xs={12}>
-        <Typography variant="caption" color="text.secondary">
-        Cost
-      </Typography>
-      <Typography variant="body1">
-        {ServiceID.cost ? `USD ${ServiceID.cost}` : '—'}
-      </Typography>
-      </Grid>
-    {ServiceID.skills?.length > 0 && (
-      <Grid item xs={12}>
-        <Typography variant="caption" color="text.secondary">
-          Skills
-        </Typography>
-        <Box display="flex" flexWrap="wrap" gap={1} mt={0.5}>
-          {ServiceID.skills.map(skill => (
-            <Box
-              key={skill}
-              sx={{
-                bgcolor: theme =>
-                  theme.palette.mode === 'dark'
-                    ? theme.palette.background.default
-                    : theme.palette.grey[100],
-                px: 1.5,
-                py: 0.5,
-                borderRadius: 2,
-                fontSize: 14
-              }}
-            >
-              {skill}
-            </Box>
-          ))}
-        </Box>
-      </Grid>
-    )}
-  </Grid>
-</Box>
-  </Grid>
-<Grid item xs={12} md={6}>
-  {/* Vendor Information */}
-  <Box sx={{ bgcolor: 'background.paper', borderRadius: 3, p: 4, mb: 3, boxShadow: 1, minWidth: 350 }}>
-    <Typography fontWeight={600} fontSize={18} mb={3}>
-      Vendor Information
-    </Typography>
-    <Grid container spacing={2}>
-      {/* Profile Picture - full width */}
-      <Grid item xs={12} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Avatar
-          src={ServiceID.user?.profile?.profile_picture ? `${imgurl}${ServiceID.user.profile.profile_picture}` : ''}
-          alt="Profile"
-          sx={{ width: 70, height: 70 }}
-        />
-        <Box>
-          <Typography variant="caption" color="text.secondary">Profile Picture</Typography>
-        </Box>
-      </Grid>
-      <Grid item xs={6}>
-        <Typography variant="caption" color="text.secondary">First Name</Typography>
-        <Typography variant="body1">{ServiceID.user?.first_name || '—'}</Typography>
-      </Grid>
-      <Grid item xs={6}>
-        <Typography variant="caption" color="text.secondary">Last Name</Typography>
-        <Typography variant="body1">{ServiceID.user?.last_name || '—'}</Typography>
-      </Grid>
-      <Grid item xs={6}>
-        <Typography variant="caption" color="text.secondary">Email</Typography>
-        <Typography variant="body1">{ServiceID.user?.email || '—'}</Typography>
-      </Grid>
-      <Grid item xs={6}>
-        <Typography variant="caption" color="text.secondary">Phone</Typography>
-        <Typography variant="body1">{ServiceID.phone_number || ServiceID.user?.phone_number || '—'}</Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="caption" color="text.secondary">Created At</Typography>
-        <Typography variant="body1">
-          {ServiceID.created_at ? new Date(ServiceID.created_at).toLocaleString() : '—'}
-        </Typography>
-      </Grid>
-    </Grid>
-  </Box>
+  // Create FormData object with all fields from editData state
+  const editForm = new FormData();
+  Object.keys(editData).forEach(key => {
+    editForm.append(key, editData[key]);
+  });
+console.log("id",eitdata);
 
-  <Box sx={{ bgcolor: 'background.paper', borderRadius: 3, p: 4, boxShadow: 1, minWidth: 350 }}>
-    <Typography fontWeight={600} fontSize={18} mb={3}>
-      Location
-    </Typography>
-    <Grid container spacing={2}>
-      <Grid item xs={6}>
-        <Typography variant="caption" color="text.secondary">Location</Typography>
-        <Typography variant="body1">{ServiceID.location || '—'}</Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="caption"  color="text.secondary">Coordinates</Typography>
-        <Typography variant="body1">{ServiceID.location_name || '—'}</Typography>
-      </Grid>
-    </Grid>
-  </Box>
-</Grid>
-
-</Grid>
-    )}
-  </DialogContent>
-  <DialogActions sx={{ p: 3 }}>
-    <Button variant="contained" size="large" onClick={() => setService(false)}>
-      Close
-    </Button>
-  </DialogActions>
-</Dialog>
-                        <Dialog
-                            PaperProps={{
-                                sx: {
-                                    borderRadius: 4,
-                                    p: 0,
-                                    backdropFilter: 'blur(8px)',
-                                    boxShadow: 24,
-                                }
-                            }}
-                            BackdropProps={{
-                                sx: {
-                                    backdropFilter: 'blur(4px)',
-                                    bgcolor: alpha(theme.palette.background.default, 0.8)
-                                }
-                            }} open={openDetailsModal} onClose={handleDetailsClose} fullWidth maxWidth="sm">
-                            <DialogTitle>Service Details</DialogTitle>
-                            <DialogContent dividers>
-                                {selectedItem && (
-                                    <DetailsGrid>
-                                        <Box>
-                                            <Label>First Name</Label>
-                                            <Value>{selectedItem.user.first_name}</Value>
-                                        </Box>
-                                        <Box>
-                                            <Label>Last Name</Label>
-                                            <Value>{selectedItem.user.last_name}</Value>
-                                        </Box>
-                                        <Box>
-                                            <Label>Email</Label>
-                                            <Value>{selectedItem.user.email}</Value>
-                                        </Box>
-                                        {/* <Box>
-                                            <Label>Service Category</Label>
-                                            <Value>{selectedItem.service_category.name}</Value>
-                                        </Box>
-                                        <Box>
-                                            <Label>Service Subcategories</Label>
-                                            <Value>
-                                                {Array.isArray(selectedItem.service_subcategories)
-                                                    ? selectedItem.service_subcategories.map(sc => sc.name).join(', ')
-                                                    : ''}
-                                            </Value>
-
-                                        </Box> */}
-                                        <Box>
-                                            <Label>Title</Label>
-                                            <Value>{selectedItem.title}</Value>
-                                        </Box>
-                                        {/* <Box>
-                                            <Label>Description</Label>
-                                            <Value>{selectedItem.description}</Value>
-                                        </Box> */}
-                                        <Box>
-                                            <Label>Location Name</Label>
-                                            <Value>{selectedItem.location_name}</Value>
-                                        </Box>
-                                        {/* <Box>
-                                            <Label>Location</Label>
-                                            <Value>{selectedItem.location}</Value>
-                                        </Box> */}
-                                        {/* <Box>
-                                            <Label>Phone Number</Label>
-                                            <Value>{selectedItem.phone_number}</Value>
-                                        </Box>
-                                        <Box>
-                                            <Label>Additional Note</Label>
-                                            <Value>{selectedItem.additional_note}</Value>
-                                        </Box>
-                                        <Box>
-                                            <Label>Base Price</Label>
-                                            <Value>{selectedItem.base_price}</Value>
-                                        </Box>
-                                        <Box>
-                                            <Label>Currency</Label>
-                                            <Value>{selectedItem.currency}</Value>
-                                        </Box> */}
-                                        <Box>
-                                            <Label>Created At</Label>
-                                            <Value> {format(new Date(selectedItem.created_at), 'HH:mm dd MMMM yyyy')}</Value>
-                                        </Box>
-                                    </DetailsGrid>
-                                )}
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={handleDetailsClose}>Close</Button>
-                            </DialogActions>
-                        </Dialog>
-
-                        <Box
-                            sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                border: "1px solid #e0e0e0",
-                                maxWidth: "220px",
-                                borderRadius: 2,
-                                marginTop: "20px",
-                                marginLeft: "auto",
-                                p: 0.5,
-                                gap: 0.5,
-                            }}
-                        >
-                            {currentPage > 1 && (
-                                <IconButton onClick={() => handlePageChange(1)} aria-label="first page">
-                                    <FirstPage />
-                                </IconButton>
-                            )}
-
-                            {prevPageUrl && (
-                                <IconButton
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    aria-label="previous page"
-                                >
-                                    <ChevronLeft />
-                                </IconButton>
-                            )}
-
-                            <Typography
-                                variant="body2"
-                                sx={{
-                                    minWidth: 30,
-                                    textAlign: "center",
-                                    fontWeight: "500",
-                                    fontSize: "14px",
-                                    padding: "8px",
-                                    px: 1,
-                                    color: theme.palette.text.primary,
-                                }}
-                            >
-                                {currentPage + 1}
-                            </Typography>
-
-                            {nextPageUrl && (
-                                <IconButton
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    aria-label="next page"
-                                >
-                                    <ChevronRight />
-                                </IconButton>
-                            )}
-
-                            {currentPage !== totalPages - 1 && (
-                                <IconButton
-                                    onClick={() => handlePageChange(totalPages - 1)}
-                                    aria-label="last page"
-                                >
-                                    <LastPage />
-                                </IconButton>
-                            )}
-                        </Box>
-                        {/* <Box sx={{ flexShrink: 0, ml: 2.5, mt: 3, display: "flex", alignItems: "center", gap: 1 }}>
-
-                            {currentPage > 1 && (
-                                <IconButton onClick={() => handlePageChange(1)} aria-label="first page">
-                                    <Typography variant="paginationLabel" >First</Typography>
-                                </IconButton>
-                            )}
-
-                            {prevPageUrl && (
-                                <IconButton onClick={() => handlePageChange(currentPage - 1)} aria-label="previous page">
-                                    <Typography variant="paginationLabel" >Prev</Typography>
-                                </IconButton>
-                            )}
-
-                            <Typography
-                                variant="paginationLabel"
-                                sx={{ minWidth: 60, textAlign: "center", color: "black", fontWeight: "500", fontSize: "13px" }}>
-                                {currentPage + 1}
-                            </Typography>
-
-                            {nextPageUrl && (
-                                <IconButton onClick={() => handlePageChange(currentPage + 1)} aria-label="next page">
-                                    <Typography variant="paginationLabel" >Next</Typography>
-                                </IconButton>
-                            )}
-
-                            {currentPage !== totalPages - 1 && (
-                                <IconButton onClick={() => handlePageChange(totalPages - 1)} aria-label="last page">
-                                    <Typography variant="paginationLabel" >Last</Typography>
-                                </IconButton>
-                            )}
-                        </Box> */}
-                    </Grid>
-                </Grid>
-            </DashboardCard>
-
-            {/* Add Modal */}
-
-            <Dialog
-                open={modal.add}
-                onClose={() => toggleModal("add")}
-                maxWidth="xl"
-                PaperProps={{ sx: { width: { xs: "95%", sm: "80%", md: "50%" }, maxHeight: "90vh", borderRadius: 2 } }}
-            >
-                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Setup Services
-                </DialogTitle>
-
-
-
-                <form onSubmit={handleSubmit}>
-                    <DialogContent sx={{ p: 3 }}>
-                        <Grid container spacing={3}>
-
-                            {/* Title */}
-                            <Grid item xs={12}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    label="Title"
-                                    value={formData.title}                                  // ← reading title state
-                                    onChange={e => setFormData(p => ({ ...p, title: e.target.value }))}  // ← updating title
-                                />
-                            </Grid>
-
-                            {/* Description */}
-                            <Grid item xs={12}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    multiline
-                                    rows={4}
-                                    label="Description"
-                                    value={formData.description}                            // ← reading description
-                                    onChange={e => setFormData(p => ({ ...p, description: e.target.value }))} // ← updating description
-                                />
-                            </Grid>
-
-                            {/* Service Category */}
-                            <Grid item xs={6}>
-                                <FormControl fullWidth>
-                                    <InputLabel>Service Category</InputLabel>
-                                    <Select
-                                        required
-                                        label="Service Category"
-                                        value={formData.service_category}                      // ← reading category
-                                        onChange={e => setFormData(p => ({
-                                            ...p,
-                                            service_category: e.target.value,                   // ← updating category
-                                            service_subcategories: [],                          // reset subs
-                                        }))}
-                                    >
-                                        {categoryList.map(cat => (
-                                            <MenuItem key={cat.id} value={cat.id}>
-                                                {cat.name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-
-                            {/* Service Subcategories */}
-                            <Grid item xs={6}>
-                                <FormControl fullWidth disabled={!formData.service_category}>
-                                    <InputLabel>Subcategories</InputLabel>
-                                    <Select
-                                        multiple
-                                        label="Subcategories"
-                                        value={formData.service_subcategories}                 // ← reading subcategories
-                                        onChange={e => setFormData(p => ({
-                                            ...p,
-                                            service_subcategories: e.target.value,             // ← updating subcategories
-                                        }))}
-                                    >
-                                        {SubcategoryList.map(sub => (
-                                            <MenuItem key={sub.id} value={sub.id}>
-                                                {sub.name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-
-                            {/* Location Name */}
-                            <Grid item xs={6}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    label="Location Name"
-                                    value={formData.location_name}                         // ← reading location_name
-                                    onChange={e => setFormData(p => ({ ...p, location_name: e.target.value }))} // ← updating
-                                />
-                            </Grid>
-
-                            {/* Coordinates */}
-                            <Grid item xs={6}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    label="Coordinates (lat,lng)"
-                                    placeholder="24.7136,46.6753"
-                                    value={formData.location}                              // ← reading location
-                                    onChange={e => setFormData(p => ({ ...p, location: e.target.value }))} // ← updating
-                                />
-                            </Grid>
-
-                            {/* Additional Note */}
-                            <Grid item xs={12}>
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={2}
-                                    label="Additional Note"
-                                    value={formData.additional_note}                       // ← reading additional_note
-                                    onChange={e => setFormData(p => ({ ...p, additional_note: e.target.value }))} // ← updating
-                                />
-                            </Grid>
-
-                            {/* Base Price */}
-                            <Grid item xs={6}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    type="number"
-                                    label="Base Price"
-                                    value={formData.base_price}                            // ← reading base_price
-                                    onChange={e => setFormData(p => ({
-                                        ...p,
-                                        base_price: parseFloat(e.target.value) || "",
-                                    }))}                                                   // ← updating base_price
-                                />
-                            </Grid>
-
-                            {/* Currency */}
-                            <Grid item xs={6}>
-                                <FormControl fullWidth>
-                                    <InputLabel>Currency</InputLabel>
-                                    <Select
-                                        required
-                                        label="Currency"
-                                        value={formData.currency}                             // ← reading currency
-                                        onChange={e => setFormData(p => ({ ...p, currency: e.target.value }))} // ← updating currency
-                                    >
-                                        {/* {currencyList.map(cur => (
-                  <MenuItem key={cur} value={cur}>
-                    {cur}
-                  </MenuItem>
-                ))} */}
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-
-                            {/* File Upload */}
-                            <Grid item xs={12}>
-                                <Button variant="outlined" component="label">
-                                    Upload Files
-                                    <input
-                                        type="file"
-                                        hidden
-                                        multiple
-                                        accept="image/*"
-                                        onChange={onFileChange}                           // ← handling files into state
-                                    />
-                                </Button>
-                            </Grid>
-
-                        </Grid>
-                    </DialogContent>
-
-                    <DialogActions sx={{ p: 3, borderTop: "1px solid #e5e9f2", gap: 1 }}>
-                        <Button onClick={() => toggleModal("add")} variant="outlined">
-                            Cancel
-                        </Button>
-                        <Button type="submit" variant="contained">
-                            Submit
-                        </Button>
-                    </DialogActions>
-                </form>
-
-
-
-            </Dialog>
-
-
-            {/* Edit Modal */}
-
-            <Dialog
-                open={modal.edit}
-                onClose={() => toggleModal("edit")}
-                maxWidth="xl"
-                PaperProps={{ sx: { width: { xs: "95%", sm: "80%", md: "50%" }, maxHeight: "90vh", borderRadius: 2 } }}
-            >
-                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary }}>
-                    Edit Services
-                </DialogTitle>
-                <form onSubmit={handleEdit}>
-                    <DialogContent sx={{ p: 3 }}>
-                        <Grid container spacing={3}>
-
-                            {/* Category Select */}
-
-                            <Grid item xs={6}>
-                                <FormControl fullWidth>
-                                    <InputLabel>Category</InputLabel>
-                                    <Select
-                                        value={editData.category_id || editData?.parent?.id}
-                                        onChange={(e) => setEditData((prev) => ({ ...prev, category_id: e.target.value }))}
-                                        // onOpen={fetchCategory}
-                                        label="Category"
-                                        MenuProps={MenuProps}
-                                    >
-                                        {categoryList.map((item) => (
-                                            <MenuItem key={item.id} value={item.id}>{item?.name}</MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-
-
-                            {/*s TextField */}
-
-                            <Grid item xs={6}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    name="category"
-                                    label="Sub Category Name"
-                                    type="text"
-                                    placeholder="Enter Category Name"
-                                    defaultValue={editData.name || ''}
-                                    onChange={(e) => { setEditData({ ...editData, sub_category: e.target.value }) }}
-                                />
-                            </Grid>
-                        </Grid>
-                    </DialogContent>
-                    <DialogActions sx={{ p: 3, borderTop: "1px solid #e5e9f2", gap: 1 }}>
-                        <Button
-                            onClick={() => toggleModal("edit")}
-                            variant="outlined"
-                            sx={{
-                                borderColor: "#e5e9f2",
-                                color: "#364a63",
-                                "&:hover": { borderColor: "#6e82a5", backgroundColor: "#f5f6fa" },
-                            }}
-                        >
-                            Cancel
-                        </Button>
-                        <Button type="submit" variant="contained" sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" } }}>
-                            Submit
-                        </Button>
-                    </DialogActions>
-                </form>
-            </Dialog>
-
-            {/* View Modal */}
-
-            <Dialog
-                open={modal.view}
-                onClose={() => toggleModal("view")}
-                maxWidth="md"
-                fullWidth
-                PaperProps={{ sx: { borderRadius: 2 } }}
-            >
-                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, display: "flex", alignItems: "center", gap: 2, color: theme.palette.text.primary }}>
-                </DialogTitle>
-                <DialogContent sx={{ p: 3, mt: 2 }}>
-                    <Grid container spacing={3}>
-                    </Grid>
-                </DialogContent>
-                <DialogActions sx={{ p: 3, borderTop: "1px solid #e5e9f2" }}>
-                    <Button
-                        onClick={() => toggleModal("view")}
-                        variant="contained"
-                        sx={{ bgcolor: "#7f54fb", "&:hover": { bgcolor: "#6a3ee8" } }}
-                    >
-                        Close
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Delete Modal */}
-
-            <Dialog
-                open={modal.delete}
-                onClose={() => toggleModal("delete")}
-                maxWidth="sm"
-                fullWidth
-                PaperProps={{ sx: { borderRadius: 2 } }}
-            >
-                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: theme.palette.text.primary }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Delete Service Category
-                    </Typography>
-                </DialogTitle>
-                <DialogContent sx={{ p: 3 }}>
-                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, p: 2, borderRadius: 1, mt: 2 }}>
-                        <IconAlertCircleFilled size={50} style={{ color: "red" }} />
-                        <Typography variant="h6" sx={{ color: theme.palette.text.primary, textAlign: "center" }}>
-                            Are you sure you want to Delete the service category:{" "}
-                            <Box component="span" sx={{ color: "red", fontWeight: 600 }}>
-                                {deleteData.name}&nbsp;
-                            </Box>
-                            ?
-                        </Typography>
-                    </Box>
-                </DialogContent>
-                <DialogActions sx={{ p: 3, borderTop: "1px solid #e5e9f2", gap: 1 }}>
-                    <Button
-                        onClick={() => toggleModal("delete")}
-                        variant="outlined"
-                        sx={{ borderColor: "#e5e9f2", color: "#364a63", "&:hover": { borderColor: "#6e82a5", bgcolor: "#f5f6fa" } }}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={() => handleDelete()}
-                        variant="contained"
-                        sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" } }}
-                    >
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </PageContainer >
-    );
+  try {
+    await axios.put(`${url}/auth/employees/${eitdata}/`, editForm, {
+      headers: {
+        Authorization: `Bearer ${tokenStr}`,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    toast.success('User Data Edited Successfully');
+    setIsEditModalOpen(false);
+    setEditData({
+      email: '', username: '', password: '', first_name: '', last_name: '',
+      phone_number: '', employee_role: '', desig: '', languages: '', dob: '', experience: ''
+    });
+    fetchService();
+  } catch (error) {
+    toast.error(error.response?.data?.error || 'Failed to edit data');
+  }
 };
 
-export default employees;
+
+  // Delete Employee
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`${url}/auth/employees/${selectedId}/`, {
+        headers: {
+          Authorization: `Bearer ${tokenStr}`,
+          "Content-Type": "application/json",
+        },
+      });
+      toast.success("Employee Deleted Successfully", { position: 'top-right', autoClose: 3000 });
+      setModal(prev => ({ ...prev, delete: false }));
+      fetchService();
+    } catch (error) {
+      toast.error(error?.response?.data?.error || "Delete failed", { position: 'top-right', autoClose: 3000 });
+    }
+  };
+
+  // Details Modal
+  const handleNameClick = (item) => {
+    setSelectedItem(item);
+    setOpenDetailsModal(true);
+  };
+  const handleDetailsClose = () => {
+    setOpenDetailsModal(false);
+    setSelectedItem(null);
+  };
+
+  // Menu Handlers
+  const handleMenusClick = (e, id) => {
+    setAnchorEl(e.currentTarget);
+    setSelectedId(id);
+  };
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedId(null);
+  };
+
+  // Styled for Details
+  const DetailsGrid = styled(Box)(({ theme }) => ({
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: theme.spacing(2),
+    backgroundColor: theme.palette.background.paper,
+    padding: theme.spacing(2),
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: theme.shadows[1],
+  }));
+  const Label = styled(Typography)(({ theme }) => ({
+    ...theme.typography.subtitle2,
+    color: theme.palette.text.primary,
+    marginBottom: theme.spacing(0.5),
+  }));
+  const Value = styled(Typography)(({ theme }) => ({
+    ...theme.typography.body2,
+    color: theme.palette.text.secondary,
+  }));
+
+  return (
+    <PageContainer title="Job Posts" description="Job Posts">
+      <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
+        Employees
+      </Typography>
+      <DashboardCard>
+        <Grid container spacing={3}>
+          <Grid item sm={12} lg={12}>
+            <Box sx={{
+              p: 2, display: "flex", justifyContent: "space-between", alignItems: "center",
+              borderBottom: "1px solid #e5e9f2",
+            }}>
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: "#364a63" }} />
+              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+                <TextField
+                  placeholder="Search by Name"
+                  size="small"
+                  value={onsearchText}
+                  onChange={(e) => { setonsearchText(e.target.value); setCurrentPage(0); }}
+                  InputProps={{
+                    startAdornment: (<InputAdornment position="start"><IconSearch fontSize="small" /></InputAdornment>),
+                    sx: { borderRadius: 1 },
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  startIcon={<IconPlus />}
+                  onClick={() => setModal((prev) => ({ ...prev, add: true }))}
+                  sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" }, borderRadius: 1, boxShadow: "none" }}
+                >Add</Button>
+              </Box>
+            </Box>
+            <TableContainer sx={{ minHeight: '700px' }}>
+              <Table size="medium" sx={{
+                minWidth: { xs: 650, sm: 750 },
+                borderCollapse: 'collapse',
+                '& thead th': { backgroundColor: '#f5f5f5', fontSize: '14px', fontWeight: 700, },
+                '& td': { fontSize: '13px', fontWeight: 500, },
+              }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="center">SN</TableCell>
+                    <TableCell align="center">Name</TableCell>
+                    <TableCell align="center">User Name</TableCell>
+                    <TableCell align="center">User Role</TableCell>
+                    <TableCell align="center">Email</TableCell>
+                    <TableCell align="center">Mobile No</TableCell>
+                    <TableCell align="center">Status</TableCell>
+                    <TableCell align="right">Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={8} align="center">
+                        <Box display="flex" justifyContent="center" alignItems="center" sx={{ height: '540px', fontWeight: 'bolder', fontSize: '15px' }}>
+                          <CircularProgress color="primary" size={25} /> Loading Details
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ) : employeeList && employeeList.length > 0 ? (
+                    employeeList.map((item, index) => (
+                      <TableRow key={item.id} hover role="checkbox" tabIndex={-1}
+                        sx={{
+                          '& td, & th': {
+                            borderBottom: mode === 0 ? '1px solid #e0e0e0' : '1px solid rgb(85,83,83)',
+                          },
+                          backgroundColor:
+                            mode === 0
+                              ? index % 2 ? '#f9f9f9' : 'white'
+                              : index % 2 ? '#2a2a2a' : '#1e1e1e',
+                        }}>
+                        <TableCell align="center">{currentPage * rowsPerPage + index + 1}</TableCell>
+                        <TableCell align="center"
+                          onClick={() => handleNameClick(item)}
+                          sx={{ cursor: 'pointer', color: 'primary.main' }}
+                        >
+                          {`${item.first_name} ${item.last_name}`}
+                        </TableCell>
+                        <TableCell align="center">{item.username}</TableCell>
+                        <TableCell align="center">{item.employee_role?.name}</TableCell>
+                        <TableCell align="center">{item.email}</TableCell>
+                        <TableCell align="center">{item.phone_number}</TableCell>
+                        <TableCell align="center">
+                          {item.is_active
+                            ? <span style={{ color: 'green', fontWeight: 'bold' }}>Active</span>
+                            : <span style={{ color: 'red', fontWeight: 'bold' }}>Inactive</span>}
+                        </TableCell>
+                        <TableCell align="right">
+                          <IconButton
+                            size="small"
+                            onClick={(e) => handleMenusClick(e, item.id)}
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': { color: 'text.primary', backgroundColor: 'rgba(255,255,255,0.08)' },
+                            }}>
+                            <IconDots fontSize="small" />
+                          </IconButton>
+                          {selectedId === item.id && (
+                            <Menu
+                              anchorEl={anchorEl}
+                              open={Boolean(anchorEl)}
+                              onClose={handleMenuClose}
+                              anchorOrigin={{ vertical: 'bottom', horizontal: 'right', }}
+                              transformOrigin={{ vertical: 'top', horizontal: 'right', }}
+                              PaperProps={{ sx: { px: 1, } }}
+                            >
+                              <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {
+                                fetchServiceIDById(item.id, false);  // view
+                                setService(true);
+                                handleMenuClose();
+                              }}>
+                                <IconEye fontSize="small" className="me-2" /> View
+                              </MenuItem>
+                              <MenuItem sx={{ py: 1.7, px: 2 }} onClick={async () => {
+                                await fetchServiceIDById(item.id, true);
+                              setSelectedId(item.id);
+                              setEitData(item.id);
+                                handleMenuClose();
+                              }}>
+                                <IconPencil fontSize="small" className="me-2" /> Edit 
+                              </MenuItem>
+                              <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {
+                                setDeleteData(item); setModal(prev => ({ ...prev, delete: true }));
+                                setSelectedId(item.id);  setAnchorEl(null);
+                              }}>
+                                <IconTrash fontSize="small" className="me-2" /> Delete
+                              </MenuItem>
+                            </Menu>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={8} align="center" sx={{ py: 10 }}>
+                        <Typography variant="subtitle2" fontWeight={600}>No Data to Display</Typography>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {/* Service Details Dialog */}
+            <Dialog
+              open={openService}
+              onClose={() => setService(false)}
+              maxWidth="lg"
+              fullWidth
+              PaperProps={{
+                sx: {
+                  borderRadius: 4,
+                  backdropFilter: 'blur(8px)',
+                  boxShadow: 24,
+                  overflow: 'hidden',
+                  bgcolor: 'background.default'
+                }
+              }}
+              BackdropProps={{
+                sx: {
+                  backdropFilter: 'blur(4px)',
+                  bgcolor: alpha(theme.palette.background.default, 0.8)
+                }
+              }}
+            >
+              <DialogTitle sx={{
+                bgcolor: theme.palette.primary.main,
+                color: theme.palette.primary.contrastText,
+                px: 4, py: 3, fontSize: theme.typography.h5.fontSize,
+              }}>Service JOEY</DialogTitle>
+              <DialogContent sx={{
+                position: 'relative', p: 6, backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                backgroundColor: alpha(theme.palette.background.default, 0.25),
+              }}>
+                {!ServiceID ? (
+                  <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" sx={{ height: 200 }}>
+                    <CircularProgress color="primary" />
+                    <Typography variant="body1" mt={2} color="text.secondary">Loading service details...</Typography>
+                  </Box>
+                ) : (
+                  <Grid container spacing={6} sx={{ marginTop: 1 }}>
+                    <Grid item xs={12} md={6}>
+                      {/* Images */}
+                      <Box display="flex" alignItems="flex-start" justifyContent="center">
+                        <Box sx={{
+                          width: 72, maxHeight: 350, overflowY: 'auto', pr: 1, display: 'flex',
+                          flexDirection: 'column', gap: 1, borderRadius: 2, border: '1px solid',
+                          borderColor: 'divider', mr: 2,
+                        }}>
+                          {ServiceID.images?.length > 0 ? ServiceID.images.map((imgUrl, idx) => (
+                            <Box key={idx} onClick={() => setMainImgIdx(idx)}
+                              sx={{
+                                width: 60, height: 60, cursor: "pointer", borderRadius: 1.5,
+                                border: mainImgIdx === idx ? "2px solid #1976d2" : "1px solid rgb(255, 255, 255)",
+                                overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
+                                bgcolor: "#f8f8f8"
+                              }}>
+                              <img
+                                src={`${imgurl}${imgUrl.image}`}
+                                alt={`Thumbnail ${idx + 1}`}
+                                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8 }}
+                              />
+                            </Box>
+                          )) : (
+                            <Box sx={{
+                              width: 60, height: 60, display: "flex", alignItems: "center", justifyContent: "center",
+                              bgcolor: "#f1f1f1", borderRadius: 2
+                            }}>
+                              <Typography variant="body2">No Image</Typography>
+                            </Box>
+                          )}
+                        </Box>
+                        <Box sx={{
+                          width: 350, height: 350, borderRadius: 3, border: '1px solid',
+                          borderColor: 'divider', display: "flex", alignItems: "center", justifyContent: "center"
+                        }}>
+                          {ServiceID.images?.[mainImgIdx] ? (
+                            <img
+                              src={`${imgurl}${ServiceID.images[mainImgIdx].image}`}
+                              alt={`Service Image ${mainImgIdx + 1}`}
+                              style={{
+                                maxWidth: "95%", maxHeight: "95%", borderRadius: 12, objectFit: "contain",
+                              }}
+                            />
+                          ) : (
+                            <Typography variant="h6" color="text.secondary">No Image</Typography>
+                          )}
+                        </Box>
+                      </Box>
+                      <Box sx={{
+                        bgcolor: 'background.paper', borderRadius: 3, p: 4, boxShadow: 1,
+                        minWidth: 350, mt: 2
+                      }}>
+                        <Typography fontWeight={600} fontSize={18} mb={3}>Service Information</Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={6}>
+                            <Typography variant="caption" color="text.secondary">Title</Typography>
+                            <Typography variant="body1">{ServiceID.title || '—'}</Typography>
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Typography variant="caption" color="text.secondary">Category</Typography>
+                            <Typography variant="body1">{ServiceID.service_category?.name || '—'}</Typography>
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Typography variant="caption" color="text.secondary">Payment Type</Typography>
+                            <Typography variant="body1">{ServiceID.payment_type || '—'}</Typography>
+                          </Grid>
+                          {ServiceID.service_subcategories?.length > 0 && (
+                            <Grid item xs={12} sm={6}>
+                              <Typography variant="caption" color="text.secondary">Subcategories</Typography>
+                              {ServiceID.service_subcategories.map(sc => (
+                                <Typography key={sc.id} variant="body2">{sc.name}</Typography>
+                              ))}
+                            </Grid>
+                          )}
+                          <Grid item xs={12}>
+                            <Typography variant="caption" color="text.secondary">Description</Typography>
+                            <Typography variant="body1">{ServiceID.description || '—'}</Typography>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <Typography variant="caption" color="text.secondary">Cost</Typography>
+                            <Typography variant="body1">{ServiceID.cost ? `USD ${ServiceID.cost}` : '—'}</Typography>
+                          </Grid>
+                          {ServiceID.skills?.length > 0 && (
+                            <Grid item xs={12}>
+                              <Typography variant="caption" color="text.secondary">Skills</Typography>
+                              <Box display="flex" flexWrap="wrap" gap={1} mt={0.5}>
+                                {ServiceID.skills.map(skill => (
+                                  <Box key={skill} sx={{
+                                    bgcolor: theme => theme.palette.mode === 'dark' ? theme.palette.background.default : theme.palette.grey[100],
+                                    px: 1.5, py: 0.5, borderRadius: 2, fontSize: 14
+                                  }}>{skill}</Box>
+                                ))}
+                              </Box>
+                            </Grid>
+                          )}
+                        </Grid>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      {/* Vendor Information */}
+                      <Box sx={{ bgcolor: 'background.paper', borderRadius: 3, p: 4, mb: 3, boxShadow: 1, minWidth: 350 }}>
+                        <Typography fontWeight={600} fontSize={18} mb={3}>Vendor Information</Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Avatar
+                              src={ServiceID.user?.profile?.profile_picture ? `${imgurl}${ServiceID.user.profile.profile_picture}` : ''}
+                              alt="Profile"
+                              sx={{ width: 70, height: 70 }}
+                            />
+                            <Box>
+                              <Typography variant="caption" color="text.secondary">Profile Picture</Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" color="text.secondary">First Name</Typography>
+                            <Typography variant="body1">{ServiceID.user?.first_name || '—'}</Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" color="text.secondary">Last Name</Typography>
+                            <Typography variant="body1">{ServiceID.user?.last_name || '—'}</Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" color="text.secondary">Email</Typography>
+                            <Typography variant="body1">{ServiceID.user?.email || '—'}</Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" color="text.secondary">Phone</Typography>
+                            <Typography variant="body1">{ServiceID.phone_number || ServiceID.user?.phone_number || '—'}</Typography>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <Typography variant="caption" color="text.secondary">Created At</Typography>
+                            <Typography variant="body1">
+                              {ServiceID.created_at ? new Date(ServiceID.created_at).toLocaleString() : '—'}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </Box>
+                      <Box sx={{ bgcolor: 'background.paper', borderRadius: 3, p: 4, boxShadow: 1, minWidth: 350 }}>
+                        <Typography fontWeight={600} fontSize={18} mb={3}>Location</Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" color="text.secondary">Location</Typography>
+                            <Typography variant="body1">{ServiceID.location || '—'}</Typography>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <Typography variant="caption" color="text.secondary">Coordinates</Typography>
+                            <Typography variant="body1">{ServiceID.location_name || '—'}</Typography>
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                )}
+              </DialogContent>
+              <DialogActions sx={{ p: 3 }}>
+                <Button variant="contained" size="large" onClick={() => setService(false)}>
+                  Close
+                </Button>
+              </DialogActions>
+            </Dialog>
+
+            {/* Details Modal */}
+            <Dialog
+              PaperProps={{
+                sx: { borderRadius: 4, p: 0, backdropFilter: 'blur(8px)', boxShadow: 24, }
+              }}
+              BackdropProps={{
+                sx: {
+                  backdropFilter: 'blur(4px)',
+                  bgcolor: alpha(theme.palette.background.default, 0.8)
+                }
+              }}
+              open={openDetailsModal} onClose={handleDetailsClose} fullWidth maxWidth="sm"
+            >
+              <DialogTitle>Service Details</DialogTitle>
+              <DialogContent dividers>
+                {selectedItem && (
+                  <DetailsGrid>
+                    <Box><Label>First Name</Label><Value>{selectedItem.user?.first_name}</Value></Box>
+                    <Box><Label>Last Name</Label><Value>{selectedItem.user?.last_name}</Value></Box>
+                    <Box><Label>Email</Label><Value>{selectedItem.user?.email}</Value></Box>
+                    <Box><Label>Title</Label><Value>{selectedItem.title}</Value></Box>
+                    <Box><Label>Location Name</Label><Value>{selectedItem.location_name}</Value></Box>
+                    <Box><Label>Created At</Label>
+                      <Value>{selectedItem.created_at ? format(new Date(selectedItem.created_at), 'HH:mm dd MMMM yyyy') : ''}</Value></Box>
+                  </DetailsGrid>
+                )}
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleDetailsClose}>Close</Button>
+              </DialogActions>
+            </Dialog>
+
+            {/* Pagination */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                border: "1px solid #e0e0e0",
+                maxWidth: "220px",
+                borderRadius: 2,
+                marginTop: "20px",
+                marginLeft: "auto",
+                p: 0.5,
+                gap: 0.5,
+              }}
+            >
+              {currentPage > 1 && (
+                <IconButton onClick={() => handlePageChange(1)} aria-label="first page"><FirstPage /></IconButton>
+              )}
+              {prevPageUrl && (
+                <IconButton onClick={() => handlePageChange(currentPage - 1)} aria-label="previous page">
+                  <ChevronLeft />
+                </IconButton>
+              )}
+              <Typography variant="body2" sx={{
+                minWidth: 30, textAlign: "center", fontWeight: "500",
+                fontSize: "14px", padding: "8px", px: 1, color: theme.palette.text.primary,
+              }}>
+                {currentPage + 1}
+              </Typography>
+              {nextPageUrl && (
+                <IconButton onClick={() => handlePageChange(currentPage + 1)} aria-label="next page"><ChevronRight /></IconButton>
+              )}
+              {currentPage !== totalPages - 1 && (
+                <IconButton onClick={() => handlePageChange(totalPages - 1)} aria-label="last page"><LastPage /></IconButton>
+              )}
+            </Box>
+          </Grid>
+        </Grid>
+      </DashboardCard>
+
+      {/* Add Modal */}
+      <Dialog
+        open={modal.add}
+        onClose={() => setModal(prev => ({ ...prev, add: false }))}
+        maxWidth="xl"
+        PaperProps={{ sx: { width: { xs: "95%", sm: "80%", md: "50%" }, maxHeight: "90vh", borderRadius: 2 } }}
+      >
+        <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
+Add Employees        </DialogTitle>
+        <form onSubmit={handleSubmit}>
+          <DialogContent sx={{ p: 3 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={6}><TextField required fullWidth label="Username" value={formData.username} onChange={e => setFormData(p => ({ ...p, username: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField required fullWidth label="Password" type="password" value={formData.password} onChange={e => setFormData(p => ({ ...p, password: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField required fullWidth label="First Name" value={formData.first_name} onChange={e => setFormData(p => ({ ...p, first_name: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField required fullWidth label="Last Name" value={formData.last_name} onChange={e => setFormData(p => ({ ...p, last_name: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField required fullWidth label="Phone Number" value={formData.phone_number} onChange={e => setFormData(p => ({ ...p, phone_number: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField required fullWidth label="Email" value={formData.email} onChange={e => setFormData(p => ({ ...p, email: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField required fullWidth label="Employee Role" value={formData.employeeRole} onChange={e => setFormData(p => ({ ...p, employeeRole: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField required fullWidth label="Designation" value={formData.desig} onChange={e => setFormData(p => ({ ...p, desig: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField required fullWidth label="Languages" value={formData.languages} onChange={e => setFormData(p => ({ ...p, languages: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField required fullWidth label="Date of Birth" type="date" InputLabelProps={{ shrink: true }} value={formData.dob} onChange={e => setFormData(p => ({ ...p, dob: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField required fullWidth label="Experience" value={formData.experience} onChange={e => setFormData(p => ({ ...p, experience: e.target.value }))} /></Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions sx={{ p: 3, borderTop: "1px solid #e5e9f2", gap: 1 }}>
+            <Button onClick={() => setModal(prev => ({ ...prev, add: false }))} variant="outlined">Cancel</Button>
+            <Button type="submit" variant="contained">Submit</Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* Edit Modal */}
+      <Dialog open={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
+Edit Employees        </DialogTitle>
+        <form onSubmit={handleEdit}>
+          <DialogContent sx={{ p: 3 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={6}><TextField label="Email" fullWidth required value={editData.email} onChange={e => setEditData(p => ({ ...p, email: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField label="Username" fullWidth required value={editData.username} onChange={e => setEditData(p => ({ ...p, username: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField label="Password" type="password" fullWidth required value={editData.password} onChange={e => setEditData(p => ({ ...p, password: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField label="First Name" fullWidth required value={editData.first_name} onChange={e => setEditData(p => ({ ...p, first_name: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField label="Last Name" fullWidth required value={editData.last_name} onChange={e => setEditData(p => ({ ...p, last_name: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField label="Phone Number" fullWidth required value={editData.phone_number} onChange={e => setEditData(p => ({ ...p, phone_number: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField label="Employee Role" fullWidth required value={editData.employee_role} onChange={e => setEditData(p => ({ ...p, employee_role: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField label="Designation" fullWidth required value={editData.desig} onChange={e => setEditData(p => ({ ...p, desig: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField label="Languages" fullWidth required value={editData.languages} onChange={e => setEditData(p => ({ ...p, languages: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField label="Date of Birth" type="date" fullWidth required InputLabelProps={{ shrink: true }} value={editData.dob} onChange={e => setEditData(p => ({ ...p, dob: e.target.value }))} /></Grid>
+              <Grid item xs={6}><TextField label="Experience" fullWidth required value={editData.experience} onChange={e => setEditData(p => ({ ...p, experience: e.target.value }))} /></Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions sx={{ p: 3, borderTop: "1px solid #e5e9f2", gap: 1 }}>
+            <Button onClick={() => setIsEditModalOpen(false)} variant="outlined">Cancel</Button>
+            <Button type="submit" variant="contained">Save Changes</Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* Delete Modal */}
+      <Dialog
+        open={modal.delete}
+        onClose={() => setModal(prev => ({ ...prev, delete: false }))}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 2 } }}
+      >
+        <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: theme.palette.text.primary }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Delete Employee
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, p: 2, borderRadius: 1, mt: 2 }}>
+            <IconAlertCircleFilled size={50} style={{ color: "red" }} />
+            <Typography variant="h6" sx={{ color: theme.palette.text.primary, textAlign: "center" }}>
+              Are you sure you want to Delete this employee:&nbsp;
+              <Box component="span" sx={{ color: "red", fontWeight: 600 }}>
+                {deleteData.username}&nbsp;
+              </Box>
+              ?
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, borderTop: "1px solid #e5e9f2", gap: 1 }}>
+          <Button
+            onClick={() => setModal(prev => ({ ...prev, delete: false }))}
+            variant="outlined"
+            sx={{ borderColor: "#e5e9f2", color: "#ffff", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDelete}
+            variant="contained"
+            sx={{ bgcolor: "#c33b3b", "&:hover": { bgcolor: "#ff0707" } }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </PageContainer>
+  );
+};
+
+export default Employees;
