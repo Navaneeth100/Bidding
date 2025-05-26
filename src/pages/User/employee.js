@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
-import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled, IconH6 } from '@tabler/icons-react';
+import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled, IconH6, IconBan, IconUserCheck } from '@tabler/icons-react';
 import axios from "axios";
 import { imgurl, url } from "../../../mainurl";
 import { toast } from "react-toastify";
@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { styled } from '@mui/material/styles';
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { format } from 'date-fns';
+import Swal from "sweetalert2";
 
 const Employees = () => {
   // Auth & Theme
@@ -250,6 +251,43 @@ console.log("id",eitdata);
     setSelectedId(null);
   };
 
+  // Block or Unblock Employee
+
+  const BlockorUnlock = async (id, name, action) => {
+    const result = await Swal.fire({
+      title: `Are you sure you want to ${action} ${name}?`,
+      icon: action === "block" ? "warning" : "info",
+      iconColor: action === "block" ? "#e53e3e" : "#519380",
+      showCancelButton: true,
+      confirmButtonColor: action === "block" ? "#d33" : "#519380",
+      cancelButtonColor: action === "block" ? "#519380" : "#d33",
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+    });
+    if (result.isConfirmed) {
+      try {
+        const headers = {
+          Authorization: `Bearer ${tokenStr}`,
+          "Content-Type": "application/json",
+        };
+
+        const submittedData = { 
+          user_id: id,
+          data: "Employee", 
+          action: action
+          }; 
+
+        const response = await axios.post(`${url}/auth/block-unblock-user/`, submittedData, { headers });
+        toast.success(response.data.message || `User ${action}ed successfully`);
+        fetchService()
+
+      } catch (error) {
+        const errorMessage = error?.response?.data?.error;
+        toast.error(errorMessage);
+      }
+    }
+  };
+
   // Styled for Details
   const DetailsGrid = styled(Box)(({ theme }) => ({
     display: 'grid',
@@ -271,7 +309,7 @@ console.log("id",eitdata);
   }));
 
   return (
-    <PageContainer title="Job Posts" description="Job Posts">
+    <PageContainer title="Employees" description="Employees">
       <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
         Employees
       </Typography>
@@ -392,6 +430,16 @@ console.log("id",eitdata);
                               }}>
                                 <IconPencil fontSize="small" className="me-2" /> Edit 
                               </MenuItem>
+                              {item.is_active && <>
+                              <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {BlockorUnlock(item.id,`${item.first_name} ${item.last_name}`,"block"), handleMenuClose() }}>
+                                <IconBan fontSize="small" className="me-2" /> Block
+                              </MenuItem>
+                              </>}
+                              {!item.is_active && <>
+                              <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {BlockorUnlock(item.id,`${item.first_name} ${item.last_name}`,"unblock"), handleMenuClose() }}>
+                                <IconUserCheck fontSize="small" className="me-2" /> Unblock
+                              </MenuItem>
+                               </>}
                               <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {
                                 setDeleteData(item); setModal(prev => ({ ...prev, delete: true }));
                                 setSelectedId(item.id);  setAnchorEl(null);

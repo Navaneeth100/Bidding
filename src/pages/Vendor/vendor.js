@@ -3,12 +3,14 @@ import { useEffect, useState,useCallback } from "react"
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, Modal } from "@mui/material"
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
-import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled, IconCheck, IconX } from '@tabler/icons-react';
+import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled, IconCheck, IconX, IconBan, IconUserCheck } from '@tabler/icons-react';
 import axios from "axios";
 import { imgurl, url } from "../../../mainurl";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
+import Swal from "sweetalert2";
+
 const Vendor = () => {
 
     // AuthTokens
@@ -306,6 +308,42 @@ const Vendor = () => {
         }
     };
 
+    // Block or Unblock Employee
+
+    const BlockorUnlock = async (id, name, action) => {
+    const result = await Swal.fire({
+        title: `Are you sure you want to ${action} ${name}?`,
+        icon: action === "block" ? "warning" : "info",
+        iconColor: action === "block" ? "#e53e3e" : "#519380",
+        showCancelButton: true,
+        confirmButtonColor: action === "block" ? "#d33" : "#519380",
+        cancelButtonColor: action === "block" ? "#519380" : "#d33",
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+    });
+    if (result.isConfirmed) {
+        try {
+        const headers = {
+            Authorization: `Bearer ${tokenStr}`,
+            "Content-Type": "application/json",
+        };
+
+        const submittedData = { 
+            user_id: id,
+            data: "Vendor", 
+            action: action
+            }; 
+
+        const response = await axios.post(`${url}/auth/block-unblock-user/`, submittedData, { headers });
+        toast.success(response.data.message || `User ${action}ed successfully`);
+        fetchSubVendor()
+
+        } catch (error) {
+        const errorMessage = error?.response?.data?.error;
+        toast.error(errorMessage);
+        }
+    }
+    };
 
     return (
         <PageContainer title="Vendor List" description="Vendor List">
@@ -475,6 +513,16 @@ const Vendor = () => {
                                                             <Button variant="contained" onClick={() => fetchCategoryById(item.id)}>
                                                                 View Details
                                                             </Button>
+                                                            {item.is_active && <>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {BlockorUnlock(item.id,`${item.first_name} ${item.last_name}`,"block"), setSelectedId(null) }}>
+                                                            <IconBan fontSize="small" className="me-2" /> Block
+                                                            </MenuItem>
+                                                            </>}
+                                                            {!item.is_active && <>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {BlockorUnlock(item.id,`${item.first_name} ${item.last_name}`,"unblock"), setSelectedId(null) }}>
+                                                            <IconUserCheck fontSize="small" className="me-2" /> Unblock
+                                                            </MenuItem>
+                                                            </>}
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
                                                                 <IconTrash fontSize="small" className="me-2" /> Delete
                                                             </MenuItem>
