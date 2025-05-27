@@ -22,6 +22,7 @@ const Employees = () => {
     const mode = JSON.parse(localStorage.getItem('mode'));
     const tokenStr = String(authTokens.access);
     const theme = useTheme();
+    const MenuProps = { PaperProps: { style: { maxHeight: 200, overflowY: 'auto' } } };
 
     // Navigation
     const navigate = useNavigate();
@@ -184,14 +185,14 @@ const Employees = () => {
     };
     const fetchUserrole = () => {
         axios
-            .get(`${url}/auth/employee-roles/`, {
+            .get(`${url}/auth/employee-roles/?data=list`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
             })
             .then((res) => {
-                setroleList(res.data.results);
+                setroleList(res.data);
             })
             .catch((error) => {
                 if (error.response && error.response.status === 401) {
@@ -202,13 +203,13 @@ const Employees = () => {
                     axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
                         localStorage.setItem("authTokens", JSON.stringify(res.data));
                         axios
-                            .get(`${url}/auth/employee-roles/`, {
+                            .get(`${url}/auth/employee-roles/?data=list`, {
                                 headers: {
                                     Authorization: `Bearer ${res.data.access}`,
                                 },
                             })
                             .then((res) => {
-                                setroleList(res.data.results);
+                                setroleList(res.data);
                             });
                     });
                 }
@@ -226,14 +227,13 @@ const Employees = () => {
             first_name: editData.first_name,
             last_name: editData.last_name,
             phone_number: editData.phone_number,
-            employeeRole: editData.employee_role,
+            employeeRole: roleList.find(item => item.name === editData.employee_role)?.id,
             desig: editData.desig,
             languages: editData.languages,
             dob: editData.dob,
             experience: editData.experience,
 
         };
-console.log("editedd",editData.employee_role);
 
         try {
             await axios.put(
@@ -252,9 +252,10 @@ console.log("editedd",editData.employee_role);
                 position: "top-right",
                 autoClose: 3000,
             });
+            fetchService()
 
             // close & reset
-            toggleModal("edit");
+            setIsEditModalOpen(false);
             setEditData({
                 email: "", username: "", password: "",
                 first_name: "", last_name: "",
@@ -265,7 +266,7 @@ console.log("editedd",editData.employee_role);
 
         } catch (err) {
             toast.error(
-                err.response?.data?.error || "Failed to edit data",
+                err.response?.data?.error,
                 { position: "top-right", autoClose: 3000 }
             );
         }
@@ -923,25 +924,21 @@ console.log("editedd",editData.employee_role);
                                 />
                             </Grid>
                             <Grid item xs={6}>
-                                <TextField
-                                    select
+                            <FormControl fullWidth>
+                                <InputLabel>Employee Role</InputLabel>
+                                <Select
+                                    value={editData.employee_role || ''}
+                                    onChange={(e) => setEditData((p) => ({ ...p, employee_role: e.target.value }))}
                                     label="Employee Role"
-                                    fullWidth
-                                    required
-                                    value={roleList.find(r => r.name === editData.employee_role)?.id || ''}
-                                    onChange={e => {
-                                        const id = parseInt(e.target.value, 10);
-                                        const role = roleList.find(r => r.id === id);
-                                        setEditData(p => ({ ...p, employee_role: role?.name || '' }));
-                                    }}
+                                    MenuProps={MenuProps}
                                 >
-                                    <MenuItem value="">Select Role</MenuItem>
-                                    {roleList.map(r => (
-                                        <MenuItem key={r.id} value={r.id}>
-                                            {r.name}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
+                                {roleList.map((item) => (
+                                    <MenuItem key={item.id} value={item.name}>
+                                    {item.name}
+                                    </MenuItem>
+                                ))}
+                                </Select>
+                            </FormControl>
                             </Grid>
                             <Grid item xs={6}>
                                 <TextField
