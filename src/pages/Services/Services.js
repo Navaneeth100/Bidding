@@ -1730,7 +1730,21 @@ const MAX_HEIGHT = THUMB_SIZE * MAX_VISIBLE;
                 onClose={() => toggleModal("delete")}
                 maxWidth="sm"
                 fullWidth
-                PaperProps={{ sx: { borderRadius: 2 } }}
+                PaperProps={{
+                                    sx: {
+                                        borderRadius: 4,
+                                        backdropFilter: 'blur(8px)',
+                                        boxShadow: 24,
+                                        overflow: 'hidden',
+                                        bgcolor: 'background.default'
+                                    }
+                                }}
+                                BackdropProps={{
+                                    sx: {
+                                        backdropFilter: 'blur(4px)',
+                                        bgcolor: alpha(theme.palette.background.default, 0.8)
+                                    }
+                                }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: theme.palette.text.primary }}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -1753,14 +1767,14 @@ const MAX_HEIGHT = THUMB_SIZE * MAX_VISIBLE;
                     <Button
                         onClick={() => toggleModal("delete")}
                         variant="outlined"
-                        sx={{ borderColor: "#e5e9f2", color: "#364a63", "&:hover": { borderColor: "#6e82a5", bgcolor: "#f5f6fa" } }}
+                        sx={{ borderColor: "#e5e9f2", color: "#ffff",bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
                     >
                         Cancel
                     </Button>
                     <Button
                         onClick={() => handleDelete()}
                         variant="contained"
-                        sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" } }}
+                        sx={{ bgcolor: "#c33b3b", "&:hover": { bgcolor: "#ff0707" } }}
                     >
                         Delete
                     </Button>

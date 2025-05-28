@@ -811,14 +811,14 @@ const EmployeeRoles = () => {
                     <Button
                         onClick={() => toggleModal("delete")}
                         variant="outlined"
-                        sx={{ borderColor: "#e5e9f2", color: "#364a63", "&:hover": { borderColor: "#6e82a5", bgcolor: "#f5f6fa" } }}
+                        sx={{ borderColor: "#e5e9f2", color: "#ffff",bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
                     >
                         Cancel
                     </Button>
                     <Button
                         onClick={() => handleDelete()}
                         variant="contained"
-                        sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" } }}
+                        sx={{ bgcolor: "#c33b3b", "&:hover": { bgcolor: "#ff0707" } }}
                     >
                         Delete
                     </Button>

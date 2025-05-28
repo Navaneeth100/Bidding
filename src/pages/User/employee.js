@@ -563,7 +563,7 @@ const Employees = () => {
                                 bgcolor: theme.palette.primary.main,
                                 color: theme.palette.primary.contrastText,
                                 px: 4, py: 3, fontSize: theme.typography.h5.fontSize,
-                            }}>Service JOEY</DialogTitle>
+                            }}>Employee Information</DialogTitle>
                             <DialogContent sx={{
                                 position: 'relative', p: 6, backdropFilter: 'blur(10px)',
                                 WebkitBackdropFilter: 'blur(10px)',
@@ -576,108 +576,11 @@ const Employees = () => {
                                     </Box>
                                 ) : (
                                     <Grid container spacing={6} sx={{ marginTop: 1 }}>
-                                        <Grid item xs={12} md={6}>
-                                            {/* Images */}
-                                            <Box display="flex" alignItems="flex-start" justifyContent="center">
-                                                <Box sx={{
-                                                    width: 72, maxHeight: 350, overflowY: 'auto', pr: 1, display: 'flex',
-                                                    flexDirection: 'column', gap: 1, borderRadius: 2, border: '1px solid',
-                                                    borderColor: 'divider', mr: 2,
-                                                }}>
-                                                    {ServiceID.images?.length > 0 ? ServiceID.images.map((imgUrl, idx) => (
-                                                        <Box key={idx} onClick={() => setMainImgIdx(idx)}
-                                                            sx={{
-                                                                width: 60, height: 60, cursor: "pointer", borderRadius: 1.5,
-                                                                border: mainImgIdx === idx ? "2px solid #1976d2" : "1px solid rgb(255, 255, 255)",
-                                                                overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
-                                                                bgcolor: "#f8f8f8"
-                                                            }}>
-                                                            <img
-                                                                src={`${imgurl}${imgUrl.image}`}
-                                                                alt={`Thumbnail ${idx + 1}`}
-                                                                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8 }}
-                                                            />
-                                                        </Box>
-                                                    )) : (
-                                                        <Box sx={{
-                                                            width: 60, height: 60, display: "flex", alignItems: "center", justifyContent: "center",
-                                                            bgcolor: "#f1f1f1", borderRadius: 2
-                                                        }}>
-                                                            <Typography variant="body2">No Image</Typography>
-                                                        </Box>
-                                                    )}
-                                                </Box>
-                                                <Box sx={{
-                                                    width: 350, height: 350, borderRadius: 3, border: '1px solid',
-                                                    borderColor: 'divider', display: "flex", alignItems: "center", justifyContent: "center"
-                                                }}>
-                                                    {ServiceID.images?.[mainImgIdx] ? (
-                                                        <img
-                                                            src={`${imgurl}${ServiceID.images[mainImgIdx].image}`}
-                                                            alt={`Service Image ${mainImgIdx + 1}`}
-                                                            style={{
-                                                                maxWidth: "95%", maxHeight: "95%", borderRadius: 12, objectFit: "contain",
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <Typography variant="h6" color="text.secondary">No Image</Typography>
-                                                    )}
-                                                </Box>
-                                            </Box>
-                                            <Box sx={{
-                                                bgcolor: 'background.paper', borderRadius: 3, p: 4, boxShadow: 1,
-                                                minWidth: 350, mt: 2
-                                            }}>
-                                                <Typography fontWeight={600} fontSize={18} mb={3}>Service Information</Typography>
-                                                <Grid container spacing={2}>
-                                                    <Grid item xs={12} sm={6}>
-                                                        <Typography variant="caption" color="text.secondary">Title</Typography>
-                                                        <Typography variant="body1">{ServiceID.title || '—'}</Typography>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={6}>
-                                                        <Typography variant="caption" color="text.secondary">Category</Typography>
-                                                        <Typography variant="body1">{ServiceID.service_category?.name || '—'}</Typography>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={6}>
-                                                        <Typography variant="caption" color="text.secondary">Payment Type</Typography>
-                                                        <Typography variant="body1">{ServiceID.payment_type || '—'}</Typography>
-                                                    </Grid>
-                                                    {ServiceID.service_subcategories?.length > 0 && (
-                                                        <Grid item xs={12} sm={6}>
-                                                            <Typography variant="caption" color="text.secondary">Subcategories</Typography>
-                                                            {ServiceID.service_subcategories.map(sc => (
-                                                                <Typography key={sc.id} variant="body2">{sc.name}</Typography>
-                                                            ))}
-                                                        </Grid>
-                                                    )}
-                                                    <Grid item xs={12}>
-                                                        <Typography variant="caption" color="text.secondary">Description</Typography>
-                                                        <Typography variant="body1">{ServiceID.description || '—'}</Typography>
-                                                    </Grid>
-                                                    <Grid item xs={12}>
-                                                        <Typography variant="caption" color="text.secondary">Cost</Typography>
-                                                        <Typography variant="body1">{ServiceID.cost ? `USD ${ServiceID.cost}` : '—'}</Typography>
-                                                    </Grid>
-                                                    {ServiceID.skills?.length > 0 && (
-                                                        <Grid item xs={12}>
-                                                            <Typography variant="caption" color="text.secondary">Skills</Typography>
-                                                            <Box display="flex" flexWrap="wrap" gap={1} mt={0.5}>
-                                                                {ServiceID.skills.map(skill => (
-                                                                    <Box key={skill} sx={{
-                                                                        bgcolor: theme => theme.palette.mode === 'dark' ? theme.palette.background.default : theme.palette.grey[100],
-                                                                        px: 1.5, py: 0.5, borderRadius: 2, fontSize: 14
-                                                                    }}>{skill}</Box>
-                                                                ))}
-                                                            </Box>
-                                                        </Grid>
-                                                    )}
-                                                </Grid>
-                                            </Box>
-                                        </Grid>
+                                        
                                         <Grid item xs={12} md={6}>
                                             {/* Vendor Information */}
                                             <Box sx={{ bgcolor: 'background.paper', borderRadius: 3, p: 4, mb: 3, boxShadow: 1, minWidth: 350 }}>
-                                                <Typography fontWeight={600} fontSize={18} mb={3}>Vendor Information</Typography>
+                                                <Typography fontWeight={600} fontSize={18} mb={3}>Profile Details</Typography>
                                                 <Grid container spacing={2}>
                                                     <Grid item xs={12} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                                         <Avatar
@@ -691,29 +594,29 @@ const Employees = () => {
                                                     </Grid>
                                                     <Grid item xs={6}>
                                                         <Typography variant="caption" color="text.secondary">First Name</Typography>
-                                                        <Typography variant="body1">{ServiceID.user?.first_name || '—'}</Typography>
+                                                        <Typography variant="body1">{ServiceID?.first_name || '—'}</Typography>
                                                     </Grid>
                                                     <Grid item xs={6}>
                                                         <Typography variant="caption" color="text.secondary">Last Name</Typography>
-                                                        <Typography variant="body1">{ServiceID.user?.last_name || '—'}</Typography>
+                                                        <Typography variant="body1">{ServiceID?.last_name || '—'}</Typography>
                                                     </Grid>
                                                     <Grid item xs={6}>
                                                         <Typography variant="caption" color="text.secondary">Email</Typography>
-                                                        <Typography variant="body1">{ServiceID.user?.email || '—'}</Typography>
+                                                        <Typography variant="body1">{ServiceID?.email || '—'}</Typography>
                                                     </Grid>
                                                     <Grid item xs={6}>
                                                         <Typography variant="caption" color="text.secondary">Phone</Typography>
                                                         <Typography variant="body1">{ServiceID.phone_number || ServiceID.user?.phone_number || '—'}</Typography>
                                                     </Grid>
                                                     <Grid item xs={12}>
-                                                        <Typography variant="caption" color="text.secondary">Created At</Typography>
+                                                        <Typography variant="caption" color="text.secondary">User name</Typography>
                                                         <Typography variant="body1">
-                                                            {ServiceID.created_at ? new Date(ServiceID.created_at).toLocaleString() : '—'}
+                                                            {ServiceID?.username}
                                                         </Typography>
                                                     </Grid>
                                                 </Grid>
                                             </Box>
-                                            <Box sx={{ bgcolor: 'background.paper', borderRadius: 3, p: 4, boxShadow: 1, minWidth: 350 }}>
+                                            {/* <Box sx={{ bgcolor: 'background.paper', borderRadius: 3, p: 4, boxShadow: 1, minWidth: 350 }}>
                                                 <Typography fontWeight={600} fontSize={18} mb={3}>Location</Typography>
                                                 <Grid container spacing={2}>
                                                     <Grid item xs={6}>
@@ -723,6 +626,41 @@ const Employees = () => {
                                                     <Grid item xs={12}>
                                                         <Typography variant="caption" color="text.secondary">Coordinates</Typography>
                                                         <Typography variant="body1">{ServiceID.location_name || '—'}</Typography>
+                                                    </Grid>
+                                                </Grid>
+                                            </Box> */}
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            
+                                            <Box sx={{
+                                               bgcolor: 'background.paper', borderRadius: 3, p: 4, mb: 3, boxShadow: 1, minWidth: 350, height:350,
+                                            }}>
+                                                <Typography fontWeight={600} fontSize={18} mb={3}>Employee Information</Typography>
+                                                <Grid container spacing={2}>
+                                                    <Grid item xs={12} sm={6}>
+                                                        <Typography variant="caption" color="text.secondary">Designation</Typography>
+                                                        <Typography variant="body1">{ServiceID?.profile?.desig}</Typography>
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={6}>
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            Languages</Typography>
+                                                        <Typography variant="body1">{ServiceID?.profile?.languages}</Typography>
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={6}>
+                                                        <Typography variant="caption" color="text.secondary">experience</Typography>
+                                                        <Typography variant="body1">{ServiceID?.profile?.experience  || '—'} years</Typography>
+                                                    </Grid>
+                                                    {ServiceID.service_subcategories?.length > 0 && (
+                                                        <Grid item xs={12} sm={6}>
+                                                            <Typography variant="caption" color="text.secondary">Subcategories</Typography>
+                                                            {ServiceID.service_subcategories.map(sc => (
+                                                                <Typography key={sc.id} variant="body2">{sc.name}</Typography>
+                                                            ))}
+                                                        </Grid>
+                                                    )}
+                                                    <Grid item xs={12}>
+                                                        <Typography variant="caption" color="text.secondary">DOB</Typography>
+                                                        <Typography variant="body1">{ServiceID?.profile?.dob  || '—'} </Typography>
                                                     </Grid>
                                                 </Grid>
                                             </Box>
@@ -1022,7 +960,7 @@ const Employees = () => {
                     <Button
                         onClick={() => setModal(prev => ({ ...prev, delete: false }))}
                         variant="outlined"
-                        sx={{ borderColor: "#e5e9f2", color: "#ffff", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
+                        sx={{ borderColor: "#e5e9f2", color: "#ffff",bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
                     >
                         Cancel
                     </Button>
