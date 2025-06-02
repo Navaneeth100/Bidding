@@ -66,7 +66,7 @@ const Router = [
       { path: '/customer', exact: true, element: <Customer /> },
       { path: '/proposals', exact: true, element: <Proposals /> },
       { path: '/user_roles', exact: true, element: <UserRole /> },
-      { path: '/employees', exact: true, element: <Employees /> },
+            { path: '/employees', exact: true, element: <Employees /> },
       { path: '/order', exact: true, element: <Order /> },
       { path: '/ongoing-order', exact: true, element: <OngoingOrder /> },
          { path: '/order-dash', exact: true, element: <OrderDash /> },
