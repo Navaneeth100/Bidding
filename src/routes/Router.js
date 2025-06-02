@@ -35,6 +35,7 @@ const ServiceBookMarks = Loadable(lazy(() => import('../pages/Services/ServiceBo
 const Proposals = Loadable(lazy(() => import('../pages/Services/Proposals')));
 const UserRole = Loadable(lazy(() => import('../pages/User/Userroles')));
 const Employees = Loadable(lazy(() => import('../pages/User/employee')));
+const Permission = Loadable(lazy(() => import('../pages/User/Permission')));
 const user = JSON.parse(localStorage.getItem('authTokens'));
 const Router = [
   {
@@ -64,6 +65,7 @@ const Router = [
       { path: '/proposals', exact: true, element: <Proposals /> },
       { path: '/user_roles', exact: true, element: <UserRole /> },
             { path: '/employees', exact: true, element: <Employees /> },
+      { path: '/permission/:id', exact: true, element: <Permission /> },
       // { path: '/icons', exact: true, element: <Icons /> },
       // { path: '/ui/typography', exact: true, element: <TypographyPage /> },
       // { path: '/ui/shadow', exact: true, element: <Shadow /> },

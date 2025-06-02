@@ -425,6 +425,9 @@ const EmployeeRoles = () => {
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
                                                                 <IconTrash fontSize="small" className="me-2" /> Delete
                                                             </MenuItem>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { navigate(`/permission/${item.id}`, {state: { role: item.name }})}}>
+                                                                <IconPlus fontSize="small" className="me-2" /> Add Permission
+                                                            </MenuItem>
                                                         </Menu>
                                                     )}
                                                 </TableCell>
