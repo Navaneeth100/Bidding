@@ -35,6 +35,7 @@ const ServiceBookMarks = Loadable(lazy(() => import('../pages/Services/ServiceBo
 const Proposals = Loadable(lazy(() => import('../pages/Services/Proposals')));
 const UserRole = Loadable(lazy(() => import('../pages/User/Userroles')));
 const Employees = Loadable(lazy(() => import('../pages/User/employee')));
+const Permission = Loadable(lazy(() => import('../pages/User/Permission')));
 const Order = Loadable(lazy(() => import('../pages/Order/Order')));
 const OngoingOrder = Loadable(lazy(() => import('../pages/Order/OngoingOrder')));
 const OrderDash = Loadable(lazy(() => import('../pages/Order/OrderDash')));
@@ -67,6 +68,7 @@ const Router = [
       { path: '/proposals', exact: true, element: <Proposals /> },
       { path: '/user_roles', exact: true, element: <UserRole /> },
             { path: '/employees', exact: true, element: <Employees /> },
+      { path: '/permission/:id', exact: true, element: <Permission /> },
       { path: '/order', exact: true, element: <Order /> },
       { path: '/ongoing-order', exact: true, element: <OngoingOrder /> },
          { path: '/order-dash', exact: true, element: <OrderDash /> },
