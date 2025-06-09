@@ -8,6 +8,9 @@ import { imgurl, url } from "../../../mainurl";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { hasPermission } from "../../../hasPermission";
+import PermissionDenied from "../PermissionDenied";
+
 const ServiceSubCategory = () => {
 
     // AuthTokens
@@ -304,6 +307,11 @@ const ServiceSubCategory = () => {
         }
     };
 
+    const hasAccess = hasPermission("view_servicecategory");
+
+    if (!hasAccess) {
+        return <PermissionDenied />;
+    }
 
     return (
         <PageContainer title="Service Sub Category" description="Service Sub Category">

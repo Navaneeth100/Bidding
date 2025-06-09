@@ -8,6 +8,8 @@ import { imgurl, url } from "../../../mainurl";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { hasPermission } from "../../../hasPermission";
+import PermissionDenied from "../PermissionDenied";
 
 const ServiceCategory = () => {
 
@@ -264,6 +266,11 @@ const ServiceCategory = () => {
         }
     };
 
+    const hasAccess = hasPermission("View_Service_Main");
+
+    if (!hasAccess) {
+        return <PermissionDenied />;
+    }
 
     return (
         <PageContainer title="Service Category" description="Service Category"  >
