@@ -4,7 +4,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled } from '@tabler/icons-react';
 import axios from "axios";
-import { imgurl, url } from "../../../mainurl";
+import { url } from "../../../mainurl";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
@@ -381,7 +381,7 @@ const ServiceCategory = () => {
                                                     {currentPage * rowsPerPage + index + 1}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    <Avatar src={item.image ? `${imgurl}${item.image}` : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
+                                                    <Avatar src={item.image ? item.image : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     {item.name}
@@ -653,7 +653,7 @@ const ServiceCategory = () => {
                             <Grid item xs={12} md={12}>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
                                     <Avatar
-                                        src={preview ? preview : `${imgurl}${editData.image}`}
+                                        src={preview ? preview : editData.image}
                                         alt=""
                                         sx={{ width: 100, height: 100, margin: "0 auto" }}
                                     />

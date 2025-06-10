@@ -1,26 +1,24 @@
-import { useEffect, useState,useCallback } from "react"
-
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, Modal,alpha } from "@mui/material"
+import { useEffect, useState } from "react"
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, FormControlLabel, FormGroup, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, alpha, } from "@mui/material"
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
-import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled, IconCheck, IconX, IconBan, IconUserCheck } from '@tabler/icons-react';
+import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled } from '@tabler/icons-react';
 import axios from "axios";
-import { url } from "../../../mainurl";
+import { url } from '../../../mainurl';
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
-import Swal from "sweetalert2";
+import { hasPermission } from "../../../hasPermission";
+import PermissionDenied from "../PermissionDenied";
 
-const Vendor = () => {
+const Banner = () => {
 
     // AuthTokens
 
     const authTokens = JSON.parse(localStorage.getItem('authTokens'));
     const mode = JSON.parse(localStorage.getItem('mode'));
     let tokenStr = String(authTokens.access);
-    const inputHeight = '56px'; // or your desired height
     const theme = useTheme();
-
     // Navigate
 
     const navigate = useNavigate();
@@ -43,9 +41,9 @@ const Vendor = () => {
         setSelectedId(id)
     }
 
-    // Get  Service Sub Category
+    // Get Banner
 
-    const [Vendor, setVendor] = useState([]);
+    const [Banner, setBanner] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
     const [nextPageUrl, setNextPageUrl] = useState(null);
@@ -55,17 +53,17 @@ const Vendor = () => {
     const [onsearchText, setonsearchText] = useState("")
     const [selectedId, setSelectedId] = useState(null)
 
-    const fetchSubVendor = () => {
+    const fetchBanner = () => {
         setLoading(true);
         axios
-            .get(`${url}/auth/vendor-customer/?user_type=Vendor&data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+            .get(`${url}/service/banners/?data=web&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
             })
             .then((res) => {
-                setVendor(res.data.results);
+                setBanner(res.data.results);
                 setNextPageUrl(res.data.next);
                 setPrevPageUrl(res.data.previous);
                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -80,13 +78,13 @@ const Vendor = () => {
                     axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
                         localStorage.setItem("authTokens", JSON.stringify(res.data));
                         axios
-                            .get(`${url}/auth/vendor-customer/?user_type=Vendor&data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+                            .get(`${url}/service/banners/?data=web&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                                 headers: {
                                     Authorization: `Bearer ${res.data.access}`,
                                 },
                             })
                             .then((res) => {
-                                setVendor(res.data.results);
+                                setBanner(res.data.results);
                                 setNextPageUrl(res.data.next);
                                 setPrevPageUrl(res.data.previous);
                                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -98,7 +96,7 @@ const Vendor = () => {
     };
 
     useEffect(() => {
-        fetchSubVendor();
+        fetchBanner();
     }, [currentPage, rowsPerPage, onsearchText]);
 
 
@@ -111,68 +109,28 @@ const Vendor = () => {
         setFormData([]);
         setEditData([]);
         setDeleteData([]);
+        setselectedFile("");
+        setPreview(null);
         setAnchorEl(null)
     };
 
-    // get  category
 
-    const MenuProps = { PaperProps: { style: { maxHeight: 200, overflowY: 'auto' } } };
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
-    const [categoryList, setcategoryList] = useState([])
-    const [open, setOpen] = useState(false);
-    const [category, setCategory] = useState(null);
-    const [categoryId, setCategoryId] = useState('');
+    // File Upload
 
-    const fetchCategoryById = useCallback(
-        async (id) => {
-          try {
-            const { data } = await axios.get(
-              `${url}/auth/vendor-customer/${id}/`,
-              {
-                headers: {
-                  Authorization: `Bearer ${tokenStr}`,
-                  'Content-Type': 'application/json',
-                },
-                withCredentials: false,
-              }
-            );
-            setCategory(data);
-          } catch (error) {
-            handleAxiosError(error);
-          }
-        },
-        [url, tokenStr] // re-create only if url or tokenStr change
-      );
-      
-      const handleAxiosError = (error) => {
-        if (axios.isAxiosError(error)) {
-          if (error.response) {
-            const { status, data } = error.response;
-            const msg =
-              data?.detail ||
-              data?.message ||
-              'An unexpected error occurred';
-            toast.error(`Error ${status}: ${msg}`);
-          } else if (error.request) {
-            toast.error(
-              'No response from server. Please check your connection.'
-            );
-          } else {
-            toast.error('Request setup error: ' + error.message);
-          }
-        } else {
-          toast.error('An unexpected non-Axios error occurred.');
-        }
-      };
+    const [selectedFile, setselectedFile] = useState("");
+    const [preview, setPreview] = useState(null);
 
-    const handleFetch = () => {
-        if (categoryId) {
-            fetchCategoryById(categoryId);
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setselectedFile(file);
+            const imageUrl = URL.createObjectURL(file);
+            setPreview(imageUrl);
         }
     };
 
-    // Add Service Sub Category
+
+    // Add Banner
 
     const [formData, setFormData] = useState([])
 
@@ -181,31 +139,34 @@ const Vendor = () => {
         event.preventDefault();
 
         let submitData = {
-            name: formData.sub_category,
-            parent: formData.category_id
+            title: formData.title,
+            image: selectedFile,
+            link: formData.link,
+            position: formData.position,
+            is_active: true
         }
 
         try {
-            const response = await axios.post(`${url}/auth/service-categories/?data=sub`, submitData, {
+            const response = await axios.post(`${url}/service/banners/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "multipart/form-data",
                 },
                 withCredentials: false,
             });
-            toast.success("Service Sub Category Added Successfully", {
+            toast.success("Banner Added Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
 
             toggleModal('add')
             resetForm()
-            fetchSubVendor()
+            fetchBanner()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -214,12 +175,12 @@ const Vendor = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
         }
     };
 
-    //  Edit Service Sub Category
+    //  Edit Banner
 
     const [editData, setEditData] = useState([])
 
@@ -229,30 +190,33 @@ const Vendor = () => {
         event.preventDefault();
 
         let submitData = {
-            name: editData.sub_category || editData.name,
-            parent: editData.category_id || editData?.parent?.id
+            title: editData.title,
+            image: selectedFile || preview,
+            link: editData.link,
+            position: editData.position,
+            is_active: editData.is_active
         };
 
         try {
-            const response = await axios.put(`${url}/auth/service-categories/${selectedId}/?data=sub`, submitData, {
+            const response = await axios.put(`${url}/service/banners/${selectedId}/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "multipart/form-data",
                 },
                 withCredentials: false,
             });
-            toast.success("Service Category Edited Successfully", {
+            toast.success("Banner Edited Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
             toggleModal('edit');
             resetForm()
-            fetchSubVendor()
+            fetchBanner()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -261,39 +225,39 @@ const Vendor = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
         }
     };
 
 
-    // Delete Service Sub Category
+    // Delete Banner
 
     const [deleteData, setDeleteData] = useState([])
 
     const handleDelete = async () => {
         try {
-            const response = await axios.delete(`${url}/auth/service-categories/${selectedId}/?data=sub`, {
+            const response = await axios.delete(`${url}/service/banners/${selectedId}/`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
                 withCredentials: false,
             });
-            toast.success("Service Category Deleted Successfully", {
+            toast.success("Banner Deleted Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
             toggleModal('delete')
-            if (Vendor.length === 1 && currentPage > 0) {
+            if (Banner.length === 1 && currentPage > 0) {
                 setCurrentPage(currentPage - 1);
             } else {
-                fetchSubVendor();
+                fetchBanner();
             }
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
@@ -303,62 +267,32 @@ const Vendor = () => {
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
-                
+
             });
         }
     };
 
-    // Block or Unblock Employee
+    const hasAccess = hasPermission("View_Service_Main");
 
-    const BlockorUnlock = async (id, name, action) => {
-    const result = await Swal.fire({
-        title: `Are you sure you want to ${action} ${name}?`,
-        icon: action === "block" ? "warning" : "info",
-        iconColor: action === "block" ? "#e53e3e" : "#519380",
-        showCancelButton: true,
-        confirmButtonColor: action === "block" ? "#d33" : "#519380",
-        cancelButtonColor: action === "block" ? "#519380" : "#d33",
-        confirmButtonText: "Yes",
-        cancelButtonText: "No",
-    });
-    if (result.isConfirmed) {
-        try {
-        const headers = {
-            Authorization: `Bearer ${tokenStr}`,
-            "Content-Type": "application/json",
-        };
-
-        const submittedData = { 
-            user_id: id,
-            data: "Vendor", 
-            action: action
-            }; 
-
-        const response = await axios.post(`${url}/auth/block-unblock-user/`, submittedData, { headers });
-        toast.success(response.data.message || `User ${action}ed successfully`);
-        fetchSubVendor()
-
-        } catch (error) {
-        const errorMessage = error?.response?.data?.error;
-        toast.error(errorMessage);
-        }
+    if (!hasAccess) {
+        return <PermissionDenied />;
     }
-    };
 
     return (
-        <PageContainer title="Vendor List" description="Vendor List">
+        <PageContainer title="Banner" description="Banner"  >
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
-                Vendor List            </Typography>
+                Banner
+            </Typography>
             <DashboardCard>
-                <Grid container spacing={3}>
-                    <Grid item sm={12} lg={12}>
+                <Grid container>
+                    <Grid item xs={12}>
                         <Box
                             sx={{
                                 p: 2,
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                borderBottom: "1px solid #e5e9f2",
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                borderBottom: `1px solid ${theme.palette.divider}`, // only here
                             }}
                         >
                             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: "#364a63" }}>
@@ -409,24 +343,36 @@ const Vendor = () => {
                             >
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell align="center">SN</TableCell>
-                                        <TableCell align="center">Profile Picture</TableCell>
-                                        <TableCell align="center">Name</TableCell>
-                                        {/* New Header Fields Added */}
-                                        <TableCell align="center">Username</TableCell>
-                                        <TableCell align="center">Email</TableCell>
-                                        {/* <TableCell align="center">First Name</TableCell>
-                                        <TableCell align="center">Last Name</TableCell> */}
-                                        <TableCell align="center">Mobile</TableCell>
-                                        <TableCell align="center">Phone Verified</TableCell>
-                                        <TableCell align="center"> Status</TableCell>
-                                        <TableCell align="right">Actions</TableCell>
+                                        <TableCell align="center">
+                                            SN
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Icon
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Title
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Link
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Updated At
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Created At
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Status
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            Actions
+                                        </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {loading ? (
                                         <TableRow>
-                                            <TableCell colSpan={12} align="center">
+                                            <TableCell colSpan={8} align="center">
                                                 <Box
                                                     display="flex"
                                                     justifyContent="center"
@@ -437,8 +383,8 @@ const Vendor = () => {
                                                 </Box>
                                             </TableCell>
                                         </TableRow>
-                                    ) : Vendor && Vendor.length > 0 ? (
-                                        Vendor.map((item, index) => (
+                                    ) : Banner && Banner.length > 0 ? (
+                                        Banner.map((item, index) => (
                                             <TableRow
                                                 hover
                                                 role="checkbox"
@@ -449,44 +395,49 @@ const Vendor = () => {
                                                     backgroundColor: mode === 0 ? (index % 2 ? "#f9f9f9" : "white") : (index % 2 ? "#2a2a2a" : "#1e1e1e"),
                                                 }}
                                             >
-                                                <TableCell align="center">{currentPage * rowsPerPage + index + 1}</TableCell>
                                                 <TableCell align="center">
-                                                    <Box display="flex" justifyContent="center">
-                                                        <Avatar
-                                                            src={item.profile?.profile_picture ? item.profile.profile_picture : ""}
-                                                            alt=""
-                                                            variant="rounded"
-                                                            sx={{ width: 50, height: 50, cursor: 'pointer' }}
-                                                        />
-                                                    </Box>
-                                                </TableCell>
-                                                <TableCell align="center">{item.first_name} {item.last_name}</TableCell>
-                                                <TableCell align="center">{item.username}</TableCell>
-                                                <TableCell align="center">{item.email}</TableCell>
-                                                <TableCell align="center">{item.phone_number}</TableCell>
-                                                <TableCell align="center">
-                                                    {item.is_phone_verified ? (
-                                                        <IconCheck size={18} style={{ color: 'green' }} />
-                                                    ) : (
-                                                        <IconX size={18} style={{ color: 'red' }} />
-                                                    )}
+                                                    {currentPage * rowsPerPage + index + 1}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {item.is_active ? (
-                                                        <span style={{ color: 'green', fontWeight: 'bold' }}>Active</span>
-                                                    ) : (
-                                                        <span style={{ color: 'red', fontWeight: 'bold' }}>Inactive</span>
-                                                    )}
+                                                    <Avatar src={item.image ? item.image : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
                                                 </TableCell>
+                                                <TableCell align="center">
+                                                    {item.title}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    {item.link || "N/A"}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    {new Date(item.updated_at).toLocaleString()}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    {new Date(item.created_at).toLocaleString()}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Chip
+                                                        label={item.is_active ? 'Active' : 'Inactive'}
+                                                        style={{
+                                                            backgroundColor: item.is_active ? 'green' : 'red',
+                                                            color: '#fff',
+                                                            fontSize: '0.75rem',
+                                                            height: '24px',
+                                                            padding: '0 8px',
+                                                            borderRadius: '16px',
+                                                            textTransform: 'capitalize',
+                                                            fontWeight: 700
+                                                        }}
+                                                    />
+                                                </TableCell>
+
                                                 <TableCell align="right">
                                                     <IconButton
                                                         size="small"
-                                                        onClick={(e) => { handleMenuClick(e, item.id) }}
+                                                        onClick={(e) => handleMenuClick(e, item.id)}
                                                         sx={{
-                                                            color: 'text.secondary',
+                                                            color: 'text.secondary', // or 'text.primary' if you want white
                                                             '&:hover': {
                                                                 color: 'text.primary',
-                                                                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                                                                backgroundColor: 'rgba(255, 255, 255, 0.08)', // subtle hover
                                                             },
                                                         }}
                                                     >
@@ -505,28 +456,14 @@ const Vendor = () => {
                                                                 vertical: 'top',
                                                                 horizontal: 'right',
                                                             }}
-                                                            PaperProps={{ sx: { px: 1 } }}
+                                                            PaperProps={{ sx: { px: 1, } }}
                                                         >
-                                                            {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); fetchCategory(); toggleModal("edit") }}>
-                                                                <IconPencil fontSize="small" className="me-2" /> Edit
-                                                            </MenuItem> */}
-                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {
-                                                                fetchCategoryById(item.id);
-                                                                toggleModal("view");
-                                                            }}
-                                                            >
+                                                            {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setViewData(item); toggleModal("view") }}>
                                                                 <IconEye fontSize="small" className="me-2" /> View
+                                                            </MenuItem> */}
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); toggleModal("edit") }}>
+                                                                <IconPencil fontSize="small" className="me-2" /> Edit
                                                             </MenuItem>
-                                                            {item.is_active && <>
-                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {BlockorUnlock(item.id,`${item.first_name} ${item.last_name}`,"block"), setSelectedId(null) }}>
-                                                            <IconBan fontSize="small" className="me-2" /> Block
-                                                            </MenuItem>
-                                                            </>}
-                                                            {!item.is_active && <>
-                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {BlockorUnlock(item.id,`${item.first_name} ${item.last_name}`,"unblock"), setSelectedId(null) }}>
-                                                            <IconUserCheck fontSize="small" className="me-2" /> Unblock
-                                                            </MenuItem>
-                                                            </>}
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
                                                                 <IconTrash fontSize="small" className="me-2" /> Delete
                                                             </MenuItem>
@@ -537,7 +474,7 @@ const Vendor = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={12} align="center" sx={{ py: 10 }}>
+                                            <TableCell colSpan={8} align="center" sx={{ py: 10 }}>
                                                 <Typography variant="subtitle2" fontWeight={600}>
                                                     No Data to Display
                                                 </Typography>
@@ -547,6 +484,7 @@ const Vendor = () => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
+
                         <Box
                             sx={{
                                 display: "flex",
@@ -582,7 +520,7 @@ const Vendor = () => {
                                     textAlign: "center",
                                     fontWeight: "500",
                                     fontSize: "14px",
-                                    padding:"8px",
+                                    padding: "8px",
                                     px: 1,
                                     color: theme.palette.text.primary,
                                 }}
@@ -650,48 +588,85 @@ const Vendor = () => {
                 open={modal.add}
                 onClose={() => toggleModal("add")}
                 maxWidth="xl"
-                PaperProps={{ sx: { width: { xs: "95%", sm: "80%", md: "50%" }, maxHeight: "90vh", borderRadius: 2 } }}
+                PaperProps={{
+                    sx: {
+                        borderRadius: 4,
+                        p: 0,
+                        backdropFilter: 'blur(8px)',
+                        boxShadow: 24,
+                        width: { xs: "95%", sm: "80%", md: "50%" },
+                        maxHeight: "90vh"
+                    }
+                }}
+                BackdropProps={{
+                    sx: {
+                        backdropFilter: 'blur(4px)',
+                        bgcolor: alpha(theme.palette.background.default, 0.8)
+                    }
+                }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Setup Service Sub Category
+                    Add Banner
                 </DialogTitle>
-
-
-
                 <form onSubmit={handleSubmit}>
                     <DialogContent sx={{ p: 3 }}>
-                        <Grid container spacing={3} alignItems="flex-end">
-
-                            {/* Category Select */}
-
-                            <Grid item xs={6}>
-                                <FormControl fullWidth>
-                                    <InputLabel>Category</InputLabel>
-                                    <Select
-                                        value={formData.category_id || ""}
-                                        onChange={(e) => setFormData((prev) => ({ ...prev, category_id: e.target.value }))}
-                                        // onOpen={fetchCategory}
-                                        label="Category"
-                                        MenuProps={MenuProps}>
-                                        {categoryList.map((item) => (
-                                            <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} md={12}>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    <Avatar
+                                        src={preview ? preview : ""}
+                                        alt=""
+                                        sx={{ width: 100, height: 100, margin: "0 auto" }}
+                                    />
+                                </Box>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    <input
+                                        accept="image/*"
+                                        id="file-upload"
+                                        type="file"
+                                        style={{ display: "none" }}
+                                        onChange={(e) => { handleFileChange(e) }}
+                                    />
+                                    <label htmlFor="file-upload">
+                                        <Button variant="contained" component="span">
+                                            Choose File
+                                        </Button>
+                                    </label>
+                                </Box>
                             </Grid>
-
-                            {/* Sub Category TextField */}
-
-                            <Grid item xs={6}>
+                            <Grid item xs={6} md={6}>
                                 <TextField
                                     required
                                     fullWidth
-                                    name="category"
-                                    label="Sub Category Name"
+                                    name="title"
+                                    label="Title"
                                     type="text"
-                                    value={formData.sub_category || ''}
-                                    placeholder="Enter Category Name"
-                                    onChange={(e) => { setFormData({ ...formData, sub_category: e.target.value }) }}
+                                    placeholder="Enter Title"
+                                    onChange={(e) => { setFormData({ ...formData, title: e.target.value }) }}
+                                    sx={{ mt: 2 }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    fullWidth
+                                    name="link"
+                                    label="Link"
+                                    type="text"
+                                    placeholder="Enter Link"
+                                    onChange={(e) => { setFormData({ ...formData, link: e.target.value }) }}
+                                    sx={{ mt: 2 }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="position"
+                                    label="Position"
+                                    type="text"
+                                    placeholder="Enter Position"
+                                    onChange={(e) => { setFormData({ ...formData, position: e.target.value }) }}
+                                    sx={{ mt: 2 }}
                                 />
                             </Grid>
                         </Grid>
@@ -711,12 +686,10 @@ const Vendor = () => {
                         <Button type="submit" variant="contained" sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" } }}>
                             Submit
                         </Button>
+
                     </DialogActions>
                 </form>
-
-
             </Dialog>
-
 
             {/* Edit Modal */}
 
@@ -724,48 +697,115 @@ const Vendor = () => {
                 open={modal.edit}
                 onClose={() => toggleModal("edit")}
                 maxWidth="xl"
-                PaperProps={{ sx: { width: { xs: "95%", sm: "80%", md: "50%" }, maxHeight: "90vh", borderRadius: 2 } }}
+                PaperProps={{
+                    sx: {
+                        borderRadius: 4,
+                        p: 0,
+                        backdropFilter: 'blur(8px)',
+                        boxShadow: 24
+                    }
+                }}
+                BackdropProps={{
+                    sx: {
+                        backdropFilter: 'blur(4px)',
+                        bgcolor: alpha(theme.palette.background.default, 0.8)
+                    }
+                }}
             >
-                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary }}>
-                    Edit Service Sub Category
+                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
+                    Edit Banner
                 </DialogTitle>
                 <form onSubmit={handleEdit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3}>
-
-                            {/* Category Select */}
-
-                            <Grid item xs={6}>
-                                <FormControl fullWidth>
-                                    <InputLabel>Category</InputLabel>
-                                    <Select
-                                        value={editData.category_id || editData?.parent?.id}
-                                        onChange={(e) => setEditData((prev) => ({ ...prev, category_id: e.target.value }))}
-                                        // onOpen={fetchCategory}
-                                        label="Category"
-                                        MenuProps={MenuProps}
-                                    >
-                                        {categoryList.map((item) => (
-                                            <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
+                            <Grid item xs={12} md={12}>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    <Avatar
+                                        src={preview ? preview : editData.image}
+                                        alt=""
+                                        sx={{ width: 100, height: 100, margin: "0 auto" }}
+                                    />
+                                </Box>
+                                <Box sx={{ p: 2, textAlign: "center" }}>
+                                    <input
+                                        accept="image/*"
+                                        id="file-upload"
+                                        type="file"
+                                        style={{ display: "none" }}
+                                        onChange={(e) => { handleFileChange(e) }}
+                                    />
+                                    <label htmlFor="file-upload">
+                                        <Button variant="contained" component="span">
+                                            Choose File
+                                        </Button>
+                                    </label>
+                                </Box>
                             </Grid>
-
-
-                            {/* Sub Category TextField */}
-
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={12}>
                                 <TextField
                                     required
                                     fullWidth
-                                    name="category"
-                                    label="Sub Category Name"
+                                    name="menu"
+                                    label="Title"
                                     type="text"
-                                    placeholder="Enter Category Name"
-                                    defaultValue={editData.name || ''}
-                                    onChange={(e) => { setEditData({ ...editData, sub_category: e.target.value }) }}
+                                    placeholder="Enter Title"
+                                    defaultValue={editData.title}
+                                    onChange={(e) => { setEditData({ ...editData, menu: e.target.value }) }}
+                                    sx={{ mt: 2 }}
                                 />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="title"
+                                    label="Title"
+                                    type="text"
+                                    placeholder="Enter Title"
+                                    defaultValue={editData.title}
+                                    onChange={(e) => { setEditData({ ...editData, title: e.target.value }) }}
+                                    sx={{ mt: 2 }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    fullWidth
+                                    name="link"
+                                    label="Link"
+                                    type="text"
+                                    placeholder="Enter Link"
+                                    defaultValue={editData.link}
+                                    onChange={(e) => { setEditData({ ...editData, link: e.target.value }) }}
+                                    sx={{ mt: 2 }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="position"
+                                    label="Position"
+                                    type="text"
+                                    placeholder="Enter Position"
+                                    defaultValue={editData.position}
+                                    onChange={(e) => { setEditData({ ...editData, position: e.target.value }) }}
+                                    sx={{ mt: 2 }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <FormGroup>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                defaultChecked={editData.is_active}
+                                                onChange={(e) => setFormData({ ...editData, is_active: e.target.checked })}
+                                                name="is_active"
+                                            />
+                                        }
+                                        label="Is Active"
+                                        sx={{ mt: 2 }}
+                                    />
+                                </FormGroup>
                             </Grid>
                         </Grid>
                     </DialogContent>
@@ -790,18 +830,17 @@ const Vendor = () => {
 
             {/* View Modal */}
 
-   <Dialog
+            <Dialog
                 open={modal.view}
-                onClose={() => toggleModal('view')}
+                onClose={() => toggleModal("view")}
                 maxWidth="md"
                 fullWidth
                 PaperProps={{
                     sx: {
                         borderRadius: 4,
+                        p: 0,
                         backdropFilter: 'blur(8px)',
-                        boxShadow: 24,
-                        overflow: 'hidden',
-                        bgcolor: 'background.default'
+                        boxShadow: 24
                     }
                 }}
                 BackdropProps={{
@@ -811,121 +850,18 @@ const Vendor = () => {
                     }
                 }}
             >
-                <DialogTitle
-                    sx={theme => ({
-                        backgroundColor: theme.palette.primary.main,
-                        color: theme.palette.primary.contrastText,
-                        px: 4,
-                        py: 3,
-                        fontSize: theme.typography.h5.fontSize,
-                    })}
-                >
-                    Vendor Information
+                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, display: "flex", alignItems: "center", gap: 2, color: theme.palette.text.primary, }}>
                 </DialogTitle>
-
-                <DialogContent
-                    sx={theme => ({
-                        position: 'relative',
-                        p: 4,
-                        backgroundColor: alpha(theme.palette.background.default, 0.15),
-                        backdropFilter: 'blur(8px)',
-                        WebkitBackdropFilter: 'blur(8px)',
-                    })}
-                >
-                    {!category ? (
-                        <Box
-                            display="flex"
-                            flexDirection="column"
-                            alignItems="center"
-                            justifyContent="center"
-                            sx={{ height: 200 }}
-                        >
-                            <CircularProgress color="primary" />
-                            <Typography mt={2} color="text.secondary">
-                                Loading service details...
-                            </Typography>
-                        </Box>
-                    ) : (
-                        <Grid container spacing={3} mt={1}>
-                            <Grid item xs={12} >
-                                <Box
-                                    sx={theme => ({
-                                        backgroundColor: theme.palette.background.paper,
-                                        borderRadius: 2,
-                                        p: 3,
-                                        boxShadow: theme.shadows[1],
-                                    })}
-                                >
-                                    <Typography fontWeight={600} fontSize={18} mb={2}>
-                                        Vendor Details
-                                    </Typography>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                            <Avatar
-                                                src={
-                                                    category.user?.profile?.profile_picture
-                                                        ? category.user.profile.profile_picture
-                                                        : undefined
-                                                }
-                                                alt="Profile"
-                                                sx={{ width: 72, height: 72 }}
-                                            />
-                                            <Typography variant="caption" color="text.secondary">
-                                                Profile Picture
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant="caption" color="text.secondary">
-                                                First Name
-                                            </Typography>
-                                            <Typography variant="body1">
-                                                {category.first_name || '—'}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant="caption" color="text.secondary">
-                                                Last Name
-                                            </Typography>
-                                            <Typography variant="body1">
-                                                {category.last_name || '—'}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant="caption" color="text.secondary">
-                                                Email
-                                            </Typography>
-                                            <Typography variant="body1">
-                                                {category.email || '—'}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant="caption" color="text.secondary">
-                                                Phone
-                                            </Typography>
-                                            <Typography variant="body1">
-                                                {category.phone_number || category.user?.phone_number || '—'}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <Typography variant="caption" color="text.secondary">
-                                                Username
-                                            </Typography>
-                                            <Typography variant="body1">
-                                                {category.username || '—'}
-                                            </Typography>
-                                        </Grid>
-                                    </Grid>
-                                </Box>
-                            </Grid>
-
-
-
-                        </Grid>
-                    )}
+                <DialogContent sx={{ p: 3, mt: 2 }}>
+                    <Grid container spacing={3}>
+                    </Grid>
                 </DialogContent>
-
-                <DialogActions sx={{ p: 2, justifyContent: 'flex-end' }}>
-                    <Button variant="contained" onClick={() => toggleModal("view")}>
+                <DialogActions sx={{ p: 3, borderTop: "1px solid #e5e9f2" }}>
+                    <Button
+                        onClick={() => toggleModal("view")}
+                        variant="contained"
+                        sx={{ bgcolor: "#7f54fb", "&:hover": { bgcolor: "#6a3ee8" } }}
+                    >
                         Close
                     </Button>
                 </DialogActions>
@@ -938,13 +874,12 @@ const Vendor = () => {
                 onClose={() => toggleModal("delete")}
                 maxWidth="sm"
                 fullWidth
-                 PaperProps={{
+                PaperProps={{
                     sx: {
                         borderRadius: 4,
+                        p: 0,
                         backdropFilter: 'blur(8px)',
-                        boxShadow: 24,
-                        overflow: 'hidden',
-                        bgcolor: 'background.default'
+                        boxShadow: 24
                     }
                 }}
                 BackdropProps={{
@@ -954,18 +889,18 @@ const Vendor = () => {
                     }
                 }}
             >
-                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: theme.palette.text.primary }}>
+                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: theme.palette.text.primary, }}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Delete Service Category
+                        Delete Banner
                     </Typography>
                 </DialogTitle>
                 <DialogContent sx={{ p: 3 }}>
-                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, p: 2, borderRadius: 1, mt: 2 }}>
+                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, p: 2, borderRadius: 1, mt: 2, color: theme.palette.text.primary, }}>
                         <IconAlertCircleFilled size={50} style={{ color: "red" }} />
-                        <Typography variant="h6" sx={{ color: theme.palette.text.primary, textAlign: "center" }}>
-                            Are you sure you want to Delete the service category:{" "}
+                        <Typography variant="h6" sx={{ textAlign: "center", color: theme.palette.text.primary }}>
+                            Are you sure you want to Delete the Banner:{" "}
                             <Box component="span" sx={{ color: "red", fontWeight: 600 }}>
-                                {deleteData.name}&nbsp;
+                                {deleteData.title}&nbsp;
                             </Box>
                             ?
                         </Typography>
@@ -975,7 +910,7 @@ const Vendor = () => {
                     <Button
                         onClick={() => toggleModal("delete")}
                         variant="outlined"
-                        sx={{ borderColor: "#e5e9f2", color: "#ffff",bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
+                        sx={{ borderColor: "#e5e9f2", color: "#ffff", bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
                     >
                         Cancel
                     </Button>
@@ -983,47 +918,13 @@ const Vendor = () => {
                         onClick={() => handleDelete()}
                         variant="contained"
                         sx={{ bgcolor: "#c33b3b", "&:hover": { bgcolor: "#ff0707" } }}
-                     >
+                    >
                         Delete
                     </Button>
                 </DialogActions>
             </Dialog>
-            <Modal open={open} onClose={handleClose}>
-                <Box sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 400,
-                    bgcolor: 'background.paper',
-                    border: '2px solid #000',
-                    boxShadow: 24,
-                    p: 4,
-                }}>
-                    <Typography variant="h6" component="h2">
-                        Enter Category ID
-                    </Typography>
-                    <TextField
-                        fullWidth
-                        margin="normal"
-                        label="Category ID"
-                        value={categoryId}
-                        onChange={(e) => setCategoryId(e.target.value)}
-                    />
-                    <Button variant="contained" onClick={handleFetch}>
-                        Fetch
-                    </Button>
-
-                    {category && (
-                        <Box mt={2}>
-                            <Typography variant="body1">Fetched Data:</Typography>
-                            <pre>{JSON.stringify(category, null, 2)}</pre>
-                        </Box>
-                    )}
-                </Box>
-            </Modal>
         </PageContainer >
     );
 };
 
-export default Vendor;
+export default Banner;
