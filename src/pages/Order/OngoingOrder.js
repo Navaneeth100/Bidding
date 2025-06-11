@@ -625,76 +625,7 @@ const [selectedImg, setSelectedImg] = useState(0);
 
             {/* Add Modal */}
 
-            <Dialog
-                open={modal.add}
-                onClose={() => toggleModal("add")}
-                maxWidth="xl"
-                PaperProps={{ sx: { width: { xs: "95%", sm: "80%", md: "50%" }, maxHeight: "90vh", borderRadius: 2 } }}
-            >
-                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Setup Service Sub Category
-                </DialogTitle>
 
-
-
-                <form onSubmit={handleSubmit}>
-                    <DialogContent sx={{ p: 3 }}>
-                        <Grid container spacing={3} alignItems="flex-end">
-
-                            {/* Category Select */}
-
-                            <Grid item xs={6}>
-                                <FormControl fullWidth>
-                                    <InputLabel>Category</InputLabel>
-                                    <Select
-                                        value={formData.category_id || ""}
-                                        onChange={(e) => setFormData((prev) => ({ ...prev, category_id: e.target.value }))}
-                                        // onOpen={fetchCategory}
-                                        label="Category"
-                                        MenuProps={MenuProps}>
-                                        {categoryList.map((item) => (
-                                            <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-
-                            {/* Sub Category TextField */}
-
-                            <Grid item xs={6}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    name="category"
-                                    label="Sub Category Name"
-                                    type="text"
-                                    value={formData.sub_category || ''}
-                                    placeholder="Enter Category Name"
-                                    onChange={(e) => { setFormData({ ...formData, sub_category: e.target.value }) }}
-                                />
-                            </Grid>
-                        </Grid>
-                    </DialogContent>
-                    <DialogActions sx={{ p: 3, borderTop: "1px solid #e5e9f2", gap: 1 }}>
-                        <Button
-                            onClick={() => toggleModal("add")}
-                            variant="outlined"
-                            sx={{
-                                borderColor: "#e5e9f2",
-                                color: "#364a63",
-                                "&:hover": { borderColor: "#6e82a5", backgroundColor: "#f5f6fa" },
-                            }}
-                        >
-                            Cancel
-                        </Button>
-                        <Button type="submit" variant="contained" sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" } }}>
-                            Submit
-                        </Button>
-                    </DialogActions>
-                </form>
-
-
-            </Dialog>
 
 
             {/* Edit Modal */}
