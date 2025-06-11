@@ -798,7 +798,7 @@ const Banner = () => {
                                         control={
                                             <Checkbox
                                                 defaultChecked={editData.is_active}
-                                                onChange={(e) => setFormData({ ...editData, is_active: e.target.checked })}
+                                                onChange={(e) =>setEditData({ ...editData, is_active: e.target.checked })}
                                                 name="is_active"
                                             />
                                         }
