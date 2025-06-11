@@ -8,8 +8,10 @@ import { url } from '../../../mainurl';
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { hasPermission } from "../../../hasPermission";
+import PermissionDenied from "../PermissionDenied";
 
-const EmployeeRoles = () => {
+const MenuList = () => {
 
     // AuthTokens
 
@@ -39,9 +41,9 @@ const EmployeeRoles = () => {
         setSelectedId(id)
     }
 
-    // Get User Role
+    // Get Menu List
 
-    const [roleList, setroleList] = useState([]);
+    const [menuList, setMenuList] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
     const [nextPageUrl, setNextPageUrl] = useState(null);
@@ -51,17 +53,17 @@ const EmployeeRoles = () => {
     const [onsearchText, setonsearchText] = useState("")
     const [selectedId, setSelectedId] = useState(null)
 
-    const fetchUserrole = () => {
+    const fetchMenuList = () => {
         setLoading(true);
         axios
-            .get(`${url}/auth/employee-roles/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+            .get(`${url}/auth/menulist/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
             })
             .then((res) => {
-                setroleList(res.data.results);
+                setMenuList(res.data.results);
                 setNextPageUrl(res.data.next);
                 setPrevPageUrl(res.data.previous);
                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -76,13 +78,13 @@ const EmployeeRoles = () => {
                     axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
                         localStorage.setItem("authTokens", JSON.stringify(res.data));
                         axios
-                            .get(`${url}/auth/employee-roles/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+                            .get(`${url}/auth/menulist/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                                 headers: {
                                     Authorization: `Bearer ${res.data.access}`,
                                 },
                             })
                             .then((res) => {
-                                setroleList(res.data.results);
+                                setMenuList(res.data.results);
                                 setNextPageUrl(res.data.next);
                                 setPrevPageUrl(res.data.previous);
                                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -94,7 +96,7 @@ const EmployeeRoles = () => {
     };
 
     useEffect(() => {
-        fetchUserrole();
+        fetchMenuList();
     }, [currentPage, rowsPerPage, onsearchText]);
 
 
@@ -128,7 +130,7 @@ const EmployeeRoles = () => {
     };
 
 
-    // Add User Role
+    // Add Menu List
 
     const [formData, setFormData] = useState([])
 
@@ -137,20 +139,19 @@ const EmployeeRoles = () => {
         event.preventDefault();
 
         let submitData = {
-            name: formData.name,
-            description:formData.description,
-            // image: selectedFile,
+            name: formData.menu,
+            image: selectedFile
         }
 
         try {
-            const response = await axios.post(`${url}/auth/employee-roles/`, submitData, {
+            const response = await axios.post(`${url}/auth/service-categories/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "multipart/form-data",
                 },
                 withCredentials: false,
             });
-            toast.success("User Role Added Successfully", {
+            toast.success("Menu List Added Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -162,7 +163,7 @@ const EmployeeRoles = () => {
 
             toggleModal('add')
             resetForm()
-            fetchUserrole()
+            fetchMenuList()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -176,7 +177,7 @@ const EmployeeRoles = () => {
         }
     };
 
-    //  Edit User Role
+    //  Edit Menu List
 
     const [editData, setEditData] = useState([])
 
@@ -186,20 +187,19 @@ const EmployeeRoles = () => {
         event.preventDefault();
 
         let submitData = {
-            name: editData.name,
-            description:editData.description,
-            // image: selectedFile || preview
+            name: editData.menu,
+            image: selectedFile || preview
         };
 
         try {
-            const response = await axios.put(`${url}/auth/employee-roles/${selectedId}/`, submitData, {
+            const response = await axios.put(`${url}/auth/service-categories/${selectedId}/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "multipart/form-data",
                 },
                 withCredentials: false,
             });
-            toast.success("User Role Edited Successfully", {
+            toast.success("Menu List Edited Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -210,7 +210,7 @@ const EmployeeRoles = () => {
             });
             toggleModal('edit');
             resetForm()
-            fetchUserrole()
+            fetchMenuList()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -225,20 +225,20 @@ const EmployeeRoles = () => {
     };
 
 
-    // Delete User Role
+    // Delete Menu List
 
     const [deleteData, setDeleteData] = useState([])
 
     const handleDelete = async () => {
         try {
-            const response = await axios.delete(`${url}/auth/employee-roles/${selectedId}/`, {
+            const response = await axios.delete(`${url}/auth/service-categories/${selectedId}/`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
                 withCredentials: false,
             });
-            toast.success("User Role Deleted Successfully", {
+            toast.success("Menu List Deleted Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -248,10 +248,10 @@ const EmployeeRoles = () => {
 
             });
             toggleModal('delete')
-            if (roleList.length === 1 && currentPage > 0) {
+            if (menuList.length === 1 && currentPage > 0) {
                 setCurrentPage(currentPage - 1);
             } else {
-                fetchUserrole();
+                fetchMenuList();
             }
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
@@ -266,11 +266,16 @@ const EmployeeRoles = () => {
         }
     };
 
+    const hasAccess = hasPermission("View_Service_Main");
+
+    if (!hasAccess) {
+        return <PermissionDenied />;
+    }
 
     return (
-        <PageContainer title="User Role" description="User Role"  >
+        <PageContainer title="Menu List" description="Menu List"  >
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
-                User Role
+                Menu List
             </Typography>
             <DashboardCard>
                 <Grid container>
@@ -302,14 +307,14 @@ const EmployeeRoles = () => {
                                         sx: { borderRadius: 1 },
                                     }}
                                 />
-                                <Button
+                                {/* <Button
                                     variant="contained"
                                     startIcon={<IconPlus />}
                                     onClick={() => toggleModal("add")}
                                     sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" }, borderRadius: 1, boxShadow: "none" }}
                                 >
                                     Add
-                                </Button>
+                                </Button> */}
                             </Box>
                         </Box>
 
@@ -335,18 +340,18 @@ const EmployeeRoles = () => {
                                         <TableCell align="center">
                                             SN
                                         </TableCell>
-                                        {/* <TableCell align="center">
-                                            Icon
-                                        </TableCell> */}
                                         <TableCell align="center">
-                                            Role
+                                            Icon
                                         </TableCell>
-                                         <TableCell align="center">
-                                            Description
+                                        <TableCell align="center">
+                                            Menu Name
                                         </TableCell>
-                                        <TableCell align="right">
+                                        <TableCell align="center">
+                                            Status
+                                        </TableCell>
+                                        {/* <TableCell align="right">
                                             Actions
-                                        </TableCell>
+                                        </TableCell> */}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -363,8 +368,8 @@ const EmployeeRoles = () => {
                                                 </Box>
                                             </TableCell>
                                         </TableRow>
-                                    ) : roleList && roleList.length > 0 ? (
-                                        roleList.map((item, index) => (
+                                    ) : menuList && menuList.length > 0 ? (
+                                        menuList.map((item, index) => (
                                             <TableRow
                                                 hover
                                                 role="checkbox"
@@ -378,16 +383,29 @@ const EmployeeRoles = () => {
                                                 <TableCell align="center">
                                                     {currentPage * rowsPerPage + index + 1}
                                                 </TableCell>
-                                                {/* <TableCell align="center">
-                                                    <Avatar src={item.image ? item.image : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
-                                                </TableCell> */}
+                                                <TableCell align="center">
+                                                    <Avatar sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa", color: "#333", }} ><i className={item.menu_icon_path}></i></Avatar>
+                                                </TableCell>
                                                 <TableCell align="center">
                                                     {item.name}
                                                 </TableCell>
-                                                 <TableCell align="center">
-                                                    {item.description || "N/A"}
+                                                <TableCell align="center">
+                                                    <Chip
+                                                        label={item.is_active ? 'Active' : 'Inactive'}
+                                                        style={{
+                                                            backgroundColor: item.is_active ? 'green' : 'red',
+                                                            color: '#fff',
+                                                            fontSize: '0.75rem',
+                                                            height: '24px',
+                                                            padding: '0 8px',
+                                                            borderRadius: '16px',
+                                                            textTransform: 'capitalize',
+                                                            fontWeight: 700
+                                                        }}
+                                                    />
                                                 </TableCell>
-                                                <TableCell align="right">
+
+                                                {/* <TableCell align="right">
                                                     <IconButton
                                                         size="small"
                                                         onClick={(e) => handleMenuClick(e, item.id)}
@@ -416,21 +434,18 @@ const EmployeeRoles = () => {
                                                             }}
                                                             PaperProps={{ sx: { px: 1, } }}
                                                         >
-                                                            {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setViewData(item); toggleModal("view") }}>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setViewData(item); toggleModal("view") }}>
                                                                 <IconEye fontSize="small" className="me-2" /> View
-                                                            </MenuItem> */}
+                                                            </MenuItem>
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); toggleModal("edit") }}>
                                                                 <IconPencil fontSize="small" className="me-2" /> Edit
                                                             </MenuItem>
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
                                                                 <IconTrash fontSize="small" className="me-2" /> Delete
                                                             </MenuItem>
-                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { navigate(`/permission/${item.id}`, {state: { role: item.name }})}}>
-                                                                <IconPlus fontSize="small" className="me-2" /> Add Permission
-                                                            </MenuItem>
                                                         </Menu>
                                                     )}
-                                                </TableCell>
+                                                </TableCell> */}
                                             </TableRow>
                                         ))
                                     ) : (
@@ -565,12 +580,12 @@ const EmployeeRoles = () => {
                 }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Add User Role
+                    Setup Menu List
                 </DialogTitle>
                 <form onSubmit={handleSubmit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3}>
-                            {/* <Grid item xs={12} md={12}>
+                            <Grid item xs={12} md={12}>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
                                     <Avatar
                                         src={preview ? preview : ""}
@@ -592,27 +607,17 @@ const EmployeeRoles = () => {
                                         </Button>
                                     </label>
                                 </Box>
-                            </Grid> */}
+                            </Grid>
                             <Grid item xs={12} md={12}>
                                 <TextField
                                     required
                                     fullWidth
-                                    name="role"
-                                    label="Role"
+                                    name="menu"
+                                    label="Menu Name"
                                     type="text"
-                                    placeholder="Enter Role"
-                                    onChange={(e) => { setFormData({ ...formData, name: e.target.value }) }}
+                                    placeholder="Enter Menu Name"
+                                    onChange={(e) => { setFormData({ ...formData, menu: e.target.value }) }}
                                     sx={{ mt: 5 }}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={4}
-                                    label="Description"
-                                    placeholder="Enter Description"
-                                    onChange={(e) => { setFormData({ ...formData, description: e.target.value }) }}
                                 />
                             </Grid>
                         </Grid>
@@ -659,12 +664,12 @@ const EmployeeRoles = () => {
                 }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Edit User Role
+                    Edit Menu List
                 </DialogTitle>
                 <form onSubmit={handleEdit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3}>
-                            {/* <Grid item xs={12} md={12}>
+                            <Grid item xs={12} md={12}>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
                                     <Avatar
                                         src={preview ? preview : editData.image}
@@ -686,29 +691,18 @@ const EmployeeRoles = () => {
                                         </Button>
                                     </label>
                                 </Box>
-                            </Grid> */}
+                            </Grid>
                             <Grid item xs={12} md={12}>
                                 <TextField
                                     required
                                     fullWidth
-                                    name="role"
-                                    label="Role"
+                                    name="menu"
+                                    label="Menu Name"
                                     type="text"
-                                    placeholder="Enter Role"
+                                    placeholder="Enter Menu Name"
                                     defaultValue={editData.name}
-                                    onChange={(e) => { setEditData({ ...editData, name: e.target.value }) }}
+                                    onChange={(e) => { setEditData({ ...editData, menu: e.target.value }) }}
                                     sx={{ mt: 5 }}
-                                />
-                            </Grid>
-                             <Grid item xs={12}>
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={4}
-                                    label="Description"
-                                    placeholder="Enter Description"
-                                    defaultValue={editData.description}
-                                    onChange={(e) => { setEditData({ ...editData, description: e.target.value }) }}
                                 />
                             </Grid>
                         </Grid>
@@ -795,14 +789,14 @@ const EmployeeRoles = () => {
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: theme.palette.text.primary, }}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Delete User Role
+                        Delete Menu List
                     </Typography>
                 </DialogTitle>
                 <DialogContent sx={{ p: 3 }}>
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, p: 2, borderRadius: 1, mt: 2, color: theme.palette.text.primary, }}>
                         <IconAlertCircleFilled size={50} style={{ color: "red" }} />
                         <Typography variant="h6" sx={{ textAlign: "center", color: theme.palette.text.primary }}>
-                            Are you sure you want to Delete the User Role:{" "}
+                            Are you sure you want to Delete the Menu List:{" "}
                             <Box component="span" sx={{ color: "red", fontWeight: 600 }}>
                                 {deleteData.name}&nbsp;
                             </Box>
@@ -814,7 +808,7 @@ const EmployeeRoles = () => {
                     <Button
                         onClick={() => toggleModal("delete")}
                         variant="outlined"
-                        sx={{ borderColor: "#e5e9f2", color: "#ffff",bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
+                        sx={{ borderColor: "#e5e9f2", color: "#ffff", bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
                     >
                         Cancel
                     </Button>
@@ -831,4 +825,4 @@ const EmployeeRoles = () => {
     );
 };
 
-export default EmployeeRoles;
+export default MenuList;

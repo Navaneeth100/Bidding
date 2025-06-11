@@ -4,7 +4,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled } from '@tabler/icons-react';
 import axios from "axios";
-import { imgurl, url } from "../../../mainurl";
+import { url } from '../../../mainurl';
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { styled } from '@mui/material/styles';
@@ -966,7 +966,7 @@ const Services = () => {
                                                             <Box
                                                                 key={idx}
                                                                 component="img"
-                                                                src={`${imgurl}${imgUrl.image}`}
+                                                                src={imgUrl.image}
                                                                 alt={`Service Image ${idx + 1}`}
                                                                 sx={{
                                                                     width: 150,
@@ -1114,7 +1114,7 @@ const Services = () => {
                                                             }}
                                                         >
                                                             <img
-                                                                src={`${imgurl}${imgUrl.image}`}
+                                                                src={imgUrl.image}
                                                                 alt={`Thumbnail ${idx + 1}`}
                                                                 style={{
                                                                     width: "100%",
@@ -1153,7 +1153,7 @@ const Services = () => {
                                                 >
                                                     {ServiceID.images?.[mainImgIdx] ? (
                                                         <img
-                                                            src={`${imgurl}${ServiceID.images[mainImgIdx].image}`}
+                                                            src={ServiceID.images[mainImgIdx].image}
                                                             alt={`Service Image ${mainImgIdx + 1}`}
                                                             style={{
                                                                 maxWidth: "95%",
@@ -1274,7 +1274,7 @@ const Services = () => {
                                                     {/* Profile Picture - full width */}
                                                     <Grid item xs={12} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                                         <Avatar
-                                                            src={ServiceID.user?.profile?.profile_picture ? `${imgurl}${ServiceID.user.profile.profile_picture}` : ''}
+                                                            src={ServiceID.user?.profile?.profile_picture ? ServiceID.user.profile.profile_picture : ''}
                                                             alt="Profile"
                                                             sx={{ width: 70, height: 70 }}
                                                         />

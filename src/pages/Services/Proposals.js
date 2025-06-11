@@ -4,7 +4,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled } from '@tabler/icons-react';
 import axios from "axios";
-import { imgurl, url } from "../../../mainurl";
+import { url } from '../../../mainurl';
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { styled } from '@mui/material/styles';
@@ -491,7 +491,7 @@ const Proposals = () => {
                                                     {currentPage * rowsPerPage + index + 1}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    <Avatar src={item?.related_post?.profile_picture ? `${imgurl}${item?.related_post?.profile_picture}` : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
+                                                    <Avatar src={item?.related_post?.profile_picture ? item?.related_post?.profile_picture : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
                                                 </TableCell>
                                                 <TableCell
                                                     align="center"
@@ -963,7 +963,7 @@ const Proposals = () => {
                         <Grid item xs={12} md={4}>
                             <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
                                 <Avatar
-                                    src={`${imgurl}${viewData.related_post?.profile_picture}`}
+                                    src={viewData.related_post?.profile_picture}
                                     alt="Profile"
                                     sx={{ width: 120, height: 120 }}
                                 />
@@ -1160,7 +1160,7 @@ const Proposals = () => {
                                     <Box
                                         key={idx}
                                         component="img"
-                                        src={`${imgurl}${imgUrl.image}`}
+                                        src={imgUrl.image}
                                         alt={`Proposal Image ${idx + 1}`}
                                         sx={{
                                             width: 150,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, alpha, } from "@mui/material"
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, FormControlLabel, FormGroup, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, alpha, } from "@mui/material"
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled } from '@tabler/icons-react';
@@ -8,8 +8,10 @@ import { url } from '../../../mainurl';
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { hasPermission } from "../../../hasPermission";
+import PermissionDenied from "../PermissionDenied";
 
-const EmployeeRoles = () => {
+const Banner = () => {
 
     // AuthTokens
 
@@ -39,9 +41,9 @@ const EmployeeRoles = () => {
         setSelectedId(id)
     }
 
-    // Get User Role
+    // Get Banner
 
-    const [roleList, setroleList] = useState([]);
+    const [Banner, setBanner] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
     const [nextPageUrl, setNextPageUrl] = useState(null);
@@ -51,17 +53,17 @@ const EmployeeRoles = () => {
     const [onsearchText, setonsearchText] = useState("")
     const [selectedId, setSelectedId] = useState(null)
 
-    const fetchUserrole = () => {
+    const fetchBanner = () => {
         setLoading(true);
         axios
-            .get(`${url}/auth/employee-roles/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+            .get(`${url}/service/banners/?data=web&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
             })
             .then((res) => {
-                setroleList(res.data.results);
+                setBanner(res.data.results);
                 setNextPageUrl(res.data.next);
                 setPrevPageUrl(res.data.previous);
                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -76,13 +78,13 @@ const EmployeeRoles = () => {
                     axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
                         localStorage.setItem("authTokens", JSON.stringify(res.data));
                         axios
-                            .get(`${url}/auth/employee-roles/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+                            .get(`${url}/service/banners/?data=web&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                                 headers: {
                                     Authorization: `Bearer ${res.data.access}`,
                                 },
                             })
                             .then((res) => {
-                                setroleList(res.data.results);
+                                setBanner(res.data.results);
                                 setNextPageUrl(res.data.next);
                                 setPrevPageUrl(res.data.previous);
                                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -94,7 +96,7 @@ const EmployeeRoles = () => {
     };
 
     useEffect(() => {
-        fetchUserrole();
+        fetchBanner();
     }, [currentPage, rowsPerPage, onsearchText]);
 
 
@@ -128,7 +130,7 @@ const EmployeeRoles = () => {
     };
 
 
-    // Add User Role
+    // Add Banner
 
     const [formData, setFormData] = useState([])
 
@@ -137,20 +139,22 @@ const EmployeeRoles = () => {
         event.preventDefault();
 
         let submitData = {
-            name: formData.name,
-            description:formData.description,
-            // image: selectedFile,
+            title: formData.title,
+            image: selectedFile,
+            link: formData.link,
+            position: formData.position,
+            is_active: true
         }
 
         try {
-            const response = await axios.post(`${url}/auth/employee-roles/`, submitData, {
+            const response = await axios.post(`${url}/service/banners/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "multipart/form-data",
                 },
                 withCredentials: false,
             });
-            toast.success("User Role Added Successfully", {
+            toast.success("Banner Added Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -162,7 +166,7 @@ const EmployeeRoles = () => {
 
             toggleModal('add')
             resetForm()
-            fetchUserrole()
+            fetchBanner()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -176,7 +180,7 @@ const EmployeeRoles = () => {
         }
     };
 
-    //  Edit User Role
+    //  Edit Banner
 
     const [editData, setEditData] = useState([])
 
@@ -186,20 +190,22 @@ const EmployeeRoles = () => {
         event.preventDefault();
 
         let submitData = {
-            name: editData.name,
-            description:editData.description,
-            // image: selectedFile || preview
+            title: editData.title,
+            image: selectedFile || preview,
+            link: editData.link,
+            position: editData.position,
+            is_active: editData.is_active
         };
 
         try {
-            const response = await axios.put(`${url}/auth/employee-roles/${selectedId}/`, submitData, {
+            const response = await axios.put(`${url}/service/banners/${selectedId}/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "multipart/form-data",
                 },
                 withCredentials: false,
             });
-            toast.success("User Role Edited Successfully", {
+            toast.success("Banner Edited Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -210,7 +216,7 @@ const EmployeeRoles = () => {
             });
             toggleModal('edit');
             resetForm()
-            fetchUserrole()
+            fetchBanner()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -225,20 +231,20 @@ const EmployeeRoles = () => {
     };
 
 
-    // Delete User Role
+    // Delete Banner
 
     const [deleteData, setDeleteData] = useState([])
 
     const handleDelete = async () => {
         try {
-            const response = await axios.delete(`${url}/auth/employee-roles/${selectedId}/`, {
+            const response = await axios.delete(`${url}/service/banners/${selectedId}/`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
                 withCredentials: false,
             });
-            toast.success("User Role Deleted Successfully", {
+            toast.success("Banner Deleted Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -248,10 +254,10 @@ const EmployeeRoles = () => {
 
             });
             toggleModal('delete')
-            if (roleList.length === 1 && currentPage > 0) {
+            if (Banner.length === 1 && currentPage > 0) {
                 setCurrentPage(currentPage - 1);
             } else {
-                fetchUserrole();
+                fetchBanner();
             }
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
@@ -266,11 +272,16 @@ const EmployeeRoles = () => {
         }
     };
 
+    const hasAccess = hasPermission("View_Service_Main");
+
+    if (!hasAccess) {
+        return <PermissionDenied />;
+    }
 
     return (
-        <PageContainer title="User Role" description="User Role"  >
+        <PageContainer title="Banner" description="Banner"  >
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
-                User Role
+                Banner
             </Typography>
             <DashboardCard>
                 <Grid container>
@@ -335,14 +346,23 @@ const EmployeeRoles = () => {
                                         <TableCell align="center">
                                             SN
                                         </TableCell>
-                                        {/* <TableCell align="center">
-                                            Icon
-                                        </TableCell> */}
                                         <TableCell align="center">
-                                            Role
+                                            Icon
                                         </TableCell>
-                                         <TableCell align="center">
-                                            Description
+                                        <TableCell align="center">
+                                            Title
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Link
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Updated At
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Created At
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Status
                                         </TableCell>
                                         <TableCell align="right">
                                             Actions
@@ -363,8 +383,8 @@ const EmployeeRoles = () => {
                                                 </Box>
                                             </TableCell>
                                         </TableRow>
-                                    ) : roleList && roleList.length > 0 ? (
-                                        roleList.map((item, index) => (
+                                    ) : Banner && Banner.length > 0 ? (
+                                        Banner.map((item, index) => (
                                             <TableRow
                                                 hover
                                                 role="checkbox"
@@ -378,15 +398,37 @@ const EmployeeRoles = () => {
                                                 <TableCell align="center">
                                                     {currentPage * rowsPerPage + index + 1}
                                                 </TableCell>
-                                                {/* <TableCell align="center">
-                                                    <Avatar src={item.image ? item.image : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
-                                                </TableCell> */}
                                                 <TableCell align="center">
-                                                    {item.name}
+                                                    <Avatar src={item.image ? item.image : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
                                                 </TableCell>
-                                                 <TableCell align="center">
-                                                    {item.description || "N/A"}
+                                                <TableCell align="center">
+                                                    {item.title}
                                                 </TableCell>
+                                                <TableCell align="center">
+                                                    {item.link || "N/A"}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    {new Date(item.updated_at).toLocaleString()}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    {new Date(item.created_at).toLocaleString()}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Chip
+                                                        label={item.is_active ? 'Active' : 'Inactive'}
+                                                        style={{
+                                                            backgroundColor: item.is_active ? 'green' : 'red',
+                                                            color: '#fff',
+                                                            fontSize: '0.75rem',
+                                                            height: '24px',
+                                                            padding: '0 8px',
+                                                            borderRadius: '16px',
+                                                            textTransform: 'capitalize',
+                                                            fontWeight: 700
+                                                        }}
+                                                    />
+                                                </TableCell>
+
                                                 <TableCell align="right">
                                                     <IconButton
                                                         size="small"
@@ -424,9 +466,6 @@ const EmployeeRoles = () => {
                                                             </MenuItem>
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
                                                                 <IconTrash fontSize="small" className="me-2" /> Delete
-                                                            </MenuItem>
-                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { navigate(`/permission/${item.id}`, {state: { role: item.name }})}}>
-                                                                <IconPlus fontSize="small" className="me-2" /> Add Permission
                                                             </MenuItem>
                                                         </Menu>
                                                     )}
@@ -554,7 +593,9 @@ const EmployeeRoles = () => {
                         borderRadius: 4,
                         p: 0,
                         backdropFilter: 'blur(8px)',
-                        boxShadow: 24
+                        boxShadow: 24,
+                        width: { xs: "95%", sm: "80%", md: "50%" },
+                        maxHeight: "90vh"
                     }
                 }}
                 BackdropProps={{
@@ -565,12 +606,12 @@ const EmployeeRoles = () => {
                 }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Add User Role
+                    Add Banner
                 </DialogTitle>
                 <form onSubmit={handleSubmit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3}>
-                            {/* <Grid item xs={12} md={12}>
+                            <Grid item xs={12} md={12}>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
                                     <Avatar
                                         src={preview ? preview : ""}
@@ -592,27 +633,40 @@ const EmployeeRoles = () => {
                                         </Button>
                                     </label>
                                 </Box>
-                            </Grid> */}
-                            <Grid item xs={12} md={12}>
+                            </Grid>
+                            <Grid item xs={6} md={6}>
                                 <TextField
                                     required
                                     fullWidth
-                                    name="role"
-                                    label="Role"
+                                    name="title"
+                                    label="Title"
                                     type="text"
-                                    placeholder="Enter Role"
-                                    onChange={(e) => { setFormData({ ...formData, name: e.target.value }) }}
-                                    sx={{ mt: 5 }}
+                                    placeholder="Enter Title"
+                                    onChange={(e) => { setFormData({ ...formData, title: e.target.value }) }}
+                                    sx={{ mt: 2 }}
                                 />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid item xs={6} md={6}>
                                 <TextField
                                     fullWidth
-                                    multiline
-                                    rows={4}
-                                    label="Description"
-                                    placeholder="Enter Description"
-                                    onChange={(e) => { setFormData({ ...formData, description: e.target.value }) }}
+                                    name="link"
+                                    label="Link"
+                                    type="text"
+                                    placeholder="Enter Link"
+                                    onChange={(e) => { setFormData({ ...formData, link: e.target.value }) }}
+                                    sx={{ mt: 2 }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="position"
+                                    label="Position"
+                                    type="text"
+                                    placeholder="Enter Position"
+                                    onChange={(e) => { setFormData({ ...formData, position: e.target.value }) }}
+                                    sx={{ mt: 2 }}
                                 />
                             </Grid>
                         </Grid>
@@ -659,12 +713,12 @@ const EmployeeRoles = () => {
                 }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Edit User Role
+                    Edit Banner
                 </DialogTitle>
                 <form onSubmit={handleEdit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3}>
-                            {/* <Grid item xs={12} md={12}>
+                            <Grid item xs={12} md={12}>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
                                     <Avatar
                                         src={preview ? preview : editData.image}
@@ -686,30 +740,72 @@ const EmployeeRoles = () => {
                                         </Button>
                                     </label>
                                 </Box>
-                            </Grid> */}
+                            </Grid>
                             <Grid item xs={12} md={12}>
                                 <TextField
                                     required
                                     fullWidth
-                                    name="role"
-                                    label="Role"
+                                    name="menu"
+                                    label="Title"
                                     type="text"
-                                    placeholder="Enter Role"
-                                    defaultValue={editData.name}
-                                    onChange={(e) => { setEditData({ ...editData, name: e.target.value }) }}
-                                    sx={{ mt: 5 }}
+                                    placeholder="Enter Title"
+                                    defaultValue={editData.title}
+                                    onChange={(e) => { setEditData({ ...editData, menu: e.target.value }) }}
+                                    sx={{ mt: 2 }}
                                 />
                             </Grid>
-                             <Grid item xs={12}>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="title"
+                                    label="Title"
+                                    type="text"
+                                    placeholder="Enter Title"
+                                    defaultValue={editData.title}
+                                    onChange={(e) => { setEditData({ ...editData, title: e.target.value }) }}
+                                    sx={{ mt: 2 }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
                                 <TextField
                                     fullWidth
-                                    multiline
-                                    rows={4}
-                                    label="Description"
-                                    placeholder="Enter Description"
-                                    defaultValue={editData.description}
-                                    onChange={(e) => { setEditData({ ...editData, description: e.target.value }) }}
+                                    name="link"
+                                    label="Link"
+                                    type="text"
+                                    placeholder="Enter Link"
+                                    defaultValue={editData.link}
+                                    onChange={(e) => { setEditData({ ...editData, link: e.target.value }) }}
+                                    sx={{ mt: 2 }}
                                 />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="position"
+                                    label="Position"
+                                    type="text"
+                                    placeholder="Enter Position"
+                                    defaultValue={editData.position}
+                                    onChange={(e) => { setEditData({ ...editData, position: e.target.value }) }}
+                                    sx={{ mt: 2 }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <FormGroup>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                defaultChecked={editData.is_active}
+                                                onChange={(e) => setFormData({ ...editData, is_active: e.target.checked })}
+                                                name="is_active"
+                                            />
+                                        }
+                                        label="Is Active"
+                                        sx={{ mt: 2 }}
+                                    />
+                                </FormGroup>
                             </Grid>
                         </Grid>
                     </DialogContent>
@@ -795,16 +891,16 @@ const EmployeeRoles = () => {
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: theme.palette.text.primary, }}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Delete User Role
+                        Delete Banner
                     </Typography>
                 </DialogTitle>
                 <DialogContent sx={{ p: 3 }}>
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, p: 2, borderRadius: 1, mt: 2, color: theme.palette.text.primary, }}>
                         <IconAlertCircleFilled size={50} style={{ color: "red" }} />
                         <Typography variant="h6" sx={{ textAlign: "center", color: theme.palette.text.primary }}>
-                            Are you sure you want to Delete the User Role:{" "}
+                            Are you sure you want to Delete the Banner:{" "}
                             <Box component="span" sx={{ color: "red", fontWeight: 600 }}>
-                                {deleteData.name}&nbsp;
+                                {deleteData.title}&nbsp;
                             </Box>
                             ?
                         </Typography>
@@ -814,7 +910,7 @@ const EmployeeRoles = () => {
                     <Button
                         onClick={() => toggleModal("delete")}
                         variant="outlined"
-                        sx={{ borderColor: "#e5e9f2", color: "#ffff",bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
+                        sx={{ borderColor: "#e5e9f2", color: "#ffff", bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
                     >
                         Cancel
                     </Button>
@@ -831,4 +927,4 @@ const EmployeeRoles = () => {
     );
 };
 
-export default EmployeeRoles;
+export default Banner;
