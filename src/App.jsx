@@ -2,6 +2,8 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import { useRoutes } from 'react-router-dom';
 import Router from './routes/Router';
 import { ToastContainer } from 'react-toastify';
+import { messaging } from './firebase'; // adjust the import path as needed
+import { onMessage } from 'firebase/messaging';
 import 'react-toastify/dist/ReactToastify.css';
 import { baseLightTheme, darkBlueTheme } from './layouts/full/header/CustomThemes'; // ✅ updated theme imports
 import { GlobalStyles } from '@mui/system';
@@ -30,6 +32,26 @@ function App() {
 
   // ✅ Choose correct theme object
   const theme = mode === 'light' ? baseLightTheme : darkBlueTheme;
+
+    useEffect(() => {
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log('🔔 FCM Message Received (Foreground):', payload);
+
+      const { title, body } = payload.notification;
+
+      // Show toast
+      toast.info(<div><strong>{title}</strong><div>{body}</div></div>, {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
