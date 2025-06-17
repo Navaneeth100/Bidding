@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { baseLightTheme, darkBlueTheme } from './layouts/full/header/CustomThemes'; // ✅ updated theme imports
 import { GlobalStyles } from '@mui/system';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 function App() {
   const routing = useRoutes(Router);
