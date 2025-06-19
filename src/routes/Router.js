@@ -41,6 +41,7 @@ const Banner = Loadable(lazy(() => import('../pages/Banner/Banner')));
 const Order = Loadable(lazy(() => import('../pages/Order/Order')));
 const OngoingOrder = Loadable(lazy(() => import('../pages/Order/OngoingOrder')));
 const OrderDash = Loadable(lazy(() => import('../pages/Order/OrderDash')));
+const Notification = Loadable(lazy(() => import('../pages/Notification/Notification')));
 const user = JSON.parse(localStorage.getItem('authTokens'));
 const Router = [
   {
@@ -76,6 +77,7 @@ const Router = [
       { path: '/order', exact: true, element: <Order /> },
       { path: '/ongoing-order', exact: true, element: <OngoingOrder /> },
       { path: '/order-dash', exact: true, element: <OrderDash /> },
+      { path: '/notification', exact: true, element: <Notification /> },
       // { path: '/icons', exact: true, element: <Icons /> },
       // { path: '/ui/typography', exact: true, element: <TypographyPage /> },
       // { path: '/ui/shadow', exact: true, element: <Shadow /> },
