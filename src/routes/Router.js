@@ -42,6 +42,8 @@ const Order = Loadable(lazy(() => import('../pages/Order/Order')));
 const OngoingOrder = Loadable(lazy(() => import('../pages/Order/OngoingOrder')));
 const OrderDash = Loadable(lazy(() => import('../pages/Order/OrderDash')));
 const Notification = Loadable(lazy(() => import('../pages/Notification/Notification')));
+const PaymentSuccess = Loadable(lazy(() => import('../pages/PaymentSuccess')));
+const PaymentCancelled = Loadable(lazy(() => import('../pages/PaymentCancelled')));
 const user = JSON.parse(localStorage.getItem('authTokens'));
 const Router = [
   {
@@ -91,6 +93,8 @@ const Router = [
       { path: '404', element: <Error /> },
       { path: '/auth/register', element: <Register /> },
       { path: '/auth/login', element: <Login /> },
+      { path: '/auth/success', element: <PaymentSuccess /> },
+      { path: '/auth/cancel', element: <PaymentCancelled /> },
       { path: '*', element: <Navigate to="/auth/404" replace /> },
     ],
   },

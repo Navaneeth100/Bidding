@@ -129,6 +129,28 @@ const ServiceCategory = () => {
         }
     };
 
+    // Skill Adds
+
+    const [skillInput, setskillInput] = useState("");
+    const [skillsList, setskillList] = useState([]);
+
+    const handleAddSkill = () => {
+        if (skillInput.trim() !== "") {
+            setskillList((prevItems) => [...prevItems, skillInput]);
+            setskillInput("");
+        }
+    };
+
+    const handleRemoveItem = (indexToRemove) => {
+        setskillList((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            handleAddSkill();
+        }
+    };
 
     // Add Service Category
 
@@ -140,7 +162,9 @@ const ServiceCategory = () => {
 
         let submitData = {
             name: formData.category,
-            image: selectedFile
+            image: selectedFile,
+            skills: skillsList,
+            commission_percentage: formData.commission,
         }
 
         try {
@@ -179,6 +203,29 @@ const ServiceCategory = () => {
 
     //  Edit Service Category
 
+    // Skill Edit
+
+    const [editskillInput, seteditskillInput] = useState("");
+    const [editskillsList, seteditskillList] = useState([]);
+
+    const handleEditSkill = () => {
+        if (editskillInput.trim() !== "") {
+            seteditskillList((prevItems) => [...prevItems, editskillInput]);
+            seteditskillInput("");
+        }
+    };
+
+    const handleRemoveEditItem = (indexToRemove) => {
+        seteditskillList((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
+    };
+
+    const handleEditKeyDown = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            handleEditSkill();
+        }
+    };
+
     const [editData, setEditData] = useState([])
 
 
@@ -188,7 +235,9 @@ const ServiceCategory = () => {
 
         let submitData = {
             name: editData.category,
-            image: selectedFile || preview
+            image: selectedFile || preview,
+            skills: editskillsList,
+            commission_percentage: editData.commission_percentage,
         };
 
         try {
@@ -346,6 +395,12 @@ const ServiceCategory = () => {
                                         <TableCell align="center">
                                             Category
                                         </TableCell>
+                                        <TableCell align="center">
+                                            Skills
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Commission
+                                        </TableCell>
                                         <TableCell align="right">
                                             Actions
                                         </TableCell>
@@ -386,6 +441,12 @@ const ServiceCategory = () => {
                                                 <TableCell align="center">
                                                     {item.name}
                                                 </TableCell>
+                                                <TableCell align="center">
+                                                    {item.skills.join(" , ")}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    {item.commission_percentage || "0.00"}
+                                                </TableCell>
                                                 <TableCell align="right">
                                                     <IconButton
                                                         size="small"
@@ -418,7 +479,7 @@ const ServiceCategory = () => {
                                                             {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setViewData(item); toggleModal("view") }}>
                                                                 <IconEye fontSize="small" className="me-2" /> View
                                                             </MenuItem> */}
-                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); toggleModal("edit") }}>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); seteditskillList(item.skills); toggleModal("edit") }}>
                                                                 <IconPencil fontSize="small" className="me-2" /> Edit
                                                             </MenuItem>
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
@@ -601,6 +662,45 @@ const ServiceCategory = () => {
                                     sx={{ mt: 5 }}
                                 />
                             </Grid>
+                            <Grid item xs={12} sm={12}>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
+                                    <TextField
+                                        label="Enter Skills"
+                                        variant="outlined"
+                                        fullWidth
+                                        value={skillInput}
+                                        onChange={(e) => setskillInput(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                    />
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleAddSkill}
+                                    >
+                                        Add
+                                    </Button>
+                                </Box>
+                                <Box>
+                                    {skillsList.map((item, index) => (
+                                        <span key={index}>
+                                            <Chip className='me-2' label={item} variant="outlined" onDelete={() => handleRemoveItem(index)} />
+                                        </span>
+                                    ))}
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} md={12}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="commission"
+                                    label="Commission"
+                                    type="number"
+                                    placeholder="Enter Commission"
+                                    onChange={(e) => { setFormData({ ...formData, commission: e.target.value }) }}
+                                    inputProps={{ step: '0.01' }}
+                                    sx={{ mt: 2 }}
+                                />
+                            </Grid>
                         </Grid>
                     </DialogContent>
                     <DialogActions sx={{ p: 3, borderTop: "1px solid #e5e9f2", gap: 1 }}>
@@ -684,6 +784,46 @@ const ServiceCategory = () => {
                                     defaultValue={editData.name}
                                     onChange={(e) => { setEditData({ ...editData, category: e.target.value }) }}
                                     sx={{ mt: 5 }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={12}>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
+                                    <TextField
+                                        label="Enter Skills"
+                                        variant="outlined"
+                                        fullWidth
+                                        value={editskillInput}
+                                        onChange={(e) => seteditskillInput(e.target.value)}
+                                        onKeyDown={handleEditKeyDown}
+                                    />
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleEditSkill}
+                                    >
+                                        Add
+                                    </Button>
+                                </Box>
+                                <Box>
+                                    {editskillsList.map((item, index) => (
+                                        <span key={index}>
+                                            <Chip className='me-2' label={item} variant="outlined" onDelete={() => handleRemoveEditItem(index)} />
+                                        </span>
+                                    ))}
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} md={12}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="commission"
+                                    label="Commission"
+                                    type="number"
+                                    placeholder="Enter Commission"
+                                    defaultValue={editData.commission_percentage}
+                                    onChange={(e) => { setEditData({ ...editData, commission_percentage: e.target.value }) }}
+                                    inputProps={{ step: '0.01' }}
+                                    sx={{ mt: 2 }}
                                 />
                             </Grid>
                         </Grid>

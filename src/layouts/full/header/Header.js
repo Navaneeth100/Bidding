@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'; 
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   AppBar,
@@ -8,6 +8,14 @@ import {
   IconButton,
   Badge,
   useTheme,
+  Typography,
+  Button,
+  Popover,
+  Divider,
+  List,
+  Chip,
+  ListItem,
+  ListItemText
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import {
@@ -24,7 +32,7 @@ import Loader from './Loader';
 
 const Header = ({ mode, toggleTheme }) => {
   const theme = useTheme();
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
   const authTokens = JSON.parse(localStorage.getItem('authTokens'));
   const tokenStr = String(authTokens?.access || '');
 
@@ -105,6 +113,36 @@ const Header = ({ mode, toggleTheme }) => {
       setLoading(false); // ✅ Hide loader
     }
   };
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const bellRef = useRef(null);
+
+  const handleClick = () => {
+    setAnchorEl(bellRef.current);
+    fetchNotifications();
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await axios.get(`${url}/auth/notifications/?page=1`, {
+        headers: { Authorization: `Bearer ${tokenStr}` }
+      });
+
+      setNotifications(response.data.results || []);
+      setUnreadCount(response.data.unread || 0);
+      setTotalCount(response.data.count || 0);
+    } catch (err) {
+      console.error("Notification fetch error", err);
+    }
+  };
+
 
   return (
     <>
@@ -196,12 +234,15 @@ const Header = ({ mode, toggleTheme }) => {
 
             {/* 🔔 Notifications icon */}
             <IconButton
+            ref={bellRef}
               size="large"
               aria-label="notifications"
               color="inherit"
               sx={{ color: theme.palette.text.primary, border: '1px solid #ccc' }}
-            >
-              <IconBell size="23" stroke="1.5" />
+              onClick={handleClick}>
+              <Badge badgeContent={unreadCount > 0 ? unreadCount : "0"} color="primary">
+                <IconBell size="23" stroke="1.5" />
+              </Badge>
             </IconButton>
 
             {/* 👤 User Profile */}
@@ -209,6 +250,87 @@ const Header = ({ mode, toggleTheme }) => {
           </Stack>
         </ToolbarStyled>
       </AppBarStyled>
+
+      {/* Notification Popover */}
+
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+        PaperProps={{
+          sx: {
+            width: 300,
+            borderRadius: 2,
+            boxShadow: 3,
+            mt: 1, // 👈 this works properly in sx
+          }
+        }}
+      >
+        {/* Header */}
+
+        <Box display="flex" justifyContent="space-between" alignItems="center" px={2} py={1}>
+          <Typography fontWeight="bold">Notifications</Typography>
+          <Chip
+            label={totalCount}
+            size="small"
+            sx={{ fontWeight: 500, fontSize: '12px' }}
+          />
+        </Box>
+        <Divider />
+
+        {/* Notification List */}
+
+        <Box maxHeight={250} overflow="auto">
+          <List dense>
+            {notifications.length === 0 ? (
+              <ListItem>
+                <ListItemText primary="No notifications" />
+              </ListItem>
+            ) : (
+              notifications.slice(0, 5).map((item, idx) => (
+                <ListItem key={idx} divider>
+                  <ListItemText
+                    primary={
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        {item.title}
+                      </Typography>
+                    }
+                    secondary={
+                      <>
+                        <Typography
+                          variant="body2"
+                          sx={{ whiteSpace: 'normal', wordBreak: 'break-word', fontSize: '0.8rem', mt: 0.3 }}
+                        >
+                          {item.message}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{ display: 'block', color: '#999', fontSize: '0.7rem', mt: 0.5 }}
+                        >
+                          {item.notification_type} • {new Date(item.sent_at).toLocaleString()}
+                        </Typography>
+                      </>
+                    }
+                  />
+                </ListItem>
+
+              ))
+            )}
+          </List>
+        </Box>
+
+        {/* Footer */}
+
+        <Divider />
+        <Box textAlign="center" py={1}>
+          <Button size="small" onClick={() => window.location.href = '/notification'}>
+            View All
+          </Button>
+        </Box>
+      </Popover>
+
     </>
   );
 };

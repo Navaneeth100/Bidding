@@ -425,13 +425,19 @@ const Notification = () => {
                                             SN
                                         </TableCell>
                                         <TableCell align="center">
-                                            Icon
+                                            Title
                                         </TableCell>
                                         <TableCell align="center">
-                                            Menu Name
+                                            Send To
                                         </TableCell>
                                         <TableCell align="center">
-                                            Status
+                                            Message
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Type
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Send At
                                         </TableCell>
                                         {/* <TableCell align="right">
                                             Actions
@@ -468,16 +474,19 @@ const Notification = () => {
                                                     {currentPage * rowsPerPage + index + 1}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    <Avatar sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa", color: "#333", }} ><i className={item.menu_icon_path}></i></Avatar>
+                                                    {item.title}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {item.name}
+                                                    {item.read_by_users.join(", ")}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    {item.message}
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     <Chip
-                                                        label={item.is_active ? 'Active' : 'Inactive'}
+                                                        label={item.notification_type}
                                                         style={{
-                                                            backgroundColor: item.is_active ? 'green' : 'red',
+                                                            backgroundColor: item.notification_type === "ALERT" ? "red" : item.notification_type === "INFO" ? "deepskyblue" : item.notification_type === "UPDATE" ? "green" : item.notification_type === "REMINDER" ? "gold" : item.notification_type === "PROMO" ? "orange" : "black",
                                                             color: '#fff',
                                                             fontSize: '0.75rem',
                                                             height: '24px',
@@ -487,6 +496,9 @@ const Notification = () => {
                                                             fontWeight: 700
                                                         }}
                                                     />
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    {item?.sent_at ? new Date(item.sent_at).toLocaleString() : "N/A"}
                                                 </TableCell>
 
                                                 {/* <TableCell align="right">
