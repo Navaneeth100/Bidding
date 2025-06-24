@@ -38,6 +38,7 @@ export default defineConfig({
 
     // ✅ Added Proxy to Fix CORS
     server: {
+        port: 3000,
         proxy: {
             "/api": {
                 target: "https://clocks-george-gg-brazilian.trycloudflare.com", // Your API
