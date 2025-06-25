@@ -4,10 +4,12 @@ import { useLocation } from 'react-router';
 import { Box, List } from '@mui/material';
 import NavItem from './NavItem';
 import NavGroup from './NavGroup/NavGroup';
+import useMenuItems from './MenuItems';
 
 const SidebarItems = ({ collapsed }) => {
   const { pathname } = useLocation();
   const pathDirect = pathname;
+  const Menuitems = useMenuItems();
 
   return (
     <Box sx={{ px: collapsed ? 1 : 3, width: '100%' }}>

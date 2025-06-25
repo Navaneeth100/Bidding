@@ -11,7 +11,7 @@ import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-mater
 import { hasPermission } from "../../../hasPermission";
 import PermissionDenied from "../PermissionDenied";
 
-const ServiceCategory = () => {
+const MenuList = () => {
 
     // AuthTokens
 
@@ -41,9 +41,9 @@ const ServiceCategory = () => {
         setSelectedId(id)
     }
 
-    // Get Service Category
+    // Get Menu List
 
-    const [categoryList, setCategoryList] = useState([]);
+    const [menuList, setMenuList] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
     const [nextPageUrl, setNextPageUrl] = useState(null);
@@ -53,17 +53,17 @@ const ServiceCategory = () => {
     const [onsearchText, setonsearchText] = useState("")
     const [selectedId, setSelectedId] = useState(null)
 
-    const fetchServiceCategory = () => {
+    const fetchMenuList = () => {
         setLoading(true);
         axios
-            .get(`${url}/auth/service-categories/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+            .get(`${url}/auth/menulist/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
             })
             .then((res) => {
-                setCategoryList(res.data.results);
+                setMenuList(res.data.results);
                 setNextPageUrl(res.data.next);
                 setPrevPageUrl(res.data.previous);
                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -78,13 +78,13 @@ const ServiceCategory = () => {
                     axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
                         localStorage.setItem("authTokens", JSON.stringify(res.data));
                         axios
-                            .get(`${url}/auth/service-categories/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+                            .get(`${url}/auth/menulist/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                                 headers: {
                                     Authorization: `Bearer ${res.data.access}`,
                                 },
                             })
                             .then((res) => {
-                                setCategoryList(res.data.results);
+                                setMenuList(res.data.results);
                                 setNextPageUrl(res.data.next);
                                 setPrevPageUrl(res.data.previous);
                                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -96,7 +96,7 @@ const ServiceCategory = () => {
     };
 
     useEffect(() => {
-        fetchServiceCategory();
+        fetchMenuList();
     }, [currentPage, rowsPerPage, onsearchText]);
 
 
@@ -129,30 +129,8 @@ const ServiceCategory = () => {
         }
     };
 
-    // Skill Adds
 
-    const [skillInput, setskillInput] = useState("");
-    const [skillsList, setskillList] = useState([]);
-
-    const handleAddSkill = () => {
-        if (skillInput.trim() !== "") {
-            setskillList((prevItems) => [...prevItems, skillInput]);
-            setskillInput("");
-        }
-    };
-
-    const handleRemoveItem = (indexToRemove) => {
-        setskillList((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
-    };
-
-    const handleKeyDown = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            handleAddSkill();
-        }
-    };
-
-    // Add Service Category
+    // Add Menu List
 
     const [formData, setFormData] = useState([])
 
@@ -161,10 +139,8 @@ const ServiceCategory = () => {
         event.preventDefault();
 
         let submitData = {
-            name: formData.category,
-            image: selectedFile,
-            skills: skillsList,
-            commission_percentage: formData.commission,
+            name: formData.menu,
+            image: selectedFile
         }
 
         try {
@@ -175,7 +151,7 @@ const ServiceCategory = () => {
                 },
                 withCredentials: false,
             });
-            toast.success("Service Category Added Successfully", {
+            toast.success("Menu List Added Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -187,7 +163,7 @@ const ServiceCategory = () => {
 
             toggleModal('add')
             resetForm()
-            fetchServiceCategory()
+            fetchMenuList()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -201,30 +177,7 @@ const ServiceCategory = () => {
         }
     };
 
-    //  Edit Service Category
-
-    // Skill Edit
-
-    const [editskillInput, seteditskillInput] = useState("");
-    const [editskillsList, seteditskillList] = useState([]);
-
-    const handleEditSkill = () => {
-        if (editskillInput.trim() !== "") {
-            seteditskillList((prevItems) => [...prevItems, editskillInput]);
-            seteditskillInput("");
-        }
-    };
-
-    const handleRemoveEditItem = (indexToRemove) => {
-        seteditskillList((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
-    };
-
-    const handleEditKeyDown = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            handleEditSkill();
-        }
-    };
+    //  Edit Menu List
 
     const [editData, setEditData] = useState([])
 
@@ -234,10 +187,8 @@ const ServiceCategory = () => {
         event.preventDefault();
 
         let submitData = {
-            name: editData.category,
-            image: selectedFile || preview,
-            skills: editskillsList,
-            commission_percentage: editData.commission_percentage,
+            name: editData.menu,
+            image: selectedFile || preview
         };
 
         try {
@@ -248,7 +199,7 @@ const ServiceCategory = () => {
                 },
                 withCredentials: false,
             });
-            toast.success("Service Category Edited Successfully", {
+            toast.success("Menu List Edited Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -259,7 +210,7 @@ const ServiceCategory = () => {
             });
             toggleModal('edit');
             resetForm()
-            fetchServiceCategory()
+            fetchMenuList()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -274,7 +225,7 @@ const ServiceCategory = () => {
     };
 
 
-    // Delete Service Category
+    // Delete Menu List
 
     const [deleteData, setDeleteData] = useState([])
 
@@ -287,7 +238,7 @@ const ServiceCategory = () => {
                 },
                 withCredentials: false,
             });
-            toast.success("Service Category Deleted Successfully", {
+            toast.success("Menu List Deleted Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -297,10 +248,10 @@ const ServiceCategory = () => {
 
             });
             toggleModal('delete')
-            if (categoryList.length === 1 && currentPage > 0) {
+            if (menuList.length === 1 && currentPage > 0) {
                 setCurrentPage(currentPage - 1);
             } else {
-                fetchServiceCategory();
+                fetchMenuList();
             }
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
@@ -322,9 +273,9 @@ const ServiceCategory = () => {
     }
 
     return (
-        <PageContainer title="Service Category" description="Service Category"  >
+        <PageContainer title="Menu List" description="Menu List"  >
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
-                Service Category
+                Menu List
             </Typography>
             <DashboardCard>
                 <Grid container>
@@ -356,14 +307,14 @@ const ServiceCategory = () => {
                                         sx: { borderRadius: 1 },
                                     }}
                                 />
-                                <Button
+                                {/* <Button
                                     variant="contained"
                                     startIcon={<IconPlus />}
                                     onClick={() => toggleModal("add")}
                                     sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" }, borderRadius: 1, boxShadow: "none" }}
                                 >
                                     Add
-                                </Button>
+                                </Button> */}
                             </Box>
                         </Box>
 
@@ -393,17 +344,14 @@ const ServiceCategory = () => {
                                             Icon
                                         </TableCell>
                                         <TableCell align="center">
-                                            Category
+                                            Menu Name
                                         </TableCell>
                                         <TableCell align="center">
-                                            Skills
+                                            Status
                                         </TableCell>
-                                        <TableCell align="center">
-                                            Commission
-                                        </TableCell>
-                                        <TableCell align="right">
+                                        {/* <TableCell align="right">
                                             Actions
-                                        </TableCell>
+                                        </TableCell> */}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -420,8 +368,8 @@ const ServiceCategory = () => {
                                                 </Box>
                                             </TableCell>
                                         </TableRow>
-                                    ) : categoryList && categoryList.length > 0 ? (
-                                        categoryList.map((item, index) => (
+                                    ) : menuList && menuList.length > 0 ? (
+                                        menuList.map((item, index) => (
                                             <TableRow
                                                 hover
                                                 role="checkbox"
@@ -436,18 +384,28 @@ const ServiceCategory = () => {
                                                     {currentPage * rowsPerPage + index + 1}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    <Avatar src={item.image ? item.image : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
+                                                    <Avatar sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa", color: "#333", }} ><i className={item.menu_icon_path}></i></Avatar>
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     {item.name}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {item.skills.join(" , ")}
+                                                    <Chip
+                                                        label={item.is_active ? 'Active' : 'Inactive'}
+                                                        style={{
+                                                            backgroundColor: item.is_active ? 'green' : 'red',
+                                                            color: '#fff',
+                                                            fontSize: '0.75rem',
+                                                            height: '24px',
+                                                            padding: '0 8px',
+                                                            borderRadius: '16px',
+                                                            textTransform: 'capitalize',
+                                                            fontWeight: 700
+                                                        }}
+                                                    />
                                                 </TableCell>
-                                                <TableCell align="center">
-                                                    {item.commission_percentage || "0.00"}
-                                                </TableCell>
-                                                <TableCell align="right">
+
+                                                {/* <TableCell align="right">
                                                     <IconButton
                                                         size="small"
                                                         onClick={(e) => handleMenuClick(e, item.id)}
@@ -476,10 +434,10 @@ const ServiceCategory = () => {
                                                             }}
                                                             PaperProps={{ sx: { px: 1, } }}
                                                         >
-                                                            {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setViewData(item); toggleModal("view") }}>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setViewData(item); toggleModal("view") }}>
                                                                 <IconEye fontSize="small" className="me-2" /> View
-                                                            </MenuItem> */}
-                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); seteditskillList(item.skills); toggleModal("edit") }}>
+                                                            </MenuItem>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); toggleModal("edit") }}>
                                                                 <IconPencil fontSize="small" className="me-2" /> Edit
                                                             </MenuItem>
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
@@ -487,7 +445,7 @@ const ServiceCategory = () => {
                                                             </MenuItem>
                                                         </Menu>
                                                     )}
-                                                </TableCell>
+                                                </TableCell> */}
                                             </TableRow>
                                         ))
                                     ) : (
@@ -622,7 +580,7 @@ const ServiceCategory = () => {
                 }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Setup Service Category
+                    Setup Menu List
                 </DialogTitle>
                 <form onSubmit={handleSubmit}>
                     <DialogContent sx={{ p: 3 }}>
@@ -654,51 +612,12 @@ const ServiceCategory = () => {
                                 <TextField
                                     required
                                     fullWidth
-                                    name="category"
-                                    label="Category Name"
+                                    name="menu"
+                                    label="Menu Name"
                                     type="text"
-                                    placeholder="Enter Category Name"
-                                    onChange={(e) => { setFormData({ ...formData, category: e.target.value }) }}
+                                    placeholder="Enter Menu Name"
+                                    onChange={(e) => { setFormData({ ...formData, menu: e.target.value }) }}
                                     sx={{ mt: 5 }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={12}>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
-                                    <TextField
-                                        label="Enter Skills"
-                                        variant="outlined"
-                                        fullWidth
-                                        value={skillInput}
-                                        onChange={(e) => setskillInput(e.target.value)}
-                                        onKeyDown={handleKeyDown}
-                                    />
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={handleAddSkill}
-                                    >
-                                        Add
-                                    </Button>
-                                </Box>
-                                <Box>
-                                    {skillsList.map((item, index) => (
-                                        <span key={index}>
-                                            <Chip className='me-2' label={item} variant="outlined" onDelete={() => handleRemoveItem(index)} />
-                                        </span>
-                                    ))}
-                                </Box>
-                            </Grid>
-                            <Grid item xs={12} md={12}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    name="commission"
-                                    label="Commission"
-                                    type="number"
-                                    placeholder="Enter Commission"
-                                    onChange={(e) => { setFormData({ ...formData, commission: e.target.value }) }}
-                                    inputProps={{ step: '0.01' }}
-                                    sx={{ mt: 2 }}
                                 />
                             </Grid>
                         </Grid>
@@ -745,7 +664,7 @@ const ServiceCategory = () => {
                 }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Edit Service Category
+                    Edit Menu List
                 </DialogTitle>
                 <form onSubmit={handleEdit}>
                     <DialogContent sx={{ p: 3 }}>
@@ -777,53 +696,13 @@ const ServiceCategory = () => {
                                 <TextField
                                     required
                                     fullWidth
-                                    name="category"
-                                    label="Category Name"
+                                    name="menu"
+                                    label="Menu Name"
                                     type="text"
-                                    placeholder="Enter Category Name"
+                                    placeholder="Enter Menu Name"
                                     defaultValue={editData.name}
-                                    onChange={(e) => { setEditData({ ...editData, category: e.target.value }) }}
+                                    onChange={(e) => { setEditData({ ...editData, menu: e.target.value }) }}
                                     sx={{ mt: 5 }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={12}>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
-                                    <TextField
-                                        label="Enter Skills"
-                                        variant="outlined"
-                                        fullWidth
-                                        value={editskillInput}
-                                        onChange={(e) => seteditskillInput(e.target.value)}
-                                        onKeyDown={handleEditKeyDown}
-                                    />
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={handleEditSkill}
-                                    >
-                                        Add
-                                    </Button>
-                                </Box>
-                                <Box>
-                                    {editskillsList.map((item, index) => (
-                                        <span key={index}>
-                                            <Chip className='me-2' label={item} variant="outlined" onDelete={() => handleRemoveEditItem(index)} />
-                                        </span>
-                                    ))}
-                                </Box>
-                            </Grid>
-                            <Grid item xs={12} md={12}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    name="commission"
-                                    label="Commission"
-                                    type="number"
-                                    placeholder="Enter Commission"
-                                    defaultValue={editData.commission_percentage}
-                                    onChange={(e) => { setEditData({ ...editData, commission_percentage: e.target.value }) }}
-                                    inputProps={{ step: '0.01' }}
-                                    sx={{ mt: 2 }}
                                 />
                             </Grid>
                         </Grid>
@@ -910,14 +789,14 @@ const ServiceCategory = () => {
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: theme.palette.text.primary, }}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Delete Service Category
+                        Delete Menu List
                     </Typography>
                 </DialogTitle>
                 <DialogContent sx={{ p: 3 }}>
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, p: 2, borderRadius: 1, mt: 2, color: theme.palette.text.primary, }}>
                         <IconAlertCircleFilled size={50} style={{ color: "red" }} />
                         <Typography variant="h6" sx={{ textAlign: "center", color: theme.palette.text.primary }}>
-                            Are you sure you want to Delete the service category:{" "}
+                            Are you sure you want to Delete the Menu List:{" "}
                             <Box component="span" sx={{ color: "red", fontWeight: 600 }}>
                                 {deleteData.name}&nbsp;
                             </Box>
@@ -929,7 +808,7 @@ const ServiceCategory = () => {
                     <Button
                         onClick={() => toggleModal("delete")}
                         variant="outlined"
-                        sx={{ borderColor: "#e5e9f2", color: "#ffff",bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
+                        sx={{ borderColor: "#e5e9f2", color: "#ffff", bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
                     >
                         Cancel
                     </Button>
@@ -946,4 +825,4 @@ const ServiceCategory = () => {
     );
 };
 
-export default ServiceCategory;
+export default MenuList;

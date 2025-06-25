@@ -7,6 +7,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import Logo from 'src/layouts/full/shared/logo/Logo';
 import AuthLogin from './auth/AuthLogin';
 import logo from '../../assets/images/logos/stay.png'
+import loginbg from '../../assets/images/logos/loginbg.webp'
 
 const Login2 = () => {
 
@@ -17,7 +18,7 @@ const Login2 = () => {
           position: 'relative',
           '&:before': {
             content: '""',
-            background: 'radial-gradient(#d2f1df, #d3d7fa, #bad8f4)',
+            background: `url(${loginbg}) no-repeat center center/cover`,
             backgroundSize: '400% 400%',
             animation: 'gradient 15s ease infinite',
             position: 'absolute',

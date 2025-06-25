@@ -32,6 +32,18 @@ const Vendor = Loadable(lazy(() => import('../pages/Vendor/vendor')));
 const Customer = Loadable(lazy(() => import('../pages/Vendor/customer')));
 const ServiceJobs = Loadable(lazy(() => import('../pages/Services/ServicesJobs')));
 const ServiceBookMarks = Loadable(lazy(() => import('../pages/Services/ServiceBookMarks')));
+const Proposals = Loadable(lazy(() => import('../pages/Services/Proposals')));
+const UserRole = Loadable(lazy(() => import('../pages/User/Userroles')));
+const Employees = Loadable(lazy(() => import('../pages/User/employee')));
+const MenuList = Loadable(lazy(() => import('../pages/User/MenuList')));
+const Permission = Loadable(lazy(() => import('../pages/User/Permission')));
+const Banner = Loadable(lazy(() => import('../pages/Banner/Banner')));
+const Order = Loadable(lazy(() => import('../pages/Order/Order')));
+const OngoingOrder = Loadable(lazy(() => import('../pages/Order/OngoingOrder')));
+const OrderDash = Loadable(lazy(() => import('../pages/Order/OrderDash')));
+const Notification = Loadable(lazy(() => import('../pages/Notification/Notification')));
+const PaymentSuccess = Loadable(lazy(() => import('../pages/PaymentSuccess')));
+const PaymentCancelled = Loadable(lazy(() => import('../pages/PaymentCancelled')));
 const user = JSON.parse(localStorage.getItem('authTokens'));
 const Router = [
   {
@@ -58,10 +70,20 @@ const Router = [
       { path: '/service-bookmarks', exact: true, element: <ServiceBookMarks /> },
       { path: '/vendor', exact: true, element: <Vendor /> },
       { path: '/customer', exact: true, element: <Customer /> },
+      { path: '/proposals', exact: true, element: <Proposals /> },
+      { path: '/user_roles', exact: true, element: <UserRole /> },
+      { path: '/employees', exact: true, element: <Employees /> },
+      { path: '/menulist', exact: true, element: <MenuList /> },
+      { path: '/permission/:id', exact: true, element: <Permission /> },
+      { path: '/Banner', exact: true, element: <Banner /> },
+      { path: '/order', exact: true, element: <Order /> },
+      { path: '/ongoing-order', exact: true, element: <OngoingOrder /> },
+      { path: '/order-dash', exact: true, element: <OrderDash /> },
+      { path: '/notification', exact: true, element: <Notification /> },
       // { path: '/icons', exact: true, element: <Icons /> },
       // { path: '/ui/typography', exact: true, element: <TypographyPage /> },
       // { path: '/ui/shadow', exact: true, element: <Shadow /> },
-      // { path: '*', element: <Navigate to="/auth/404" /> },
+      { path: '*', element: <Navigate to="/auth/404" replace /> },
     ],
   },
   {
@@ -71,7 +93,9 @@ const Router = [
       { path: '404', element: <Error /> },
       { path: '/auth/register', element: <Register /> },
       { path: '/auth/login', element: <Login /> },
-      // { path: '*', element: <Navigate to="/auth/404" /> },
+      { path: '/auth/success', element: <PaymentSuccess /> },
+      { path: '/auth/cancel', element: <PaymentCancelled /> },
+      { path: '*', element: <Navigate to="/auth/404" replace /> },
     ],
   },
 ];

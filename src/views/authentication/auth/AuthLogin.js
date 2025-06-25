@@ -15,6 +15,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { IconEye } from '@tabler/icons-react';
 import { IconEyeClosed } from '@tabler/icons-react';
+import { registerDevice } from '../../../utils/registerDevice'; // Adjust the relative path
 
 const AuthLogin = ({ title, subtitle, subtext }) => {
 
@@ -36,67 +37,70 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
 
     const navigate = useNavigate()
 
-    const handleSubmit = async () => {
-        try {
-            const response = await axios.post(`${url}/auth/admin/login/`, {
-                email: formData.email,
-                password: formData.password,
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (response.status === 200) {
-                const data = response.data;
-                toast.success('Login successful !', {
-                    position: 'top-right',
-                    autoClose: 1500,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    
-                });
+const handleSubmit = async () => {
+  try {
+    const response = await axios.post(`${url}/auth/admin/login/`, {
+      email: formData.email,
+      password: formData.password,
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-                  // ✅ Save tokens to localStorage
-                localStorage.setItem('authTokens', JSON.stringify(data));
+    if (response.status === 200) {
+      const data = response.data;
 
-                  // ✅ Handle mode: use backend's or preserve existing
-                  const previousMode = localStorage.getItem('mode');
-                  const loginMode = data.mode !== undefined ? data.mode.toString() : previousMode || '0';
+      toast.success('Login successful!', {
+        position: 'top-right',
+        autoClose: 1500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
 
-                  localStorage.setItem('mode', loginMode);
+      // ✅ Save tokens to localStorage
+      localStorage.setItem('authTokens', JSON.stringify(data));
 
-                  // ✅ Sync theme if needed — only after login success
-                  const currentTheme = window.__themeMode; // from App.js
-                  const targetTheme = loginMode === '1' ? 'dark' : 'light';
+      // ✅ Extract token from response
+      const tokenStr = data.token || data.access || data.access_token;
+      if (tokenStr) {
+        // ✅ Register FCM device
+        await registerDevice(tokenStr);
+      } else {
+        console.warn('No valid token found for FCM registration.');
+      }
 
-                  if (currentTheme && currentTheme !== targetTheme) {
-                    window.__toggleTheme?.();
-                  }
+      // ✅ Handle mode: use backend's or preserve existing
+      const previousMode = localStorage.getItem('mode');
+      const loginMode = data.mode !== undefined ? data.mode.toString() : previousMode || '0';
+      localStorage.setItem('mode', loginMode);
 
-                  // ✅ Navigate after short delay
-                setTimeout(() => {
-                    navigate("/dashboard")
-                }, 1500);
-            }
-        } catch (err) {
-            toast.error(`${err.response.data.error}`, {
-                position: 'top-right',
-                autoClose: 1500,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                
-            });
-        }
-        finally {
-            // setTimeout(() => {
-            //     navigate("/dashboard")
-            // }, 2000);
-        }
-    };
+      // ✅ Sync theme after login
+      const currentTheme = window.__themeMode;
+      const targetTheme = loginMode === '1' ? 'dark' : 'light';
+
+      if (currentTheme && currentTheme !== targetTheme) {
+        window.__toggleTheme?.();
+      }
+
+      // ✅ Navigate after short delay
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1500);
+    }
+  } catch (err) {
+    toast.error(`${err.response?.data?.error || 'Login failed'}`, {
+      position: 'top-right',
+      autoClose: 1500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+  }
+};
 
     return (
         <>
@@ -128,12 +132,12 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
                         onChange={(e) => { handleChange(e) }} onKeyDown={handleKeyDown} />
                 </Box>
                 <Stack justifyContent="space-between" direction="row" alignItems="center" my={2}>
-                    <FormGroup>
+                    {/* <FormGroup>
                         <FormControlLabel
                             control={<Checkbox defaultChecked />}
                             label="Remeber this Device"
                         />
-                    </FormGroup>
+                    </FormGroup> */}
                     {/* <Typography
                     component={Link}
                     to="/"

@@ -1,14 +1,16 @@
 import { useEffect, useState,useCallback } from "react"
 
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, Modal } from "@mui/material"
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, Modal,alpha } from "@mui/material"
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
-import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled, IconCheck, IconX } from '@tabler/icons-react';
+import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled, IconCheck, IconX, IconBan, IconUserCheck } from '@tabler/icons-react';
 import axios from "axios";
-import { url } from "../../../mainurl";
+import { url } from '../../../mainurl';
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
+import Swal from "sweetalert2";
+
 const Vendor = () => {
 
     // AuthTokens
@@ -306,6 +308,42 @@ const Vendor = () => {
         }
     };
 
+    // Block or Unblock Employee
+
+    const BlockorUnlock = async (id, name, action) => {
+    const result = await Swal.fire({
+        title: `Are you sure you want to ${action} ${name}?`,
+        icon: action === "block" ? "warning" : "info",
+        iconColor: action === "block" ? "#e53e3e" : "#519380",
+        showCancelButton: true,
+        confirmButtonColor: action === "block" ? "#d33" : "#519380",
+        cancelButtonColor: action === "block" ? "#519380" : "#d33",
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+    });
+    if (result.isConfirmed) {
+        try {
+        const headers = {
+            Authorization: `Bearer ${tokenStr}`,
+            "Content-Type": "application/json",
+        };
+
+        const submittedData = { 
+            user_id: id,
+            data: "Vendor", 
+            action: action
+            }; 
+
+        const response = await axios.post(`${url}/auth/block-unblock-user/`, submittedData, { headers });
+        toast.success(response.data.message || `User ${action}ed successfully`);
+        fetchSubVendor()
+
+        } catch (error) {
+        const errorMessage = error?.response?.data?.error;
+        toast.error(errorMessage);
+        }
+    }
+    };
 
     return (
         <PageContainer title="Vendor List" description="Vendor List">
@@ -415,7 +453,7 @@ const Vendor = () => {
                                                 <TableCell align="center">
                                                     <Box display="flex" justifyContent="center">
                                                         <Avatar
-                                                            src={item.profile?.profile_picture ? `${url}${item.profile.profile_picture}` : ""}
+                                                            src={item.profile?.profile_picture ? item.profile.profile_picture : ""}
                                                             alt=""
                                                             variant="rounded"
                                                             sx={{ width: 50, height: 50, cursor: 'pointer' }}
@@ -472,9 +510,23 @@ const Vendor = () => {
                                                             {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); fetchCategory(); toggleModal("edit") }}>
                                                                 <IconPencil fontSize="small" className="me-2" /> Edit
                                                             </MenuItem> */}
-                                                            <Button variant="contained" onClick={() => fetchCategoryById(item.id)}>
-                                                                View Details
-                                                            </Button>
+                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {
+                                                                fetchCategoryById(item.id);
+                                                                toggleModal("view");
+                                                            }}
+                                                            >
+                                                                <IconEye fontSize="small" className="me-2" /> View
+                                                            </MenuItem>
+                                                            {item.is_active && <>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {BlockorUnlock(item.id,`${item.first_name} ${item.last_name}`,"block"), setSelectedId(null) }}>
+                                                            <IconBan fontSize="small" className="me-2" /> Block
+                                                            </MenuItem>
+                                                            </>}
+                                                            {!item.is_active && <>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {BlockorUnlock(item.id,`${item.first_name} ${item.last_name}`,"unblock"), setSelectedId(null) }}>
+                                                            <IconUserCheck fontSize="small" className="me-2" /> Unblock
+                                                            </MenuItem>
+                                                            </>}
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
                                                                 <IconTrash fontSize="small" className="me-2" /> Delete
                                                             </MenuItem>
@@ -738,25 +790,142 @@ const Vendor = () => {
 
             {/* View Modal */}
 
-            <Dialog
+   <Dialog
                 open={modal.view}
-                onClose={() => toggleModal("view")}
+                onClose={() => toggleModal('view')}
                 maxWidth="md"
                 fullWidth
-                PaperProps={{ sx: { borderRadius: 2 } }}
+                PaperProps={{
+                    sx: {
+                        borderRadius: 4,
+                        backdropFilter: 'blur(8px)',
+                        boxShadow: 24,
+                        overflow: 'hidden',
+                        bgcolor: 'background.default'
+                    }
+                }}
+                BackdropProps={{
+                    sx: {
+                        backdropFilter: 'blur(4px)',
+                        bgcolor: alpha(theme.palette.background.default, 0.8)
+                    }
+                }}
             >
-                <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, display: "flex", alignItems: "center", gap: 2, color: theme.palette.text.primary }}>
+                <DialogTitle
+                    sx={theme => ({
+                        backgroundColor: theme.palette.primary.main,
+                        color: theme.palette.primary.contrastText,
+                        px: 4,
+                        py: 3,
+                        fontSize: theme.typography.h5.fontSize,
+                    })}
+                >
+                    Vendor Information
                 </DialogTitle>
-                <DialogContent sx={{ p: 3, mt: 2 }}>
-                    <Grid container spacing={3}>
-                    </Grid>
+
+                <DialogContent
+                    sx={theme => ({
+                        position: 'relative',
+                        p: 4,
+                        backgroundColor: alpha(theme.palette.background.default, 0.15),
+                        backdropFilter: 'blur(8px)',
+                        WebkitBackdropFilter: 'blur(8px)',
+                    })}
+                >
+                    {!category ? (
+                        <Box
+                            display="flex"
+                            flexDirection="column"
+                            alignItems="center"
+                            justifyContent="center"
+                            sx={{ height: 200 }}
+                        >
+                            <CircularProgress color="primary" />
+                            <Typography mt={2} color="text.secondary">
+                                Loading service details...
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <Grid container spacing={3} mt={1}>
+                            <Grid item xs={12} >
+                                <Box
+                                    sx={theme => ({
+                                        backgroundColor: theme.palette.background.paper,
+                                        borderRadius: 2,
+                                        p: 3,
+                                        boxShadow: theme.shadows[1],
+                                    })}
+                                >
+                                    <Typography fontWeight={600} fontSize={18} mb={2}>
+                                        Vendor Details
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                            <Avatar
+                                                src={
+                                                    category.user?.profile?.profile_picture
+                                                        ? category.user.profile.profile_picture
+                                                        : undefined
+                                                }
+                                                alt="Profile"
+                                                sx={{ width: 72, height: 72 }}
+                                            />
+                                            <Typography variant="caption" color="text.secondary">
+                                                Profile Picture
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Typography variant="caption" color="text.secondary">
+                                                First Name
+                                            </Typography>
+                                            <Typography variant="body1">
+                                                {category.first_name || '—'}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Typography variant="caption" color="text.secondary">
+                                                Last Name
+                                            </Typography>
+                                            <Typography variant="body1">
+                                                {category.last_name || '—'}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Typography variant="caption" color="text.secondary">
+                                                Email
+                                            </Typography>
+                                            <Typography variant="body1">
+                                                {category.email || '—'}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Typography variant="caption" color="text.secondary">
+                                                Phone
+                                            </Typography>
+                                            <Typography variant="body1">
+                                                {category.phone_number || category.user?.phone_number || '—'}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Typography variant="caption" color="text.secondary">
+                                                Username
+                                            </Typography>
+                                            <Typography variant="body1">
+                                                {category.username || '—'}
+                                            </Typography>
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+                            </Grid>
+
+
+
+                        </Grid>
+                    )}
                 </DialogContent>
-                <DialogActions sx={{ p: 3, borderTop: "1px solid #e5e9f2" }}>
-                    <Button
-                        onClick={() => toggleModal("view")}
-                        variant="contained"
-                        sx={{ bgcolor: "#7f54fb", "&:hover": { bgcolor: "#6a3ee8" } }}
-                    >
+
+                <DialogActions sx={{ p: 2, justifyContent: 'flex-end' }}>
+                    <Button variant="contained" onClick={() => toggleModal("view")}>
                         Close
                     </Button>
                 </DialogActions>
@@ -769,7 +938,21 @@ const Vendor = () => {
                 onClose={() => toggleModal("delete")}
                 maxWidth="sm"
                 fullWidth
-                PaperProps={{ sx: { borderRadius: 2 } }}
+                 PaperProps={{
+                    sx: {
+                        borderRadius: 4,
+                        backdropFilter: 'blur(8px)',
+                        boxShadow: 24,
+                        overflow: 'hidden',
+                        bgcolor: 'background.default'
+                    }
+                }}
+                BackdropProps={{
+                    sx: {
+                        backdropFilter: 'blur(4px)',
+                        bgcolor: alpha(theme.palette.background.default, 0.8)
+                    }
+                }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: theme.palette.text.primary }}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -792,15 +975,15 @@ const Vendor = () => {
                     <Button
                         onClick={() => toggleModal("delete")}
                         variant="outlined"
-                        sx={{ borderColor: "#e5e9f2", color: "#364a63", "&:hover": { borderColor: "#6e82a5", bgcolor: "#f5f6fa" } }}
+                        sx={{ borderColor: "#e5e9f2", color: "#ffff",bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
                     >
                         Cancel
                     </Button>
                     <Button
                         onClick={() => handleDelete()}
                         variant="contained"
-                        sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" } }}
-                    >
+                        sx={{ bgcolor: "#c33b3b", "&:hover": { bgcolor: "#ff0707" } }}
+                     >
                         Delete
                     </Button>
                 </DialogActions>
