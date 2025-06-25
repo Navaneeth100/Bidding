@@ -10,8 +10,9 @@ import { useNavigate } from "react-router-dom";
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { hasPermission } from "../../../hasPermission";
 import PermissionDenied from "../PermissionDenied";
+import { IconSend } from "@tabler/icons-react";
 
-const ServiceCategory = () => {
+const Notification = () => {
 
     // AuthTokens
 
@@ -41,9 +42,9 @@ const ServiceCategory = () => {
         setSelectedId(id)
     }
 
-    // Get Service Category
+    // Get Notification
 
-    const [categoryList, setCategoryList] = useState([]);
+    const [Notification, setNotification] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
     const [nextPageUrl, setNextPageUrl] = useState(null);
@@ -53,17 +54,17 @@ const ServiceCategory = () => {
     const [onsearchText, setonsearchText] = useState("")
     const [selectedId, setSelectedId] = useState(null)
 
-    const fetchServiceCategory = () => {
+    const fetchNotification = () => {
         setLoading(true);
         axios
-            .get(`${url}/auth/service-categories/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+            .get(`${url}/auth/notifications/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
             })
             .then((res) => {
-                setCategoryList(res.data.results);
+                setNotification(res.data.results);
                 setNextPageUrl(res.data.next);
                 setPrevPageUrl(res.data.previous);
                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -78,13 +79,13 @@ const ServiceCategory = () => {
                     axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
                         localStorage.setItem("authTokens", JSON.stringify(res.data));
                         axios
-                            .get(`${url}/auth/service-categories/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+                            .get(`${url}/auth/notifications/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                                 headers: {
                                     Authorization: `Bearer ${res.data.access}`,
                                 },
                             })
                             .then((res) => {
-                                setCategoryList(res.data.results);
+                                setNotification(res.data.results);
                                 setNextPageUrl(res.data.next);
                                 setPrevPageUrl(res.data.previous);
                                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -96,7 +97,7 @@ const ServiceCategory = () => {
     };
 
     useEffect(() => {
-        fetchServiceCategory();
+        fetchNotification();
     }, [currentPage, rowsPerPage, onsearchText]);
 
 
@@ -129,53 +130,112 @@ const ServiceCategory = () => {
         }
     };
 
-    // Skill Adds
+    // get  users
 
-    const [skillInput, setskillInput] = useState("");
-    const [skillsList, setskillList] = useState([]);
+    const MenuProps = { PaperProps: { style: { maxHeight: 200, overflowY: 'auto' } } };
 
-    const handleAddSkill = () => {
-        if (skillInput.trim() !== "") {
-            setskillList((prevItems) => [...prevItems, skillInput]);
-            setskillInput("");
+    const [categoryList, setcategoryList] = useState([])
+
+    const fetchCategory = () => {
+        axios
+            .get(`${url}/auth/service-categories/?data=list`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            })
+            .then((res) => {
+
+                setcategoryList(res.data);
+            })
+            .catch((error) => {
+                let refresh = String(authTokens.refresh);
+                axios.post(`${url}/api/token/refresh/`, { refresh: refresh }).then((res) => {
+                    localStorage.setItem("authTokens", JSON.stringify(res.data));
+                    //   setNewAuthTokens(JSON.stringify(res.data));
+
+                    const new_headers = {
+                        Authorization: `Bearer ${res.data.access}`,
+                    };
+                    axios
+                        .get(`${url}/auth/service-categories/?data=list`, { headers: new_headers })
+                        .then((res) => {
+
+                            setcategoryList(res.data);
+                        });
+                });
+            });
+    };
+
+    const [userList, setuserList] = useState([])
+
+    const fetchUsers = () => {
+        axios
+            .get(`${url}/auth/users/filter/?user_type=${formData.user_type || ""}&service_category_id=${formData.category_id || ""}`, {
+                headers: {
+                    Authorization: `Bearer ${tokenStr}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: false,
+            })
+            .then((res) => {
+
+                setuserList(res.data);
+            })
+            .catch((error) => {
+                let refresh = String(authTokens.refresh);
+                axios.post(`${url}/api/token/refresh/`, { refresh: refresh }).then((res) => {
+
+                    localStorage.setItem("authTokens", JSON.stringify(res.data));
+
+                    const new_headers = {
+                        Authorization: `Bearer ${res.data.access}`,
+                    };
+                    axios
+                        .get(`${url}/auth/users/filter/?user_type=${formData.user_type || ""}&service_category_id=${formData.category_id || ""}`, { headers: new_headers })
+                        .then((res) => {
+
+                            setuserList(res.data);
+                        });
+                });
+            });
+    };
+
+    // Add Notification
+
+    const [formData, setFormData] = useState({ user_type: '', category_id: '' });
+    const [userids, setuserids] = useState([])
+
+    useEffect(() => {
+        if (formData.user_type) {
+            fetchUsers();
         }
-    };
+    }, [formData.user_type, formData.category_id]);
 
-    const handleRemoveItem = (indexToRemove) => {
-        setskillList((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
-    };
-
-    const handleKeyDown = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            handleAddSkill();
-        }
-    };
-
-    // Add Service Category
-
-    const [formData, setFormData] = useState([])
 
     const handleSubmit = async (event) => {
 
         event.preventDefault();
 
         let submitData = {
-            name: formData.category,
-            image: selectedFile,
-            skills: skillsList,
-            commission_percentage: formData.commission,
+
+            user_ids: userids.map(name => (userList.find(item => `${item.first_name} ${item.last_name}`.trim().toLowerCase() === name.trim().toLowerCase())?.id)),
+            title: formData.title,
+            message: formData.message,
+            notification_type: formData.type
+
         }
 
         try {
-            const response = await axios.post(`${url}/auth/service-categories/`, submitData, {
+            const response = await axios.post(`${url}/auth/send-push-notifications/`, JSON.stringify(submitData), {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "multipart/form-data",
+                    "Content-Type": "application/json",
                 },
                 withCredentials: false,
             });
-            toast.success("Service Category Added Successfully", {
+            toast.success("Notification Added Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -187,7 +247,7 @@ const ServiceCategory = () => {
 
             toggleModal('add')
             resetForm()
-            fetchServiceCategory()
+            fetchNotification()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -201,30 +261,7 @@ const ServiceCategory = () => {
         }
     };
 
-    //  Edit Service Category
-
-    // Skill Edit
-
-    const [editskillInput, seteditskillInput] = useState("");
-    const [editskillsList, seteditskillList] = useState([]);
-
-    const handleEditSkill = () => {
-        if (editskillInput.trim() !== "") {
-            seteditskillList((prevItems) => [...prevItems, editskillInput]);
-            seteditskillInput("");
-        }
-    };
-
-    const handleRemoveEditItem = (indexToRemove) => {
-        seteditskillList((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
-    };
-
-    const handleEditKeyDown = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            handleEditSkill();
-        }
-    };
+    //  Edit Notification
 
     const [editData, setEditData] = useState([])
 
@@ -234,21 +271,19 @@ const ServiceCategory = () => {
         event.preventDefault();
 
         let submitData = {
-            name: editData.category,
-            image: selectedFile || preview,
-            skills: editskillsList,
-            commission_percentage: editData.commission_percentage,
+            name: editData.menu,
+            image: selectedFile || preview
         };
 
         try {
             const response = await axios.put(`${url}/auth/service-categories/${selectedId}/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "multipart/form-data",
+                    "Content-Type": "application/json",
                 },
                 withCredentials: false,
             });
-            toast.success("Service Category Edited Successfully", {
+            toast.success("Notification Edited Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -259,7 +294,7 @@ const ServiceCategory = () => {
             });
             toggleModal('edit');
             resetForm()
-            fetchServiceCategory()
+            fetchNotification()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -274,7 +309,7 @@ const ServiceCategory = () => {
     };
 
 
-    // Delete Service Category
+    // Delete Notification
 
     const [deleteData, setDeleteData] = useState([])
 
@@ -287,7 +322,7 @@ const ServiceCategory = () => {
                 },
                 withCredentials: false,
             });
-            toast.success("Service Category Deleted Successfully", {
+            toast.success("Notification Deleted Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -297,10 +332,10 @@ const ServiceCategory = () => {
 
             });
             toggleModal('delete')
-            if (categoryList.length === 1 && currentPage > 0) {
+            if (Notification.length === 1 && currentPage > 0) {
                 setCurrentPage(currentPage - 1);
             } else {
-                fetchServiceCategory();
+                fetchNotification();
             }
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
@@ -322,9 +357,9 @@ const ServiceCategory = () => {
     }
 
     return (
-        <PageContainer title="Service Category" description="Service Category"  >
+        <PageContainer title="Notification" description="Notification"  >
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
-                Service Category
+                Notification
             </Typography>
             <DashboardCard>
                 <Grid container>
@@ -358,11 +393,11 @@ const ServiceCategory = () => {
                                 />
                                 <Button
                                     variant="contained"
-                                    startIcon={<IconPlus />}
+                                    startIcon={<IconSend />}
                                     onClick={() => toggleModal("add")}
                                     sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" }, borderRadius: 1, boxShadow: "none" }}
                                 >
-                                    Add
+                                    Send
                                 </Button>
                             </Box>
                         </Box>
@@ -390,20 +425,23 @@ const ServiceCategory = () => {
                                             SN
                                         </TableCell>
                                         <TableCell align="center">
-                                            Icon
+                                            Title
                                         </TableCell>
                                         <TableCell align="center">
-                                            Category
+                                            Send To
                                         </TableCell>
                                         <TableCell align="center">
-                                            Skills
+                                            Message
                                         </TableCell>
                                         <TableCell align="center">
-                                            Commission
+                                            Type
                                         </TableCell>
-                                        <TableCell align="right">
+                                        <TableCell align="center">
+                                            Send At
+                                        </TableCell>
+                                        {/* <TableCell align="right">
                                             Actions
-                                        </TableCell>
+                                        </TableCell> */}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -420,8 +458,8 @@ const ServiceCategory = () => {
                                                 </Box>
                                             </TableCell>
                                         </TableRow>
-                                    ) : categoryList && categoryList.length > 0 ? (
-                                        categoryList.map((item, index) => (
+                                    ) : Notification && Notification.length > 0 ? (
+                                        Notification.map((item, index) => (
                                             <TableRow
                                                 hover
                                                 role="checkbox"
@@ -436,18 +474,34 @@ const ServiceCategory = () => {
                                                     {currentPage * rowsPerPage + index + 1}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    <Avatar src={item.image ? item.image : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
+                                                    {item.title}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {item.name}
+                                                    {item.read_by_users.join(", ")}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {item.skills.join(" , ")}
+                                                    {item.message}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {item.commission_percentage || "0.00"}
+                                                    <Chip
+                                                        label={item.notification_type}
+                                                        style={{
+                                                            backgroundColor: item.notification_type === "ALERT" ? "red" : item.notification_type === "INFO" ? "deepskyblue" : item.notification_type === "UPDATE" ? "green" : item.notification_type === "REMINDER" ? "gold" : item.notification_type === "PROMO" ? "orange" : "black",
+                                                            color: '#fff',
+                                                            fontSize: '0.75rem',
+                                                            height: '24px',
+                                                            padding: '0 8px',
+                                                            borderRadius: '16px',
+                                                            textTransform: 'capitalize',
+                                                            fontWeight: 700
+                                                        }}
+                                                    />
                                                 </TableCell>
-                                                <TableCell align="right">
+                                                <TableCell align="center">
+                                                    {item?.sent_at ? new Date(item.sent_at).toLocaleString() : "N/A"}
+                                                </TableCell>
+
+                                                {/* <TableCell align="right">
                                                     <IconButton
                                                         size="small"
                                                         onClick={(e) => handleMenuClick(e, item.id)}
@@ -476,10 +530,10 @@ const ServiceCategory = () => {
                                                             }}
                                                             PaperProps={{ sx: { px: 1, } }}
                                                         >
-                                                            {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setViewData(item); toggleModal("view") }}>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setViewData(item); toggleModal("view") }}>
                                                                 <IconEye fontSize="small" className="me-2" /> View
-                                                            </MenuItem> */}
-                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); seteditskillList(item.skills); toggleModal("edit") }}>
+                                                            </MenuItem>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); toggleModal("edit") }}>
                                                                 <IconPencil fontSize="small" className="me-2" /> Edit
                                                             </MenuItem>
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
@@ -487,7 +541,7 @@ const ServiceCategory = () => {
                                                             </MenuItem>
                                                         </Menu>
                                                     )}
-                                                </TableCell>
+                                                </TableCell> */}
                                             </TableRow>
                                         ))
                                     ) : (
@@ -622,84 +676,104 @@ const ServiceCategory = () => {
                 }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Setup Service Category
+                    Send Notification
                 </DialogTitle>
                 <form onSubmit={handleSubmit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={12}>
-                                <Box sx={{ p: 2, textAlign: "center" }}>
-                                    <Avatar
-                                        src={preview ? preview : ""}
-                                        alt=""
-                                        sx={{ width: 100, height: 100, margin: "0 auto" }}
-                                    />
-                                </Box>
-                                <Box sx={{ p: 2, textAlign: "center" }}>
-                                    <input
-                                        accept="image/*"
-                                        id="file-upload"
-                                        type="file"
-                                        style={{ display: "none" }}
-                                        onChange={(e) => { handleFileChange(e) }}
-                                    />
-                                    <label htmlFor="file-upload">
-                                        <Button variant="contained" component="span">
-                                            Choose File
-                                        </Button>
-                                    </label>
-                                </Box>
-                            </Grid>
-                            <Grid item xs={12} md={12}>
+                            <Grid item xs={6} md={6}>
                                 <TextField
                                     required
                                     fullWidth
-                                    name="category"
-                                    label="Category Name"
+                                    name="title"
+                                    label="Title"
                                     type="text"
-                                    placeholder="Enter Category Name"
-                                    onChange={(e) => { setFormData({ ...formData, category: e.target.value }) }}
-                                    sx={{ mt: 5 }}
+                                    placeholder="Enter Title"
+                                    onChange={(e) => { setFormData({ ...formData, title: e.target.value }) }}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12}>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
-                                    <TextField
-                                        label="Enter Skills"
-                                        variant="outlined"
-                                        fullWidth
-                                        value={skillInput}
-                                        onChange={(e) => setskillInput(e.target.value)}
-                                        onKeyDown={handleKeyDown}
-                                    />
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={handleAddSkill}
+
+                            <Grid item xs={6}>
+                                <FormControl fullWidth>
+                                    <InputLabel>User Type</InputLabel>
+                                    <Select
+                                        onChange={(e) => setFormData((prev) => ({ ...prev, user_type: e.target.value }))}
+                                        label="User Type"
+                                        MenuProps={MenuProps}
                                     >
-                                        Add
-                                    </Button>
-                                </Box>
-                                <Box>
-                                    {skillsList.map((item, index) => (
-                                        <span key={index}>
-                                            <Chip className='me-2' label={item} variant="outlined" onDelete={() => handleRemoveItem(index)} />
-                                        </span>
-                                    ))}
-                                </Box>
+                                        <MenuItem value="Vendor">Vendor</MenuItem>
+                                        <MenuItem value="Customer">Customer</MenuItem>
+                                        <MenuItem value="Employee">Employee</MenuItem>
+                                    </Select>
+                                </FormControl>
                             </Grid>
+
+                            <Grid item xs={6}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Category</InputLabel>
+                                    <Select
+                                        value={formData.category_id || ""}
+                                        onChange={(e) => setFormData((prev) => ({ ...prev, category_id: e.target.value }))}
+                                        onOpen={fetchCategory}
+                                        label="Category"
+                                        MenuProps={MenuProps}>
+                                        {categoryList.map((item) => (
+                                            <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+
+                            <Grid item xs={6}>
+                                <FormControl fullWidth>
+                                    <InputLabel>User</InputLabel>
+                                    <Select
+                                        multiple
+                                        value={userids}
+                                        renderValue={(selected) => selected.join(', ')}
+                                        onChange={(e) => { setuserids(e.target.value) }}
+                                        label="User"
+                                        MenuProps={MenuProps}
+                                    >
+                                        {userList.length > 0 ? (
+                                            userList.map((item) => (
+                                                <MenuItem key={item.id} value={`${item.first_name} ${item.last_name}`}>{item.first_name} {item.last_name}</MenuItem>
+                                            ))
+                                        ) : (
+                                            <MenuItem disabled>No Users found</MenuItem>
+                                        )}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+
                             <Grid item xs={12} md={12}>
                                 <TextField
                                     required
                                     fullWidth
-                                    name="commission"
-                                    label="Commission"
-                                    type="number"
-                                    placeholder="Enter Commission"
-                                    onChange={(e) => { setFormData({ ...formData, commission: e.target.value }) }}
-                                    inputProps={{ step: '0.01' }}
-                                    sx={{ mt: 2 }}
+                                    label="Message"
+                                    name="message"
+                                    multiline
+                                    rows={4}
+                                    placeholder="Enter Message"
+                                    onChange={(e) => { setFormData({ ...formData, message: e.target.value }) }}
                                 />
+                            </Grid>
+
+                            <Grid item xs={6}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Type</InputLabel>
+                                    <Select
+                                        onChange={(e) => setFormData((prev) => ({ ...prev, type: e.target.value }))}
+                                        label="Type"
+                                        MenuProps={MenuProps}
+                                    >
+                                        <MenuItem value="ALERT">ALERT</MenuItem>
+                                        <MenuItem value="INFO">INFO</MenuItem>
+                                        <MenuItem value="REMINDER">REMINDER</MenuItem>
+                                        <MenuItem value="PROMO">PROMO</MenuItem>
+                                        <MenuItem value="UPDATE">UPDATE</MenuItem>
+                                    </Select>
+                                </FormControl>
                             </Grid>
                         </Grid>
                     </DialogContent>
@@ -745,7 +819,7 @@ const ServiceCategory = () => {
                 }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Edit Service Category
+                    Edit Notification
                 </DialogTitle>
                 <form onSubmit={handleEdit}>
                     <DialogContent sx={{ p: 3 }}>
@@ -777,53 +851,13 @@ const ServiceCategory = () => {
                                 <TextField
                                     required
                                     fullWidth
-                                    name="category"
-                                    label="Category Name"
+                                    name="menu"
+                                    label="Menu Name"
                                     type="text"
-                                    placeholder="Enter Category Name"
+                                    placeholder="Enter Menu Name"
                                     defaultValue={editData.name}
-                                    onChange={(e) => { setEditData({ ...editData, category: e.target.value }) }}
+                                    onChange={(e) => { setEditData({ ...editData, menu: e.target.value }) }}
                                     sx={{ mt: 5 }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={12}>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
-                                    <TextField
-                                        label="Enter Skills"
-                                        variant="outlined"
-                                        fullWidth
-                                        value={editskillInput}
-                                        onChange={(e) => seteditskillInput(e.target.value)}
-                                        onKeyDown={handleEditKeyDown}
-                                    />
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={handleEditSkill}
-                                    >
-                                        Add
-                                    </Button>
-                                </Box>
-                                <Box>
-                                    {editskillsList.map((item, index) => (
-                                        <span key={index}>
-                                            <Chip className='me-2' label={item} variant="outlined" onDelete={() => handleRemoveEditItem(index)} />
-                                        </span>
-                                    ))}
-                                </Box>
-                            </Grid>
-                            <Grid item xs={12} md={12}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    name="commission"
-                                    label="Commission"
-                                    type="number"
-                                    placeholder="Enter Commission"
-                                    defaultValue={editData.commission_percentage}
-                                    onChange={(e) => { setEditData({ ...editData, commission_percentage: e.target.value }) }}
-                                    inputProps={{ step: '0.01' }}
-                                    sx={{ mt: 2 }}
                                 />
                             </Grid>
                         </Grid>
@@ -910,14 +944,14 @@ const ServiceCategory = () => {
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: theme.palette.text.primary, }}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Delete Service Category
+                        Delete Notification
                     </Typography>
                 </DialogTitle>
                 <DialogContent sx={{ p: 3 }}>
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, p: 2, borderRadius: 1, mt: 2, color: theme.palette.text.primary, }}>
                         <IconAlertCircleFilled size={50} style={{ color: "red" }} />
                         <Typography variant="h6" sx={{ textAlign: "center", color: theme.palette.text.primary }}>
-                            Are you sure you want to Delete the service category:{" "}
+                            Are you sure you want to Delete the Notification:{" "}
                             <Box component="span" sx={{ color: "red", fontWeight: 600 }}>
                                 {deleteData.name}&nbsp;
                             </Box>
@@ -929,7 +963,7 @@ const ServiceCategory = () => {
                     <Button
                         onClick={() => toggleModal("delete")}
                         variant="outlined"
-                        sx={{ borderColor: "#e5e9f2", color: "#ffff",bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
+                        sx={{ borderColor: "#e5e9f2", color: "#ffff", bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
                     >
                         Cancel
                     </Button>
@@ -946,4 +980,4 @@ const ServiceCategory = () => {
     );
 };
 
-export default ServiceCategory;
+export default Notification;

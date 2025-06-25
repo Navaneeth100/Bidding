@@ -4,10 +4,13 @@ import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled } from '@tabler/icons-react';
 import axios from "axios";
-import { url } from "../../../mainurl";
+import { url } from '../../../mainurl';
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { hasPermission } from "../../../hasPermission";
+import PermissionDenied from "../PermissionDenied";
+
 const ServiceSubCategory = () => {
 
     // AuthTokens
@@ -304,6 +307,11 @@ const ServiceSubCategory = () => {
         }
     };
 
+    const hasAccess = hasPermission("view_servicecategory");
+
+    if (!hasAccess) {
+        return <PermissionDenied />;
+    }
 
     return (
         <PageContainer title="Service Sub Category" description="Service Sub Category">
@@ -417,7 +425,7 @@ const ServiceSubCategory = () => {
                                                     {currentPage * rowsPerPage + index + 1}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    <Avatar src={item.image ? `${url}${item.image}` : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
+                                                    <Avatar src={item.image ? item.image : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     {item.parent.name}
@@ -723,7 +731,7 @@ const ServiceSubCategory = () => {
                             <Grid item xs={12} md={12}>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
                                     <Avatar
-                                        src={preview ? preview : `${url}${editData.image}`}
+                                        src={preview ? preview : editData.image}
                                         alt=""
                                         sx={{ width: 100, height: 100, margin: "0 auto" }}
                                     />
@@ -881,14 +889,14 @@ const ServiceSubCategory = () => {
                     <Button
                         onClick={() => toggleModal("delete")}
                         variant="outlined"
-                        sx={{ borderColor: "#e5e9f2", color: "#364a63", "&:hover": { borderColor: "#6e82a5", bgcolor: "#f5f6fa" } }}
+                        sx={{ borderColor: "#e5e9f2", color: "#ffff",bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
                     >
                         Cancel
                     </Button>
                     <Button
                         onClick={() => handleDelete()}
                         variant="contained"
-                        sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" } }}
+                        sx={{ bgcolor: "#c33b3b", "&:hover": { bgcolor: "#ff0707" } }}
                     >
                         Delete
                     </Button>

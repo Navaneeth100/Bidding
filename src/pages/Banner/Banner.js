@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, alpha, } from "@mui/material"
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, FormControlLabel, FormGroup, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, alpha, } from "@mui/material"
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled } from '@tabler/icons-react';
@@ -11,7 +11,7 @@ import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-mater
 import { hasPermission } from "../../../hasPermission";
 import PermissionDenied from "../PermissionDenied";
 
-const ServiceCategory = () => {
+const Banner = () => {
 
     // AuthTokens
 
@@ -41,9 +41,9 @@ const ServiceCategory = () => {
         setSelectedId(id)
     }
 
-    // Get Service Category
+    // Get Banner
 
-    const [categoryList, setCategoryList] = useState([]);
+    const [Banner, setBanner] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
     const [nextPageUrl, setNextPageUrl] = useState(null);
@@ -53,17 +53,17 @@ const ServiceCategory = () => {
     const [onsearchText, setonsearchText] = useState("")
     const [selectedId, setSelectedId] = useState(null)
 
-    const fetchServiceCategory = () => {
+    const fetchBanner = () => {
         setLoading(true);
         axios
-            .get(`${url}/auth/service-categories/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+            .get(`${url}/service/banners/?data=web&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
             })
             .then((res) => {
-                setCategoryList(res.data.results);
+                setBanner(res.data.results);
                 setNextPageUrl(res.data.next);
                 setPrevPageUrl(res.data.previous);
                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -78,13 +78,13 @@ const ServiceCategory = () => {
                     axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
                         localStorage.setItem("authTokens", JSON.stringify(res.data));
                         axios
-                            .get(`${url}/auth/service-categories/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+                            .get(`${url}/service/banners/?data=web&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                                 headers: {
                                     Authorization: `Bearer ${res.data.access}`,
                                 },
                             })
                             .then((res) => {
-                                setCategoryList(res.data.results);
+                                setBanner(res.data.results);
                                 setNextPageUrl(res.data.next);
                                 setPrevPageUrl(res.data.previous);
                                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -96,7 +96,7 @@ const ServiceCategory = () => {
     };
 
     useEffect(() => {
-        fetchServiceCategory();
+        fetchBanner();
     }, [currentPage, rowsPerPage, onsearchText]);
 
 
@@ -129,30 +129,8 @@ const ServiceCategory = () => {
         }
     };
 
-    // Skill Adds
 
-    const [skillInput, setskillInput] = useState("");
-    const [skillsList, setskillList] = useState([]);
-
-    const handleAddSkill = () => {
-        if (skillInput.trim() !== "") {
-            setskillList((prevItems) => [...prevItems, skillInput]);
-            setskillInput("");
-        }
-    };
-
-    const handleRemoveItem = (indexToRemove) => {
-        setskillList((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
-    };
-
-    const handleKeyDown = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            handleAddSkill();
-        }
-    };
-
-    // Add Service Category
+    // Add Banner
 
     const [formData, setFormData] = useState([])
 
@@ -161,21 +139,22 @@ const ServiceCategory = () => {
         event.preventDefault();
 
         let submitData = {
-            name: formData.category,
+            title: formData.title,
             image: selectedFile,
-            skills: skillsList,
-            commission_percentage: formData.commission,
+            link: formData.link,
+            position: formData.position,
+            is_active: true
         }
 
         try {
-            const response = await axios.post(`${url}/auth/service-categories/`, submitData, {
+            const response = await axios.post(`${url}/service/banners/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "multipart/form-data",
                 },
                 withCredentials: false,
             });
-            toast.success("Service Category Added Successfully", {
+            toast.success("Banner Added Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -187,7 +166,7 @@ const ServiceCategory = () => {
 
             toggleModal('add')
             resetForm()
-            fetchServiceCategory()
+            fetchBanner()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -201,30 +180,7 @@ const ServiceCategory = () => {
         }
     };
 
-    //  Edit Service Category
-
-    // Skill Edit
-
-    const [editskillInput, seteditskillInput] = useState("");
-    const [editskillsList, seteditskillList] = useState([]);
-
-    const handleEditSkill = () => {
-        if (editskillInput.trim() !== "") {
-            seteditskillList((prevItems) => [...prevItems, editskillInput]);
-            seteditskillInput("");
-        }
-    };
-
-    const handleRemoveEditItem = (indexToRemove) => {
-        seteditskillList((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
-    };
-
-    const handleEditKeyDown = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            handleEditSkill();
-        }
-    };
+    //  Edit Banner
 
     const [editData, setEditData] = useState([])
 
@@ -234,21 +190,22 @@ const ServiceCategory = () => {
         event.preventDefault();
 
         let submitData = {
-            name: editData.category,
+            title: editData.title,
             image: selectedFile || preview,
-            skills: editskillsList,
-            commission_percentage: editData.commission_percentage,
+            link: editData.link,
+            position: editData.position,
+            is_active: editData.is_active
         };
 
         try {
-            const response = await axios.put(`${url}/auth/service-categories/${selectedId}/`, submitData, {
+            const response = await axios.put(`${url}/service/banners/${selectedId}/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "multipart/form-data",
                 },
                 withCredentials: false,
             });
-            toast.success("Service Category Edited Successfully", {
+            toast.success("Banner Edited Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -259,7 +216,7 @@ const ServiceCategory = () => {
             });
             toggleModal('edit');
             resetForm()
-            fetchServiceCategory()
+            fetchBanner()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -274,20 +231,20 @@ const ServiceCategory = () => {
     };
 
 
-    // Delete Service Category
+    // Delete Banner
 
     const [deleteData, setDeleteData] = useState([])
 
     const handleDelete = async () => {
         try {
-            const response = await axios.delete(`${url}/auth/service-categories/${selectedId}/`, {
+            const response = await axios.delete(`${url}/service/banners/${selectedId}/`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
                 withCredentials: false,
             });
-            toast.success("Service Category Deleted Successfully", {
+            toast.success("Banner Deleted Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -297,10 +254,10 @@ const ServiceCategory = () => {
 
             });
             toggleModal('delete')
-            if (categoryList.length === 1 && currentPage > 0) {
+            if (Banner.length === 1 && currentPage > 0) {
                 setCurrentPage(currentPage - 1);
             } else {
-                fetchServiceCategory();
+                fetchBanner();
             }
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
@@ -322,9 +279,9 @@ const ServiceCategory = () => {
     }
 
     return (
-        <PageContainer title="Service Category" description="Service Category"  >
+        <PageContainer title="Banner" description="Banner"  >
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
-                Service Category
+                Banner
             </Typography>
             <DashboardCard>
                 <Grid container>
@@ -393,13 +350,19 @@ const ServiceCategory = () => {
                                             Icon
                                         </TableCell>
                                         <TableCell align="center">
-                                            Category
+                                            Title
                                         </TableCell>
                                         <TableCell align="center">
-                                            Skills
+                                            Link
                                         </TableCell>
                                         <TableCell align="center">
-                                            Commission
+                                            Updated At
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Created At
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            Status
                                         </TableCell>
                                         <TableCell align="right">
                                             Actions
@@ -420,8 +383,8 @@ const ServiceCategory = () => {
                                                 </Box>
                                             </TableCell>
                                         </TableRow>
-                                    ) : categoryList && categoryList.length > 0 ? (
-                                        categoryList.map((item, index) => (
+                                    ) : Banner && Banner.length > 0 ? (
+                                        Banner.map((item, index) => (
                                             <TableRow
                                                 hover
                                                 role="checkbox"
@@ -439,14 +402,33 @@ const ServiceCategory = () => {
                                                     <Avatar src={item.image ? item.image : null} alt="icon" sx={{ width: 50, height: 50, m: "auto", borderRadius: 2, boxShadow: 1, bgcolor: "#fafafa" }} />
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {item.name}
+                                                    {item.title}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {item.skills.join(" , ")}
+                                                    {item.link || "N/A"}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {item.commission_percentage || "0.00"}
+                                                    {new Date(item.updated_at).toLocaleString()}
                                                 </TableCell>
+                                                <TableCell align="center">
+                                                    {new Date(item.created_at).toLocaleString()}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Chip
+                                                        label={item.is_active ? 'Active' : 'Inactive'}
+                                                        style={{
+                                                            backgroundColor: item.is_active ? 'green' : 'red',
+                                                            color: '#fff',
+                                                            fontSize: '0.75rem',
+                                                            height: '24px',
+                                                            padding: '0 8px',
+                                                            borderRadius: '16px',
+                                                            textTransform: 'capitalize',
+                                                            fontWeight: 700
+                                                        }}
+                                                    />
+                                                </TableCell>
+
                                                 <TableCell align="right">
                                                     <IconButton
                                                         size="small"
@@ -479,7 +461,7 @@ const ServiceCategory = () => {
                                                             {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setViewData(item); toggleModal("view") }}>
                                                                 <IconEye fontSize="small" className="me-2" /> View
                                                             </MenuItem> */}
-                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); seteditskillList(item.skills); toggleModal("edit") }}>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); toggleModal("edit") }}>
                                                                 <IconPencil fontSize="small" className="me-2" /> Edit
                                                             </MenuItem>
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
@@ -611,7 +593,9 @@ const ServiceCategory = () => {
                         borderRadius: 4,
                         p: 0,
                         backdropFilter: 'blur(8px)',
-                        boxShadow: 24
+                        boxShadow: 24,
+                        width: { xs: "95%", sm: "80%", md: "50%" },
+                        maxHeight: "90vh"
                     }
                 }}
                 BackdropProps={{
@@ -622,7 +606,7 @@ const ServiceCategory = () => {
                 }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Setup Service Category
+                    Add Banner
                 </DialogTitle>
                 <form onSubmit={handleSubmit}>
                     <DialogContent sx={{ p: 3 }}>
@@ -650,54 +634,38 @@ const ServiceCategory = () => {
                                     </label>
                                 </Box>
                             </Grid>
-                            <Grid item xs={12} md={12}>
+                            <Grid item xs={6} md={6}>
                                 <TextField
                                     required
                                     fullWidth
-                                    name="category"
-                                    label="Category Name"
+                                    name="title"
+                                    label="Title"
                                     type="text"
-                                    placeholder="Enter Category Name"
-                                    onChange={(e) => { setFormData({ ...formData, category: e.target.value }) }}
-                                    sx={{ mt: 5 }}
+                                    placeholder="Enter Title"
+                                    onChange={(e) => { setFormData({ ...formData, title: e.target.value }) }}
+                                    sx={{ mt: 2 }}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12}>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
-                                    <TextField
-                                        label="Enter Skills"
-                                        variant="outlined"
-                                        fullWidth
-                                        value={skillInput}
-                                        onChange={(e) => setskillInput(e.target.value)}
-                                        onKeyDown={handleKeyDown}
-                                    />
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={handleAddSkill}
-                                    >
-                                        Add
-                                    </Button>
-                                </Box>
-                                <Box>
-                                    {skillsList.map((item, index) => (
-                                        <span key={index}>
-                                            <Chip className='me-2' label={item} variant="outlined" onDelete={() => handleRemoveItem(index)} />
-                                        </span>
-                                    ))}
-                                </Box>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    fullWidth
+                                    name="link"
+                                    label="Link"
+                                    type="text"
+                                    placeholder="Enter Link"
+                                    onChange={(e) => { setFormData({ ...formData, link: e.target.value }) }}
+                                    sx={{ mt: 2 }}
+                                />
                             </Grid>
-                            <Grid item xs={12} md={12}>
+                            <Grid item xs={6} md={6}>
                                 <TextField
                                     required
                                     fullWidth
-                                    name="commission"
-                                    label="Commission"
-                                    type="number"
-                                    placeholder="Enter Commission"
-                                    onChange={(e) => { setFormData({ ...formData, commission: e.target.value }) }}
-                                    inputProps={{ step: '0.01' }}
+                                    name="position"
+                                    label="Position"
+                                    type="text"
+                                    placeholder="Enter Position"
+                                    onChange={(e) => { setFormData({ ...formData, position: e.target.value }) }}
                                     sx={{ mt: 2 }}
                                 />
                             </Grid>
@@ -745,7 +713,7 @@ const ServiceCategory = () => {
                 }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Edit Service Category
+                    Edit Banner
                 </DialogTitle>
                 <form onSubmit={handleEdit}>
                     <DialogContent sx={{ p: 3 }}>
@@ -777,54 +745,67 @@ const ServiceCategory = () => {
                                 <TextField
                                     required
                                     fullWidth
-                                    name="category"
-                                    label="Category Name"
+                                    name="menu"
+                                    label="Title"
                                     type="text"
-                                    placeholder="Enter Category Name"
-                                    defaultValue={editData.name}
-                                    onChange={(e) => { setEditData({ ...editData, category: e.target.value }) }}
-                                    sx={{ mt: 5 }}
+                                    placeholder="Enter Title"
+                                    defaultValue={editData.title}
+                                    onChange={(e) => { setEditData({ ...editData, menu: e.target.value }) }}
+                                    sx={{ mt: 2 }}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12}>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
-                                    <TextField
-                                        label="Enter Skills"
-                                        variant="outlined"
-                                        fullWidth
-                                        value={editskillInput}
-                                        onChange={(e) => seteditskillInput(e.target.value)}
-                                        onKeyDown={handleEditKeyDown}
-                                    />
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={handleEditSkill}
-                                    >
-                                        Add
-                                    </Button>
-                                </Box>
-                                <Box>
-                                    {editskillsList.map((item, index) => (
-                                        <span key={index}>
-                                            <Chip className='me-2' label={item} variant="outlined" onDelete={() => handleRemoveEditItem(index)} />
-                                        </span>
-                                    ))}
-                                </Box>
-                            </Grid>
-                            <Grid item xs={12} md={12}>
+                            <Grid item xs={6} md={6}>
                                 <TextField
                                     required
                                     fullWidth
-                                    name="commission"
-                                    label="Commission"
-                                    type="number"
-                                    placeholder="Enter Commission"
-                                    defaultValue={editData.commission_percentage}
-                                    onChange={(e) => { setEditData({ ...editData, commission_percentage: e.target.value }) }}
-                                    inputProps={{ step: '0.01' }}
+                                    name="title"
+                                    label="Title"
+                                    type="text"
+                                    placeholder="Enter Title"
+                                    defaultValue={editData.title}
+                                    onChange={(e) => { setEditData({ ...editData, title: e.target.value }) }}
                                     sx={{ mt: 2 }}
                                 />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    fullWidth
+                                    name="link"
+                                    label="Link"
+                                    type="text"
+                                    placeholder="Enter Link"
+                                    defaultValue={editData.link}
+                                    onChange={(e) => { setEditData({ ...editData, link: e.target.value }) }}
+                                    sx={{ mt: 2 }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="position"
+                                    label="Position"
+                                    type="text"
+                                    placeholder="Enter Position"
+                                    defaultValue={editData.position}
+                                    onChange={(e) => { setEditData({ ...editData, position: e.target.value }) }}
+                                    sx={{ mt: 2 }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <FormGroup>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                defaultChecked={editData.is_active}
+                                                onChange={(e) =>setEditData({ ...editData, is_active: e.target.checked })}
+                                                name="is_active"
+                                            />
+                                        }
+                                        label="Is Active"
+                                        sx={{ mt: 2 }}
+                                    />
+                                </FormGroup>
                             </Grid>
                         </Grid>
                     </DialogContent>
@@ -910,16 +891,16 @@ const ServiceCategory = () => {
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: theme.palette.text.primary, }}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Delete Service Category
+                        Delete Banner
                     </Typography>
                 </DialogTitle>
                 <DialogContent sx={{ p: 3 }}>
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, p: 2, borderRadius: 1, mt: 2, color: theme.palette.text.primary, }}>
                         <IconAlertCircleFilled size={50} style={{ color: "red" }} />
                         <Typography variant="h6" sx={{ textAlign: "center", color: theme.palette.text.primary }}>
-                            Are you sure you want to Delete the service category:{" "}
+                            Are you sure you want to Delete the Banner:{" "}
                             <Box component="span" sx={{ color: "red", fontWeight: 600 }}>
-                                {deleteData.name}&nbsp;
+                                {deleteData.title}&nbsp;
                             </Box>
                             ?
                         </Typography>
@@ -929,7 +910,7 @@ const ServiceCategory = () => {
                     <Button
                         onClick={() => toggleModal("delete")}
                         variant="outlined"
-                        sx={{ borderColor: "#e5e9f2", color: "#ffff",bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
+                        sx={{ borderColor: "#e5e9f2", color: "#ffff", bgcolor: "#3f7b69", "&:hover": { borderColor: "#6e82a5", bgcolor: "#369e7f" } }}
                     >
                         Cancel
                     </Button>
@@ -946,4 +927,4 @@ const ServiceCategory = () => {
     );
 };
 
-export default ServiceCategory;
+export default Banner;

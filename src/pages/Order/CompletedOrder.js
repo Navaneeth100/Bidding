@@ -1,16 +1,17 @@
 import { useEffect, useState, useCallback } from "react"
+
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, Modal, alpha } from "@mui/material"
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled, IconCheck, IconX, IconBan, IconUserCheck } from '@tabler/icons-react';
 import axios from "axios";
-import { url } from '../../../mainurl';
+import { url } from "../../../mainurl";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-material";
 import Swal from "sweetalert2";
 
-const Customer = () => {
+const CompletedOrders = () => {
 
     // AuthTokens
 
@@ -19,7 +20,6 @@ const Customer = () => {
     let tokenStr = String(authTokens.access);
     const inputHeight = '56px'; // or your desired height
     const theme = useTheme();
-
     // Navigate
 
     const navigate = useNavigate();
@@ -44,7 +44,7 @@ const Customer = () => {
 
     // Get  Service Sub Category
 
-    const [Customer, setCustomer] = useState([]);
+    const [Vendor, setVendor] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
     const [nextPageUrl, setNextPageUrl] = useState(null);
@@ -54,17 +54,17 @@ const Customer = () => {
     const [onsearchText, setonsearchText] = useState("")
     const [selectedId, setSelectedId] = useState(null)
 
-    const fetchSubCustomer = () => {
+    const fetchSubVendor = () => {
         setLoading(true);
         axios
-            .get(`${url}/auth/vendor-customer/?user_type=Customer&data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+            .get(`${url}/proposal/orders/?status_search=completed&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
             })
             .then((res) => {
-                setCustomer(res.data.results);
+                setVendor(res.data.results);
                 setNextPageUrl(res.data.next);
                 setPrevPageUrl(res.data.previous);
                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -79,13 +79,13 @@ const Customer = () => {
                     axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
                         localStorage.setItem("authTokens", JSON.stringify(res.data));
                         axios
-                            .get(`${url}/auth/vendor-customer/?user_type=Customer&data=sub&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+                            .get(`${url}/proposal/orders/?status_search=completed&search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                                 headers: {
                                     Authorization: `Bearer ${res.data.access}`,
                                 },
                             })
                             .then((res) => {
-                                setCustomer(res.data.results);
+                                setVendor(res.data.results);
                                 setNextPageUrl(res.data.next);
                                 setPrevPageUrl(res.data.previous);
                                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -97,7 +97,7 @@ const Customer = () => {
     };
 
     useEffect(() => {
-        fetchSubCustomer();
+        fetchSubVendor();
     }, [currentPage, rowsPerPage, onsearchText]);
 
 
@@ -122,12 +122,13 @@ const Customer = () => {
     const [open, setOpen] = useState(false);
     const [category, setCategory] = useState(null);
     const [categoryId, setCategoryId] = useState('');
-
+const images = category?.proposal?.related_post?.images || [];
+const [selectedImg, setSelectedImg] = useState(0);
     const fetchCategoryById = useCallback(
         async (id) => {
             try {
                 const { data } = await axios.get(
-                    `${url}/auth/vendor-customer/${id}/`,
+                    `${url}/proposal/orders/${id}/`,
                     {
                         headers: {
                             Authorization: `Bearer ${tokenStr}`,
@@ -143,6 +144,27 @@ const Customer = () => {
         },
         [url, tokenStr] // re-create only if url or tokenStr change
     );
+
+    const handleAxiosError = (error) => {
+        if (axios.isAxiosError(error)) {
+            if (error.response) {
+                const { status, data } = error.response;
+                const msg =
+                    data?.detail ||
+                    data?.message ||
+                    'An unexpected error occurred';
+                toast.error(`Error ${status}: ${msg}`);
+            } else if (error.request) {
+                toast.error(
+                    'No response from server. Please check your connection.'
+                );
+            } else {
+                toast.error('Request setup error: ' + error.message);
+            }
+        } else {
+            toast.error('An unexpected non-Axios error occurred.');
+        }
+    };
 
     const handleFetch = () => {
         if (categoryId) {
@@ -183,7 +205,7 @@ const Customer = () => {
 
             toggleModal('add')
             resetForm()
-            fetchSubCustomer()
+            fetchSubVendor()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -230,7 +252,7 @@ const Customer = () => {
             });
             toggleModal('edit');
             resetForm()
-            fetchSubCustomer()
+            fetchSubVendor()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -268,10 +290,10 @@ const Customer = () => {
 
             });
             toggleModal('delete')
-            if (Customer.length === 1 && currentPage > 0) {
+            if (Vendor.length === 1 && currentPage > 0) {
                 setCurrentPage(currentPage - 1);
             } else {
-                fetchSubCustomer();
+                fetchSubVendor();
             }
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
@@ -308,13 +330,13 @@ const Customer = () => {
 
                 const submittedData = {
                     user_id: id,
-                    data: "Customer",
+                    data: "Vendor",
                     action: action
                 };
 
                 const response = await axios.post(`${url}/auth/block-unblock-user/`, submittedData, { headers });
                 toast.success(response.data.message || `User ${action}ed successfully`);
-                fetchSubCustomer()
+                fetchSubVendor()
 
             } catch (error) {
                 const errorMessage = error?.response?.data?.error;
@@ -324,9 +346,9 @@ const Customer = () => {
     };
 
     return (
-        <PageContainer title="Customer List" description="Customer List">
+        <PageContainer title="Vendor List" description="Vendor List">
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
-                Customer List            </Typography>
+                Completed List            </Typography>
             <DashboardCard>
                 <Grid container spacing={3}>
                     <Grid item sm={12} lg={12}>
@@ -357,14 +379,14 @@ const Customer = () => {
                                         sx: { borderRadius: 1 },
                                     }}
                                 />
-                                <Button
+                                {/* <Button
                                     variant="contained"
                                     startIcon={<IconPlus />}
                                     onClick={() => toggleModal("add")}
                                     sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" }, borderRadius: 1, boxShadow: "none" }}
                                 >
                                     Add
-                                </Button>
+                                </Button> */}
                             </Box>
                         </Box>
 
@@ -387,17 +409,15 @@ const Customer = () => {
                             >
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell align="center">SN</TableCell>
-                                        <TableCell align="center">Profile Picture</TableCell>
-                                        <TableCell align="center">Name</TableCell>
-                                        {/* New Header Fields Added */}
-                                        <TableCell align="center">Username</TableCell>
-                                        <TableCell align="center">Email</TableCell>
-                                        {/* <TableCell align="center">First Name</TableCell>
-                                        <TableCell align="center">Last Name</TableCell> */}
-                                        <TableCell align="center">Mobile</TableCell>
-                                        <TableCell align="center">Phone Verified</TableCell>
-                                        <TableCell align="center"> Status</TableCell>
+
+                                        <TableCell align="center">Order ID</TableCell>
+                                        <TableCell align="center">Vendor Name</TableCell>
+                                        <TableCell align="center">Customer Name</TableCell>
+                                        <TableCell align="center">Service</TableCell>
+                                        <TableCell align="center">Start Date</TableCell>
+                                        <TableCell align="center">Deadline</TableCell>
+                                        <TableCell align="center">Amount</TableCell>
+                                        <TableCell align="center">Pricing</TableCell>
                                         <TableCell align="right">Actions</TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -415,51 +435,32 @@ const Customer = () => {
                                                 </Box>
                                             </TableCell>
                                         </TableRow>
-                                    ) : Customer && Customer.length > 0 ? (
-                                        Customer.map((item, index) => (
+                                    ) : Vendor && Vendor.length > 0 ? (
+                                        Vendor.map((order, index) => (
                                             <TableRow
                                                 hover
                                                 role="checkbox"
                                                 tabIndex={-1}
-                                                key={item.id}
+                                                key={order.id}
                                                 sx={{
                                                     "& td, & th": { borderBottom: mode == 0 ? "1px solid #e0e0e0" : "1px solid rgb(85, 83, 83)" },
                                                     backgroundColor: mode === 0 ? (index % 2 ? "#f9f9f9" : "white") : (index % 2 ? "#2a2a2a" : "#1e1e1e"),
                                                 }}
                                             >
                                                 <TableCell align="center">{currentPage * rowsPerPage + index + 1}</TableCell>
-                                                <TableCell align="center">
-                                                    <Box display="flex" justifyContent="center">
-                                                        <Avatar
-                                                            src={item.profile?.profile_picture ? item.profile.profile_picture : ""}
-                                                            alt=""
-                                                            variant="rounded"
-                                                            sx={{ width: 50, height: 50, cursor: 'pointer' }}
-                                                        />
-                                                    </Box>
-                                                </TableCell>
-                                                <TableCell align="center">{item.first_name} {item.last_name}</TableCell>
-                                                <TableCell align="center">{item.username}</TableCell>
-                                                <TableCell align="center">{item.email}</TableCell>
-                                                <TableCell align="center">{item.phone_number}</TableCell>
-                                                <TableCell align="center">
-                                                    {item.is_phone_verified ? (
-                                                        <IconCheck size={18} style={{ color: 'green' }} />
-                                                    ) : (
-                                                        <IconX size={18} style={{ color: 'red' }} />
-                                                    )}
-                                                </TableCell>
-                                                <TableCell align="center">
-                                                    {item.is_active ? (
-                                                        <span style={{ color: 'green', fontWeight: 'bold' }}>Active</span>
-                                                    ) : (
-                                                        <span style={{ color: 'red', fontWeight: 'bold' }}>Inactive</span>
-                                                    )}
-                                                </TableCell>
+                                                {/* <TableCell align="center">{order.id}</TableCell> */}
+                                                <TableCell align="center">{order.vendor.first_name} {order.vendor?.last_name} </TableCell>
+                                                <TableCell align="center">{order.customer?.first_name} {order.customer?.last_name}</TableCell>
+                                                <TableCell align="center">{order.related_post.title}</TableCell>
+                                                <TableCell align="center">{new Date(order.start_date).toLocaleDateString()}</TableCell>
+                                                <TableCell align="center">{new Date(order.deadline).toLocaleDateString()}</TableCell>
+                                                <TableCell align="center">{order.final_amount} {order.related_post.currency}</TableCell>
+                                                <TableCell align="center">{order.pricing_method}</TableCell>
+
                                                 <TableCell align="right">
                                                     <IconButton
                                                         size="small"
-                                                        onClick={(e) => { handleMenuClick(e, item.id) }}
+                                                        onClick={(e) => { handleMenuClick(e, order.id) }}
                                                         sx={{
                                                             color: 'text.secondary',
                                                             '&:hover': {
@@ -470,7 +471,7 @@ const Customer = () => {
                                                     >
                                                         <IconDots fontSize="small" />
                                                     </IconButton>
-                                                    {selectedId === item.id && (
+                                                    {selectedId === order.id && (
                                                         <Menu
                                                             anchorEl={anchorEl}
                                                             open={Boolean(anchorEl)}
@@ -489,25 +490,25 @@ const Customer = () => {
                                                                 <IconPencil fontSize="small" className="me-2" /> Edit
                                                             </MenuItem> */}
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {
-                                                                fetchCategoryById(item.id);
+                                                                fetchCategoryById(order.id);
                                                                 toggleModal("view");
                                                             }}
                                                             >
                                                                 <IconEye fontSize="small" className="me-2" /> View
                                                             </MenuItem>
-                                                            {item.is_active && <>
-                                                                <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { BlockorUnlock(item.id, `${item.first_name} ${item.last_name}`, "block"), setSelectedId(null) }}>
+                                                            {order.is_active && <>
+                                                                <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { BlockorUnlock(order.id, `${order.first_name} ${order.last_name}`, "block"), setSelectedId(null) }}>
                                                                     <IconBan fontSize="small" className="me-2" /> Block
                                                                 </MenuItem>
                                                             </>}
-                                                            {!item.is_active && <>
-                                                                <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { BlockorUnlock(item.id, `${item.first_name} ${item.last_name}`, "unblock"), setSelectedId(null) }}>
+                                                            {/* {!order.is_active && <>
+                                                                <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { BlockorUnlock(order.id, `${order.first_name} ${order.last_name}`, "unblock"), setSelectedId(null) }}>
                                                                     <IconUserCheck fontSize="small" className="me-2" /> Unblock
                                                                 </MenuItem>
-                                                            </>}
-                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
+                                                            </>} */}
+                                                            {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(order); toggleModal("delete") }}>
                                                                 <IconTrash fontSize="small" className="me-2" /> Delete
-                                                            </MenuItem>
+                                                            </MenuItem> */}
                                                         </Menu>
                                                     )}
                                                 </TableCell>
@@ -626,7 +627,6 @@ const Customer = () => {
 
 
 
-
             {/* Edit Modal */}
 
             <Dialog
@@ -702,9 +702,9 @@ const Customer = () => {
             <Dialog
                 open={modal.view}
                 onClose={() => toggleModal('view')}
-                maxWidth="md"
+                maxWidth="lg"
                 fullWidth
-                PaperProps={{
+                 PaperProps={{
                     sx: {
                         borderRadius: 4,
                         backdropFilter: 'blur(8px)',
@@ -720,119 +720,295 @@ const Customer = () => {
                     }
                 }}
             >
-                <DialogTitle
-                    sx={theme => ({
-                        backgroundColor: theme.palette.primary.main,
-                        color: theme.palette.primary.contrastText,
-                        px: 4,
-                        py: 3,
-                        fontSize: theme.typography.h5.fontSize,
-                    })}
-                >
-                    Customer Information
+                <DialogTitle sx={{
+                    backgroundColor: 'primary.main',
+                    color: 'primary.contrastText',
+                    px: 4,
+                    py: 3,
+                    fontSize: '1.5rem',
+                }}>
+                    Order Information
                 </DialogTitle>
+                <DialogContent sx={{
+                    p: { xs: 2, sm: 4, md: 6 },
+                    backgroundColor: 'background.default',
 
-                <DialogContent
-                    sx={theme => ({
-                        position: 'relative',
-                        p: 4,
-                        backgroundColor: alpha(theme.palette.background.default, 0.15),
-                        backdropFilter: 'blur(8px)',
-                        WebkitBackdropFilter: 'blur(8px)',
-                    })}
-                >
-                    {!category ? (
-                        <Box
-                            display="flex"
-                            flexDirection="column"
-                            alignItems="center"
-                            justifyContent="center"
-                            sx={{ height: 200 }}
-                        >
-                            <CircularProgress color="primary" />
-                            <Typography mt={2} color="text.secondary">
-                                Loading service details...
-                            </Typography>
-                        </Box>
-                    ) : (
-                        <Grid container spacing={3} mt={1}>
-                            <Grid item xs={12} >
-                                <Box
-                                    sx={theme => ({
-                                        backgroundColor: theme.palette.background.paper,
-                                        borderRadius: 2,
-                                        p: 3,
-                                        boxShadow: theme.shadows[1],
-                                    })}
-                                >
-                                    <Typography fontWeight={600} fontSize={18} mb={2}>
-                                        Customer Details
-                                    </Typography>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                            <Avatar
-                                                src={
-                                                    category.user?.profile?.profile_picture
-                                                        ? category.user.profile.profile_picture
-                                                        : undefined
-                                                }
-                                                alt="Profile"
-                                                sx={{ width: 72, height: 72 }}
-                                            />
-                                            <Typography variant="caption" color="text.secondary">
-                                                Profile Picture
+                }}>
+                    <Grid container spacing={4} sx={{
+
+                        marginTop: "20px",
+                    }}>
+                        {/* SERVICE INFO */}
+                        <Grid item xs={12} md={6}>
+                            <Box sx={{
+                                p: 3, borderRadius: 3, bgcolor: 'background.paper', boxShadow: 2,
+                                height: '100%', display: 'flex', flexDirection: 'column', gap: 2
+                            }}>
+                                <Typography variant="h6">Service Information</Typography>
+                                <Typography variant="subtitle2" color="text.secondary" mt={1}>Title</Typography>
+                                <Typography>{category?.proposal?.related_post?.title || '—'}</Typography>
+
+                                <Typography variant="subtitle2" color="text.secondary" mt={1}>Category</Typography>
+                                <Typography>{category?.proposal?.related_post?.service_category?.name || '—'}</Typography>
+
+                                <Typography variant="subtitle2" color="text.secondary" mt={1}>Subcategories</Typography>
+                                <Box display="flex" flexWrap="wrap" gap={1}>
+                                    {category?.proposal?.related_post?.service_subcategories?.length > 0
+                                        ? category.proposal.related_post.service_subcategories.map(sc =>
+                                            <Chip key={sc.id} label={sc.name} size="small" variant="outlined" />
+                                        )
+                                        : '—'}
+                                </Box>
+
+                                <Typography variant="subtitle2" color="text.secondary" mt={1}>Description</Typography>
+                                <Typography>{category?.proposal?.related_post?.description || '—'}</Typography>
+
+                                <Typography variant="subtitle2" color="text.secondary" mt={1}>Additional Note</Typography>
+                                <Typography>{category?.proposal?.related_post?.additional_note || '—'}</Typography>
+
+                                <Typography variant="subtitle2" color="text.secondary" mt={1}>Cost</Typography>
+                                <Typography>
+                                    {category?.proposal?.related_post?.base_price
+                                        ? `USD ${category.proposal.related_post.base_price}`
+                                        : '—'}
+                                </Typography>
+
+                                {/* Thumbnails Gallery */}
+
+
+<Box sx={{ mt: 2 }}>
+  <Typography variant="subtitle2" color="text.secondary">
+    Images
+  </Typography>
+  <Grid
+    container
+    spacing={2}
+    mt={1}
+    alignItems="flex-start"
+  >
+    {/* Thumbnails - responsive width */}
+    <Grid item xs={12} md={4}>
+      <Grid container spacing={1}>
+        {images.length > 0 ? images.map((img, i) => (
+          <Grid item xs={6} key={img.id}>
+            <Box
+              component="img"
+              src={img.image}
+              alt="Service Thumbnail"
+              sx={{
+                width: '100%',
+                height: 80,
+                objectFit: 'cover',
+                borderRadius: 2,
+                border: selectedImg === i ? '2px solid #1976d2' : '1px solid #eee',
+                cursor: 'pointer',
+                transition: 'border 0.2s',
+                boxSizing: 'border-box',
+                display: 'block',
+              }}
+              onClick={() => setSelectedImg(i)}
+            />
+          </Grid>
+        )) : (
+          <Grid item xs={12}>
+            <Box sx={{
+              width: '100%',
+              height: 80,
+              bgcolor: 'grey.100',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 2,
+              color: 'text.disabled',
+              fontWeight: 500
+            }}>No Image</Box>
+          </Grid>
+        )}
+      </Grid>
+    </Grid>
+
+    {/* Main Image Preview */}
+    <Grid item xs={12} md={8}>
+      <Paper elevation={2} sx={{
+        // width: '100%',
+        maxWidth: 400,
+        minHeight: 200,
+        aspectRatio: '1 / 1', // For a square preview
+        display: 'flex',
+        alignItems: 'center',
+         padding:"10px",
+        justifyContent: 'center',
+        borderRadius: 2,
+        mx: 'auto',
+      }}>
+        {images[selectedImg]
+          ? (
+            <img
+              src={images[selectedImg].image}
+              alt="Selected"
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+               
+                borderRadius: 8,
+                display: 'block',
+                objectFit: 'contain',
+              }}
+            />
+          ) : (
+            <Typography color="text.disabled">No Image </Typography>
+          )
+        }
+      </Paper>
+    </Grid>
+  </Grid>
+</Box>
+
+                            </Box>
+                        </Grid>
+
+                        {/* Right Panel: Vendor, Customer, Location, Pricing */}
+                        <Grid item xs={12} md={6} container direction="column" spacing={3}>
+                            {/* VENDOR */}
+                            <Grid item>
+                                <Box sx={{
+                                    p: 3, borderRadius: 3, bgcolor: 'background.paper', boxShadow: 2,
+                                    mb: 2, display: 'flex', flexDirection: 'column', gap: 2
+                                }}>
+                                    <Typography variant="h6">Vendor Information</Typography>
+                                    <Box display="flex" alignItems="center" gap={2}>
+                                        <Avatar src={category?.vendor?.profile_picture} alt="Vendor" sx={{ width: 56, height: 56 }}>
+                                            {category?.vendor?.first_name?.[0] || 'V'}
+                                        </Avatar>
+                                        <Box>
+                                            <Typography fontWeight="bold">
+                                                {category?.vendor?.first_name} {category?.vendor?.last_name}
                                             </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant="caption" color="text.secondary">
-                                                First Name
-                                            </Typography>
-                                            <Typography variant="body1">
-                                                {category.first_name || '—'}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant="caption" color="text.secondary">
-                                                Last Name
-                                            </Typography>
-                                            <Typography variant="body1">
-                                                {category.last_name || '—'}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant="caption" color="text.secondary">
-                                                Email
-                                            </Typography>
-                                            <Typography variant="body1">
-                                                {category.email || '—'}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant="caption" color="text.secondary">
-                                                Phone
-                                            </Typography>
-                                            <Typography variant="body1">
-                                                {category.phone_number || category.user?.phone_number || '—'}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <Typography variant="caption" color="text.secondary">
-                                                Username
-                                            </Typography>
-                                            <Typography variant="body1">
-                                                {category.username || '—'}
-                                            </Typography>
-                                        </Grid>
-                                    </Grid>
+                                        </Box>
+                                    </Box>
                                 </Box>
                             </Grid>
+                            <Grid item>
+                                <Box sx={{
+                                    p: 3, borderRadius: 3, bgcolor: 'background.paper', boxShadow: 2,
+                                    mb: 2, display: 'flex', flexDirection: 'column', gap: 2
+                                }}>
+                                    <Typography variant="h6">Customer Information</Typography>
+                                    <Box display="flex" alignItems="center" gap={2}>
+                                        <Avatar src={category?.customer?.profile_picture} alt="Customer" sx={{ width: 56, height: 56 }}>
+                                            {category?.customer?.first_name?.[0] || 'C'}
+                                        </Avatar>
+                                        <Box>
+                                            <Typography fontWeight="bold">
+                                                {category?.customer?.first_name} {category?.customer?.last_name}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </Box>
+                            </Grid>
+                            {/* CUSTOMER */}
 
+                            <Grid item>
+                                <Box sx={{
+                                    p: 3, borderRadius: 3, bgcolor: 'background.paper', boxShadow: 2,
+                                    mb: 2, display: 'flex', flexDirection: 'column', gap: 1
+                                }}>
+                                    <Typography variant="h6">Location</Typography>
+                                    <Typography variant="body2" color="text.secondary">Location Name:</Typography>
+                                    <Typography>{category?.proposal?.related_post?.location_name || '—'}</Typography>
+                                    <Typography variant="body2" color="text.secondary">Coordinates:</Typography>
+                                    <Typography>{category?.proposal?.related_post?.location || '—'}</Typography>
+                                </Box>
+                            </Grid>
+                            {/* PRICING & STATUS */}
+                           <Grid item >
+  <Box
+    sx={{
+      p: 4,
+      borderRadius: 4,
+      bgcolor: 'background.paper',
+      boxShadow: 3,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 2,
+  
+      mx: 'auto',
+    }}
+  >
+    <Typography
+      variant="h6"
+      sx={{
+        fontWeight: 700,
+        letterSpacing: 1,
+        mb: 1,
+        color: 'primary.main',
+      }}
+    >
+      Pricing & Status
+    </Typography>
 
+    <Divider sx={{ mb: 1 }} />
 
+    <Stack spacing={1.5}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+          Pricing Method
+        </Typography>
+        <Typography variant="body2" color="text.primary" sx={{ fontWeight: 600 }}>
+          {category?.negotiation?.pricing_method || '—'}
+        </Typography>
+      </Stack>
+
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+          Final Amount
+        </Typography>
+        <Typography variant="body2" color="text.primary" sx={{ fontWeight: 600 }}>
+          {category?.negotiation?.final_amount ? `USD ${category.negotiation.final_amount}` : '—'}
+        </Typography>
+      </Stack>
+
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+          Negotiation Status
+        </Typography>
+        <Typography variant="body2" color="text.primary" sx={{ fontWeight: 600 }}>
+          {category?.negotiation?.status || '—'}
+        </Typography>
+      </Stack>
+
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+          Start
+        </Typography>
+        <Typography variant="body2" color="text.primary" sx={{ fontWeight: 600 }}>
+          {category?.negotiation?.start_date?.slice(0, 10) || '—'}
+        </Typography>
+      </Stack>
+
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+          End
+        </Typography>
+        <Typography variant="body2" color="text.primary" sx={{ fontWeight: 600 }}>
+          {category?.negotiation?.end_date?.slice(0, 10) || '—'}
+        </Typography>
+      </Stack>
+
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+          Order Status
+        </Typography>
+        <Typography variant="body2" color="text.primary" sx={{ fontWeight: 600 }}>
+          {category?.status || '—'}
+        </Typography>
+      </Stack>
+    </Stack>
+  </Box>
+</Grid>
                         </Grid>
-                    )}
+                    </Grid>
                 </DialogContent>
-
                 <DialogActions sx={{ p: 2, justifyContent: 'flex-end' }}>
                     <Button variant="contained" onClick={() => toggleModal("view")}>
                         Close
@@ -847,7 +1023,7 @@ const Customer = () => {
                 onClose={() => toggleModal("delete")}
                 maxWidth="sm"
                 fullWidth
-                 PaperProps={{
+                PaperProps={{
                     sx: {
                         borderRadius: 4,
                         backdropFilter: 'blur(8px)',
@@ -935,4 +1111,4 @@ const Customer = () => {
     );
 };
 
-export default Customer;
+export default CompletedOrders;
