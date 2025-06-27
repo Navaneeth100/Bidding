@@ -47,6 +47,7 @@ const PaymentSuccess = Loadable(lazy(() => import('../pages/PaymentSuccess')));
 const PaymentCancelled = Loadable(lazy(() => import('../pages/PaymentCancelled')));
 const Tickets = Loadable(lazy(() => import('../pages/Services/Tickets')));
 const TicketChat = Loadable(lazy(() => import('../pages/Services/TicketChat')));
+const Subscriptions = Loadable(lazy(() => import('../pages/Services/Subscription')));
 
 const user = JSON.parse(localStorage.getItem('authTokens'));
 const Router = [
@@ -87,6 +88,7 @@ const Router = [
       { path: '/chatuser', exact: true, element: <Chatuser /> },
       { path: '/tickets', exact: true, element: <Tickets /> },
       { path: '/ticket_chat/:id', exact: true, element: <TicketChat /> },
+      { path: '/subscriptions', exact: true, element: <Subscriptions /> },
       // { path: '/ui/typography', exact: true, element: <TypographyPage /> },
       // { path: '/ui/shadow', exact: true, element: <Shadow /> },
       { path: '*', element: <Navigate to="/auth/404" replace /> },
