@@ -1,7 +1,8 @@
 // src/firebase.js
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
-
+import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth"; 
 const firebaseConfig = {
   apiKey: "AIzaSyDSJ8r73OsF3b0aF27JzoHjHVfKHkYDMTs",
   authDomain: "http://bidding-app-de135.firebaseapp.com",
@@ -14,5 +15,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
-
+export const db = getFirestore(app);
+export const auth = getAuth(app);
 export { messaging, getToken, onMessage };
