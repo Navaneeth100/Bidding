@@ -1,994 +1,390 @@
-"use client"
-
-import { useCallback, useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
-  AppBar,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CircularProgress,
-  IconButton,
-  InputAdornment,
-  List,
-  ListItemButton,
-  ListItemAvatar,
-  ListItemText,
-  Paper,
-  TextField,
-  Toolbar,
-  Tooltip,
-  Typography,
-  useMediaQuery,
-  Menu,
-  MenuItem,
-  Badge,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Drawer,
-  Container,
-  Grid,
-  useTheme,
-} from "@mui/material"
-import { alpha, styled, ThemeProvider } from "@mui/material/styles"
-import SendRoundedIcon from "@mui/icons-material/SendRounded"
-import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon"
-import AttachFileIcon from "@mui/icons-material/AttachFile"
-import DoneAllOutlinedIcon from "@mui/icons-material/DoneAllOutlined"
-import DoneOutlinedIcon from "@mui/icons-material/DoneOutlined"
-import MoreVertIcon from "@mui/icons-material/MoreVert"
-import DeleteIcon from "@mui/icons-material/Delete"
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline"
-import SearchIcon from "@mui/icons-material/Search"
-import PersonIcon from "@mui/icons-material/Person"
-import MenuIcon from "@mui/icons-material/Menu"
-import SettingsIcon from "@mui/icons-material/Settings"
-import NotificationsIcon from "@mui/icons-material/Notifications"
-import OnlineIcon from "@mui/icons-material/FiberManualRecord"
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
-import EmojiPicker from "emoji-picker-react"
+  collection,
+  query,
+  where,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db, auth } from "../../firebase";
+import { url } from "../../../mainurl";
 
-// -----------------------------------------------------------------------------
-// Theme helpers
-// -----------------------------------------------------------------------------
-const mode = JSON.parse(localStorage.getItem("mode") || '"light"')
+const ChatApp = () => {
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [chats, setChats] = useState([]);
+  const [selectedChatId, setSelectedChatId] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [employeeList, setEmployeeList] = useState([]);
+  const [creatingChatUserId, setCreatingChatUserId] = useState("");
+  const [newMessage, setNewMessage] = useState("");
+  const [user_id, setUser_id] = useState("");
+  const [firebaseUID, setFirebaseUID] = useState(null);
+  const [tokenUserId, setTokenUserId] = useState(null);
 
-// -----------------------------------------------------------------------------
-// Styled components
-// -----------------------------------------------------------------------------
-const MessageCard = styled(Card, {
-  shouldForwardProp: (prop) => prop !== "mine",
-})(({ theme, mine }) => ({
-  maxWidth: "75%",
-  alignSelf: mine ? "flex-end" : "flex-start",
-  background: mine
-    ? `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.15)} 0%, ${alpha(
-        theme.palette.primary.main,
-        0.25,
-      )} 100%)`
-    : theme.palette.background.paper,
-  boxShadow: mine ? theme.shadows[3] : theme.shadows[1],
-  marginBottom: theme.spacing(1),
-  position: "relative",
-  transition: "all 0.2s ease-in-out",
-  "&:hover": {
-    transform: "translateY(-1px)",
-    boxShadow: theme.shadows[4],
-  },
-}))
+console.log("firebaseUID",firebaseUID);
 
-const StyledBadge = styled(Badge)(({ theme }) => ({
-  "& .MuiBadge-badge": {
-    backgroundColor: "#44b700",
-    color: "#44b700",
-    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-    "&::after": {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-      borderRadius: "50%",
-      animation: "ripple 1.2s infinite ease-in-out",
-      border: "1px solid currentColor",
-      content: '""',
-    },
-  },
-  "@keyframes ripple": {
-    "0%": { transform: "scale(.8)", opacity: 1 },
-    "100%": { transform: "scale(2.4)", opacity: 0 },
-  },
-}))
+  const getCurrentUserIdFromToken = () => {
+    const authTokens = localStorage.getItem("authTokens");
+    if (!authTokens) return null;
 
-const AdminHeader = styled(AppBar)(({ theme }) => ({
-  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-  boxShadow: theme.shadows[4],
-}))
+    try {
+      const accessToken = JSON.parse(authTokens).access;
+      if (!accessToken) return null;
 
-// -----------------------------------------------------------------------------
-// Component
-// -----------------------------------------------------------------------------
-export default function ChatPanelWithUserList({ adminFcmToken }) {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"))
+      const payloadBase64 = accessToken.split(".")[1];
+      if (!payloadBase64) return null;
 
-  // ---------------------------------------------------------------------------
-  // Chat state ----------------------------------------------------------------
-  // ---------------------------------------------------------------------------
-  const [rooms, setRooms] = useState([])
-  const [chatId, setChatId] = useState(null)
-  const [msgs, setMsgs] = useState([])
-  const [text, setText] = useState("")
-  const [loadingRooms, setLoadingRooms] = useState(true)
-  const [hasMore, setHasMore] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filteredRooms, setFilteredRooms] = useState([])
+      const payloadJson = atob(payloadBase64);
+      const payload = JSON.parse(payloadJson);
 
-  // ---------------------------------------------------------------------------
-  // UI state ------------------------------------------------------------------
-  // ---------------------------------------------------------------------------
-  const [sidebarOpen, setSidebarOpen] = useState(!isMobile)
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
-  const [messageMenuAnchor, setMessageMenuAnchor] = useState(null)
-  const [selectedMessage, setSelectedMessage] = useState(null)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [showScrollToBottom, setShowScrollToBottom] = useState(false)
-  const [isUserScrolling, setIsUserScrolling] = useState(false)
-  const [lastMsgCount, setLastMsgCount] = useState(0)
-
-  // ---------------------------------------------------------------------------
-  // Refs ----------------------------------------------------------------------
-  // ---------------------------------------------------------------------------
-  const bottomRef = useRef(null)
-  const feedRef = useRef(null)
-  const emojiPickerRef = useRef(null)
-  const scrollTimer = useRef(null)
-  const textareaRef = useRef(null) // NEW: for auto‑focus
-
-  // ---------------------------------------------------------------------------
-  // Mock data for demo --------------------------------------------------------
-  // ---------------------------------------------------------------------------
-  useEffect(() => {
-    setTimeout(() => {
-      const mockRooms = [
-        {
-          id: "john-doe",
-          name: "John Doe",
-          lastMessage: {
-            text: "Hello, I need help with my order",
-            senderId: "john-doe",
-            timestamp: new Date(),
-          },
-          unreadCount: 2,
-          isOnline: true,
-        },
-        {
-          id: "jane-smith",
-          name: "Jane Smith",
-          lastMessage: {
-            text: "Thank you for your assistance",
-            senderId: "admin",
-            timestamp: new Date(),
-          },
-          unreadCount: 0,
-          isOnline: false,
-        },
-         {
-          id: "jane-smith",
-          name: "Jane Smith",
-          lastMessage: {
-            text: "Thank you for your assistance",
-            senderId: "admin",
-            timestamp: new Date(),
-          },
-          unreadCount: 0,
-          isOnline: false,
-        },
-         {
-          id: "jane-smith",
-          name: "Jane Smith",
-          lastMessage: {
-            text: "Thank you for your assistance",
-            senderId: "admin",
-            timestamp: new Date(),
-          },
-          unreadCount: 0,
-          isOnline: false,
-        },
-         {
-          id: "jane-smith",
-          name: "Jane Smith",
-          lastMessage: {
-            text: "Thank you for your assistance",
-            senderId: "admin",
-            timestamp: new Date(),
-          },
-          unreadCount: 0,
-          isOnline: false,
-        },
-         {
-          id: "jane-smith",
-          name: "Jane Smith",
-          lastMessage: {
-            text: "Thank you for your assistance",
-            senderId: "admin",
-            timestamp: new Date(),
-          },
-          unreadCount: 0,
-          isOnline: false,
-        },
-         {
-          id: "jane-smith",
-          name: "Jane Smith",
-          lastMessage: {
-            text: "Thank you for your assistance",
-            senderId: "admin",
-            timestamp: new Date(),
-          },
-          unreadCount: 0,
-          isOnline: false,
-        },
-         {
-          id: "jane-smith",
-          name: "Jane Smith",
-          lastMessage: {
-            text: "Thank you for your assistance",
-            senderId: "admin",
-            timestamp: new Date(),
-          },
-          unreadCount: 0,
-          isOnline: false,
-        }, {
-          id: "jane-smith",
-          name: "Jane Smith",
-          lastMessage: {
-            text: "Thank you for your assistance",
-            senderId: "admin",
-            timestamp: new Date(),
-          },
-          unreadCount: 0,
-          isOnline: false,
-        },
-         {
-          id: "jane-smith",
-          name: "Jane Smith",
-          lastMessage: {
-            text: "Thank you for your assistance",
-            senderId: "admin",
-            timestamp: new Date(),
-          },
-          unreadCount: 0,
-          isOnline: false,
-        },
-        {
-          id: "mike-johnson",
-          name: "Mike Johnson",
-          lastMessage: {
-            text: "Is there any update on my request?",
-            senderId: "mike-johnson",
-            timestamp: new Date(),
-          },
-          unreadCount: 1,
-          isOnline: true,
-        },
-        {
-          id: "sarah-wilson",
-          name: "Sarah Wilson",
-          lastMessage: {
-            text: "Can you help me with billing?",
-            senderId: "sarah-wilson",
-            timestamp: new Date(),
-          },
-          unreadCount: 3,
-          isOnline: true,
-        },
-        {
-          id: "david-brown",
-          name: "David Brown",
-          lastMessage: {
-            text: "Product delivery status?",
-            senderId: "david-brown",
-            timestamp: new Date(),
-          },
-          unreadCount: 0,
-          isOnline: false,
-        },
-      ]
-      setRooms(mockRooms)
-      setFilteredRooms(mockRooms)
-      setLoadingRooms(false)
-    }, 1000)
-  }, [])
-
-  useEffect(() => {
-    if (chatId) {
-      const mockMessages = [
-        {
-          id: "1",
-          text: "Hello! How can I help you today?",
-          senderId: "admin",
-          receiverId: chatId,
-          timestamp: new Date(Date.now() - 3600000),
-          status: "read",
-        },
-        {
-          id: "2",
-          text: "I have a question about my recent order",
-          senderId: chatId,
-          receiverId: "admin",
-          timestamp: new Date(Date.now() - 3000000),
-          status: "read",
-        },
-        {
-          id: "3",
-          text: "What would you like to know? I'm here to assist you with any concerns.",
-          senderId: "admin",
-          receiverId: chatId,
-          timestamp: new Date(Date.now() - 2400000),
-          status: "delivered",
-        },
-        {
-          id: "4",
-          text: "My order was supposed to arrive yesterday but I haven't received it yet.",
-          senderId: chatId,
-          receiverId: "admin",
-          timestamp: new Date(Date.now() - 1800000),
-          status: "read",
-        },
-        {
-          id: "5",
-          text: "Let me check your order status for you. Can you please provide your order number?",
-          senderId: "admin",
-          receiverId: chatId,
-          timestamp: new Date(Date.now() - 1200000),
-          status: "read",
-        },
-      ]
-      setMsgs(mockMessages)
-      setLastMsgCount(mockMessages.length)
+      return payload.user_id || null;
+    } catch (err) {
+      console.error("Failed to decode token", err);
+      return null;
     }
-  }, [chatId])
+  };
 
-  // ---------------------------------------------------------------------------
-  // Filtering & search --------------------------------------------------------
-  // ---------------------------------------------------------------------------
   useEffect(() => {
-    if (searchQuery.trim()) {
-      setFilteredRooms(
-        rooms.filter(
-          (room) =>
-            room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            room.lastMessage?.text.toLowerCase().includes(searchQuery.toLowerCase()),
-        ),
-      )
+    const userId = getCurrentUserIdFromToken();
+    if (userId) {
+      setUser_id(userId);
+    }
+  }, []);
+
+  // This effect will run *after* user_id changes
+  useEffect(() => {
+    console.log("auth_id:", user_id);
+  }, [user_id]);
+
+
+
+ 
+
+
+
+  // Fetch employee list from your API
+  const fetchUserList = async () => {
+    try {
+      const tokenStr = JSON.parse(localStorage.getItem("authTokens"))?.access;
+      if (!tokenStr) return;
+
+      const res = await axios.get(`${url}/auth/employees/?data=list`, {
+        headers: { Authorization: `Bearer ${tokenStr}` },
+      });
+      setEmployeeList(res.data);
+      console.log("Employee list:", res.data);
+    } catch (error) {
+      console.error("Failed to fetch employee list", error);
+    }
+  };
+
+  // Fetch chats where currentUserId is in users array
+  const fetchUserChats = async (user_id) => {
+    if (!user_id) return;
+
+    try {
+      const chatsQuery = query(
+        collection(db, "chats"),
+        where("users", "array-contains", user_id)
+      );
+      const snapshot = await getDocs(chatsQuery);
+      const userChats = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setChats(userChats);
+      if (userChats.length > 0 && !selectedChatId) {
+        setSelectedChatId(userChats[0].id);
+      }
+    } catch (error) {
+      console.error("Error fetching chats:", error);
+    }
+  };
+
+  // Listen for messages in selected chat
+  useEffect(() => {
+    if (!selectedChatId) {
+      setMessages([]);
+   
+      return;
+    }
+
+    const messagesQuery = query(
+      collection(db, "chats", selectedChatId, "messages"),
+      orderBy("timestamp", "asc")
+    );
+
+    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+      const msgs = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        timestamp: doc.data().timestamp?.toDate() || new Date(),
+      }));
+      setMessages(msgs);
+    });
+
+    return () => unsubscribe();
+  }, [selectedChatId]);
+
+useEffect(() => {
+  console.log("Setting up Firebase auth listener...");
+
+  const unsubscribe = auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      console.log("Firebase user logged in:", user);
+      console.log("Firebase user UID:", user.uid);
+      setFirebaseUID(user.uid);
+
+      // Optionally load your authTokens if needed
+      let tokens = localStorage.getItem("authTokens");
+      if (!tokens) {
+        console.log("No authTokens found. You may need to re-authenticate your API.");
+        // Here you could request a new token or redirect to login
+        return;
+      }
+
+      tokens = JSON.parse(tokens);
+      const apiUserId = getCurrentUserIdFromToken();
+      if (apiUserId) {
+        setUser_id(apiUserId);
+      } else {
+        console.log("No API user_id decoded. You may need to re-login.");
+      }
     } else {
-      setFilteredRooms(rooms)
+      console.log("No Firebase user logged in");
+      setFirebaseUID(null);
+      setUser_id(null);
     }
-  }, [searchQuery, rooms])
+  });
 
-  // ---------------------------------------------------------------------------
-  // Scroll helpers ------------------------------------------------------------
-  // ---------------------------------------------------------------------------
-  const scrollToBottom = useCallback(
-    (smooth = true) => {
-      bottomRef.current?.scrollIntoView({
-        behavior: smooth ? "smooth" : "auto",
-        block: "end",
-      })
-    },
-    [bottomRef],
-  )
+  return () => {
+    console.log("Cleaning up Firebase auth listener");
+    unsubscribe();
+  };
+}, []);
 
-  const handleScroll = useCallback(() => {
-    const el = feedRef.current
-    if (!el) return
 
-    const { scrollTop, scrollHeight, clientHeight } = el
-    const atBottom = scrollHeight - scrollTop - clientHeight < 48
-    const atTop = scrollTop < 120
+  // Create new chat with selected Firebase UID user
+  const createNewChat = async () => {
+    if (!creatingChatUserId || !currentUserId) return;
 
-    setShowScrollToBottom(!atBottom && msgs.length > 0)
+    // Double check if chat exists just in case (should be excluded in dropdown)
+    const existingChat = chats.find(
+      (chat) =>
+        chat.users.length === 2 &&
+        chat.users.includes(currentUserId) &&
+        chat.users.includes(creatingChatUserId)
+    );
 
-    // Debounce "user is scrolling"
-    setIsUserScrolling(true)
-    if (scrollTimer.current) clearTimeout(scrollTimer.current)
-    scrollTimer.current = setTimeout(() => setIsUserScrolling(false), 150)
-
-    // Load more when near top
-    if (atTop && !loadingMore && hasMore) {
-      handleLoadMore()
+    if (existingChat) {
+      setSelectedChatId(existingChat.id);
+      setCreatingChatUserId("");
+      return;
     }
-  }, [msgs.length, loadingMore, hasMore])
 
-  useEffect(() => {
-    if (msgs.length <= lastMsgCount) return
-    const last = msgs[msgs.length - 1]
-    const isMine = last?.senderId === "admin"
+    try {
+      const chatDoc = await addDoc(collection(db, "chats"), {
+        users: [currentUserId, creatingChatUserId],
+        createdAt: serverTimestamp(),
+      });
 
-    if (isMine || !isUserScrolling) {
-      requestAnimationFrame(() => scrollToBottom(true))
+      fetchUserChats(currentUserId);
+      setSelectedChatId(chatDoc.id);
+      setCreatingChatUserId("");
+    } catch (error) {
+      console.error("Error creating chat:", error);
     }
-    setLastMsgCount(msgs.length)
-  }, [msgs, lastMsgCount, isUserScrolling, scrollToBottom])
+  };
 
-  // Jump to bottom when chat changes
-  useEffect(() => {
-    if (msgs.length) scrollToBottom(false)
-  }, [chatId])
+  // Send message in selected chat
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !selectedChatId || !currentUserId) return;
 
-  useEffect(() => () => scrollTimer.current && clearTimeout(scrollTimer.current), [])
-
-  // ---------------------------------------------------------------------------
-  // Load more messages --------------------------------------------------------
-  // ---------------------------------------------------------------------------
-  const handleLoadMore = useCallback(() => {
-    if (loadingMore || !hasMore) return
-    setLoadingMore(true)
-
-    setTimeout(() => {
-      const olderMessages = [
-        {
-          id: `old-${Date.now()}`,
-          text: "This is an older message loaded from history",
-          senderId: chatId,
-          receiverId: "admin",
-          timestamp: new Date(Date.now() - 7200000),
-          status: "read",
-        },
-        {
-          id: `old-${Date.now() + 1}`,
-          text: "Another older message for context",
-          senderId: "admin",
-          receiverId: chatId,
-          timestamp: new Date(Date.now() - 7800000),
-          status: "read",
-        },
-      ]
-      setMsgs((prev) => [...olderMessages, ...prev])
-      setLoadingMore(false)
-      if (msgs.length > 15) setHasMore(false)
-    }, 1000)
-  }, [loadingMore, hasMore, chatId, msgs.length])
-
-  // ---------------------------------------------------------------------------
-  // Emoji handling ------------------------------------------------------------
-  // ---------------------------------------------------------------------------
-  const handleEmojiClick = (emojiData) => {
-    setText((prev) => prev + emojiData.emoji)
-    setShowEmojiPicker(false)
-  }
-
-  // ---------------------------------------------------------------------------
-  // Message context menu / delete --------------------------------------------
-  // ---------------------------------------------------------------------------
-  const handleMessageMenu = (event, message) => {
-    if (message.senderId === "admin") {
-      setMessageMenuAnchor(event.currentTarget)
-      setSelectedMessage(message)
+    try {
+      await addDoc(collection(db, "chats", selectedChatId, "messages"), {
+        content: newMessage.trim(),
+        senderId: currentUserId,
+        timestamp: serverTimestamp(),
+      });
+      setNewMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
-  }
-  const handleCloseMessageMenu = () => {
-    setMessageMenuAnchor(null)
-    setSelectedMessage(null)
-  }
-  const handleDeleteMessage = () => {
-    setDeleteDialogOpen(true)
-    handleCloseMessageMenu()
-  }
-  const confirmDeleteMessage = () => {
-    if (selectedMessage) {
-      setMsgs((prev) => prev.filter((msg) => msg.id !== selectedMessage.id))
-      setDeleteDialogOpen(false)
-      setSelectedMessage(null)
-    }
-  }
+  };
 
-  // ---------------------------------------------------------------------------
-  // Send message --------------------------------------------------------------
-  // ---------------------------------------------------------------------------
-  const send = useCallback(() => {
-    if (!text.trim() || !chatId) return
-
-    const newMessage = {
-      id: Date.now().toString(),
-      text: text.trim(),
-      senderId: "admin",
-      receiverId: chatId,
-      timestamp: new Date(),
-      status: "sent",
-    }
-    setMsgs((prev) => [...prev, newMessage])
-    setText("")
-
-    // Simulate status updates
-    setTimeout(() => {
-      setMsgs((prev) => prev.map((msg) => (msg.id === newMessage.id ? { ...msg, status: "delivered" } : msg)))
-    }, 1000)
-    setTimeout(() => {
-      setMsgs((prev) => prev.map((msg) => (msg.id === newMessage.id ? { ...msg, status: "read" } : msg)))
-    }, 3000)
-  }, [chatId, text])
-
-  // ---------------------------------------------------------------------------
-  // Helpers -------------------------------------------------------------------
-  // ---------------------------------------------------------------------------
-  const currentUser = rooms.find((room) => room.id === chatId)
-
-  // Auto‑focus composer when chat changes
-  useEffect(() => {
-    if (chatId) textareaRef.current?.focus()
-  }, [chatId])
-
-  // ---------------------------------------------------------------------------
-  // Render --------------------------------------------------------------------
-  // ---------------------------------------------------------------------------
   return (
-    <ThemeProvider theme={theme}>
-      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh", bgcolor: theme.palette.background.default }}>
-        {/* ------------------------------------------------------------------- */}
-        {/* Header                                                              */}
-        {/* ------------------------------------------------------------------- */}
-        <AdminHeader position="static" elevation={0}>
-          <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }}>
-            <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1 }}>
-              <ChatBubbleOutlineIcon sx={{ mr: 2, fontSize: 28 }} />
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                Admin Chat Panel
-              </Typography>
-            </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Tooltip title="Notifications">
-                <IconButton color="inherit">
-                  <Badge badgeContent={4} color="error">
-                    <NotificationsIcon />
-                  </Badge>
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Settings">
-                <IconButton color="inherit">
-                  <SettingsIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Toolbar>
-        </AdminHeader>
+    <div style={{ padding: 20, maxWidth: 900, margin: "0 auto" }}>
+      <h2>🔥 Firebase Chat App</h2>
 
-        {/* ------------------------------------------------------------------- */}
-        {/* Main grid                                                           */}
-        {/* ------------------------------------------------------------------- */}
-        <Container maxWidth={false} sx={{ flex: 1, p: { xs: 1, md: 2 }, display: "flex", gap: 2 }}>
-          <Grid container spacing={2} sx={{ height: "100%" }}>
-            {/* --------------------------------------------------------------- */}
-            {/* Sidebar                                                        */}
-            {/* --------------------------------------------------------------- */}
-<Grid item xs={12} md={4} lg={3} sx={{ height: "60%" }}>
+      <div style={{ marginBottom: 20 }}>
+        <label>
+          Create New Chat:{" "}
+          <select
+            value={creatingChatUserId}
+            onChange={(e) => setCreatingChatUserId(e.target.value)}
+          >
+            <option value="">Select user</option>
+            {employeeList
+              .filter((u) => {
+                if (u.id === currentUserId) return false; // exclude yourself
+                // exclude users already in chat with currentUserId
+                const hasChat = chats.some(
+                  (chat) =>
+                    chat.users.length === 2 &&
+                    chat.users.includes(currentUserId) &&
+                    chat.users.includes(u.id)
+                );
+                return !hasChat;
+              })
+              .map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.username}
+                </option>
+              ))}
+          </select>
+        </label>
+        <button
+          onClick={createNewChat}
+          disabled={!creatingChatUserId}
+          style={{ marginLeft: 10 }}
+        >
+          Create
+        </button>
+      </div>
 
-              <Paper
-                elevation={3}
-                sx={{
-                  height: "100%",
-                  display: { xs: chatId && isMobile ? "none" : "flex", md: "flex" },
-                  flexDirection: "column",
-                  borderRadius: 2,
+      <div style={{ display: "flex", gap: 20 }}>
+        {/* Chat List */}
+        <div
+          style={{
+            width: "30%",
+            border: "1px solid #ccc",
+            padding: 10,
+            maxHeight: 400,
+            overflowY: "auto",
+          }}
+        >
+          <h3>Your Chats</h3>
+          {chats.length === 0 && <p>No chats found</p>}
+          {chats.map((chat) => (
+            <div
+              key={chat.id}
+              onClick={() => setSelectedChatId(chat.id)}
+              style={{
+                padding: 8,
+                cursor: "pointer",
+                backgroundColor:
+                  chat.id === selectedChatId ? "#eee" : "white",
+                borderBottom: "1px solid #ddd",
+              }}
+            >
+              <div>
+
+              </div>
+              <div>
+                <strong>Users:</strong>{" "}
+                {chat.users
+                  .map((uid) => {
+                    const user = employeeList.find((e) => e.id === uid);
+                    return user ? user.username : null; // return null if no username found
+                  })
+                  .filter(Boolean) // remove nulls
+                  .join(", ")
+                }
+
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Messages + input */}
+        <div
+          style={{
+            width: "70%",
+            border: "1px solid #ccc",
+            height: 400,
+            display: "flex",
+            flexDirection: "column",
+            padding: 10,
+          }}
+        >
+          {selectedChatId ? (
+            <>
+              <h3>Chat Messages</h3>
+              <div
+                style={{
+                  flexGrow: 1,
+                  overflowY: "auto",
+                  marginBottom: 10,
+                  border: "1px solid #ddd",
+                  padding: 10,
+                  borderRadius: 4,
+                  backgroundColor: "#fafafa",
                 }}
               >
-                {/* Sidebar header */}
-                <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      Conversations
-                    </Typography>
-                    <Chip label={`${filteredRooms.length} active`} size="small" color="primary" variant="outlined" />
-                  </Box>
-                  {/* Search */}
-                  <TextField
-                    fullWidth
-                    size="small"
-                    placeholder="Search conversations..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon color="action" />
-                        </InputAdornment>
-                      ),
-                    }}
-                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }}
-                  />
-                </Box>
-
-                {/* Chat list */}
-                {loadingRooms ? (
-                  <Box sx={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <CircularProgress />
-                  </Box>
-                ) : (
-                  <List dense disablePadding sx={{ flex: 1, overflowY: "auto" }}>
-                    {filteredRooms.map((room) => (
-                      <ListItemButton
-                        key={room.id}
-                        selected={room.id === chatId}
-                        onClick={() => {
-                          setChatId(room.id)
-                          if (isMobile) setSidebarOpen(false)
-                        }}
-                        sx={{
-                          py: 2,
-                          px: 2,
-                          borderRadius: 2,
-                          mx: 1,
-                          my: 0.5,
-                          "&.Mui-selected": {
-                            bgcolor: alpha(theme.palette.primary.main, 0.1),
-                            "&:hover": { bgcolor: alpha(theme.palette.primary.main, 0.15) },
-                          },
-                        }}
-                      >
-                        <ListItemAvatar>
-                          <StyledBadge
-                            overlap="circular"
-                            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                            variant="dot"
-                            invisible={!room.isOnline}
-                          >
-                            <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
-                              {room.name.charAt(0).toUpperCase()}
-                            </Avatar>
-                          </StyledBadge>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                              <Typography variant="subtitle2" noWrap sx={{ flexGrow: 1 }}>
-                                {room.name}
-                              </Typography>
-                              {!!room.unreadCount && (
-                                <Badge
-                                  badgeContent={room.unreadCount}
-                                  color="error"
-                                  sx={{ "& .MuiBadge-badge": { fontSize: "0.7rem" } }}
-                                />
-                              )}
-                            </Box>
-                          }
-                          secondary={
-                            <Typography variant="caption" color="text.secondary" noWrap>
-                              {room.lastMessage?.text || "No messages yet"}
-                            </Typography>
-                          }
-                        />
-                      </ListItemButton>
-                    ))}
-                  </List>
-                )}
-              </Paper>
-            </Grid>
-
-            {/* --------------------------------------------------------------- */}
-            {/* Chat area                                                       */}
-            {/* --------------------------------------------------------------- */}
-           <Grid item xs={12} md={8} lg={9} sx={{ height: "60%" }}>
-
-              {chatId ? (
-                <Paper
-                  elevation={3}
-                  sx={{ height: "100%", display: "flex", flexDirection: "column", borderRadius: 2, overflow: "hidden" }}
-                >
-                  {/* Chat header */}
-                  <AppBar position="static" color="primary" elevation={0} sx={{ borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
-                    <Toolbar>
-                      {isMobile && (
-                        <IconButton color="inherit" onClick={() => setChatId(null)} sx={{ mr: 1 }}>
-                          <MenuIcon />
-                        </IconButton>
-                      )}
-                      <Avatar sx={{ mr: 2, bgcolor: alpha(theme.palette.common.white, 0.2) }}>
-                        {currentUser?.name?.charAt(0).toUpperCase() || "U"}
-                      </Avatar>
-                      <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="subtitle1" noWrap>
-                          {currentUser?.name || chatId}
-                        </Typography>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                          <OnlineIcon
-                            sx={{ fontSize: 12, color: currentUser?.isOnline ? "#44b700" : "rgba(255,255,255,0.5)" }}
-                          />
-                          <Typography variant="caption" sx={{ opacity: 0.8 }}>
-                            {currentUser?.isOnline ? "Online" : "Offline"}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <IconButton color="inherit">
-                        <MoreVertIcon />
-                      </IconButton>
-                    </Toolbar>
-                  </AppBar>
-
-                  {/* issuesss feed */}
-                  <Box sx={{ position: "relative", flex: 1, minHeight: 0 }}>
-                    <Box
-                      ref={feedRef}
-                      onScroll={handleScroll}
-                      sx={{
-                        overflowY: "auto",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 1,
-                        p: 2,
-                        height: "100%",
-                        minHeight: 0,
-                        bgcolor: alpha(theme.palette.background.default, 0.3),
-                        scrollBehavior: "smooth",
-                        "&::-webkit-scrollbar": { width: 6 },
-                        "&::-webkit-scrollbar-thumb": {
-                          background: alpha(theme.palette.text.primary, 0.25),
-                          borderRadius: 3,
-                        },
-                      }}
-                    >
-                      {loadingMore && (
-                        <Box
-                          sx={{
-                            position: "sticky",
-                            top: 0,
-                            zIndex: 1,
-                            display: "flex",
-                            justifyContent: "center",
-                            py: 2,
-                            bgcolor: alpha(theme.palette.background.default, 0.8),
-                            backdropFilter: "blur(4px)",
-                          }}
-                        >
-                          <CircularProgress size={24} />
-                        </Box>
-                      )}
-
-                      {msgs.map((msg) => (
-                        <MessageCard
-                          key={msg.id}
-                          mine={msg.senderId === "admin"}
-                          onClick={(e) => handleMessageMenu(e, msg)}
-                          sx={{ cursor: msg.senderId === "admin" ? "pointer" : "default" }}
-                        >
-                          <Box sx={{ p: 2 }}>
-                            <Typography variant="body2" sx={{ wordBreak: "break-word" }}>
-                              {msg.text}
-                            </Typography>
-                            <Box sx={{ mt: 1, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.5 }}>
-                              <Typography variant="caption" color="text.secondary">
-                                {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                              </Typography>
-                              {msg.senderId === "admin" && (
-                                <>
-                                  {msg.status === "read" ? (
-                                    <DoneAllOutlinedIcon fontSize="inherit" sx={{ color: theme.palette.primary.main }} />
-                                  ) : msg.status === "delivered" ? (
-                                    <DoneAllOutlinedIcon fontSize="inherit" sx={{ opacity: 0.5 }} />
-                                  ) : (
-                                    <DoneOutlinedIcon fontSize="inherit" sx={{ opacity: 0.6 }} />
-                                  )}
-                                </>
-                              )}
-                            </Box>
-                          </Box>
-                        </MessageCard>
-                      ))}
-
-                      <div ref={bottomRef} />
-                    </Box>
-
-                    {/* Scroll‑to‑bottom FAB */}
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        bottom: 16,
-                        right: 16,
-                        zIndex: 2,
-                        pointerEvents: showScrollToBottom ? "auto" : "none",
-                        opacity: showScrollToBottom ? 1 : 0,
-                        transition: "opacity 0.25s ease",
-                      }}
-                    >
-                      <IconButton
-                        onClick={() => scrollToBottom(true)}
-                        sx={{
-                          bgcolor: theme.palette.primary.main,
-                          color: theme.palette.primary.contrastText,
-                          boxShadow: 3,
-                          "&:hover": { bgcolor: theme.palette.primary.dark },
-                        }}
-                        size="small"
-                      >
-                        <KeyboardArrowDownIcon />
-                      </IconButton>
-                    </Box>
-                  </Box>
-
-                  {/* ---------------------------------------------------------------- */}
-                  {/* Composer                                                         */}
-                  {/* ---------------------------------------------------------------- */}
-                  <Paper
-                    elevation={3}
-                    sx={{
-                      p: 2,
-                      borderTop: `1px solid ${theme.palette.divider}`,
-                      position: "relative",
-                      borderBottomLeftRadius: 12,
-                      borderBottomRightRadius: 12,
+                {messages.length === 0 && <p>No messages yet.</p>}
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    style={{
+                      marginBottom: 8,
+                      textAlign:
+                        msg.senderId === currentUserId ? "right" : "left",
                     }}
                   >
-                    {showEmojiPicker && (
-                      <Box ref={emojiPickerRef} sx={{ position: "absolute", bottom: "100%", left: 16, zIndex: 1000, mb: 1 }}>
-                        <EmojiPicker onEmojiClick={handleEmojiClick} theme={mode} height={350} width={300} />
-                      </Box>
-                    )}
+                    <span
+                      style={{
+                        display: "inline-block",
+                        padding: "6px 10px",
+                        borderRadius: 16,
+                        backgroundColor:
+                          msg.senderId === currentUserId
+                            ? "#4caf50"
+                            : "#e0e0e0",
+                        color: msg.senderId === currentUserId ? "white" : "black",
+                        maxWidth: "70%",
+                        wordWrap: "break-word",
+                      }}
+                    >
+                      {msg.content || "[No Text]"}
+                    </span>
+                  </div>
+                ))}
+              </div>
 
-                    <TextField
-                      fullWidth
-                      multiline
-                      inputRef={textareaRef}
-                      minRows={1}
-                      maxRows={6} // WhatsApp‑style cap
-                      placeholder="Type your message..."
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                      onKeyDown={(e) => {
-                        // Send on Enter, keep newline with Shift+Enter
-                        if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey) {
-                          e.preventDefault()
-                          send()
-                        }
-                        // Ctrl+Enter alternate send
-                        if (e.key === "Enter" && e.ctrlKey) {
-                          e.preventDefault()
-                          send()
-                        }
-                        // Escape closes emoji picker
-                        if (e.key === "Escape") setShowEmojiPicker(false)
-                      }}
-                      disabled={!chatId}
-                      InputProps={{
-                        inputProps: {
-                          style: {
-                            overflowY: "auto", // scrollbar inside textarea when needed
-                            resize: "none",
-                          },
-                        },
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Tooltip title="Add emoji">
-                              <IconButton
-                                size="small"
-                                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                                color={showEmojiPicker ? "primary" : "default"}
-                              >
-                                <InsertEmoticonIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </InputAdornment>
-                        ),
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <Tooltip title="Attach file">
-                              <IconButton size="small">
-                                <AttachFileIcon />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Send message">
-                              <IconButton color="primary" onClick={send} disabled={!text.trim() || !chatId} sx={{ ml: 1 }}>
-                                <SendRoundedIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </InputAdornment>
-                        ),
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: 3,
-                          alignItems: "flex-start",
-                        },
-                        "& .MuiInputAdornment-positionStart": { alignSelf: "flex-start", mt: 1 },
-                        "& .MuiInputAdornment-positionEnd": { alignSelf: "flex-start", mt: 1 },
-                      }}
-                    />
-                  </Paper>
-                </Paper>
-              ) : (
-                // -------------------------------------------------------------
-                // Empty state
-                // -------------------------------------------------------------
-                <Paper
-                  elevation={2}
-                  sx={{
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexDirection: "column",
-                    borderRadius: 2,
-                    color: "text.secondary",
-                    p: 4,
+              {/* Message input */}
+              <div style={{ display: "flex", gap: 10 }}>
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type your message..."
+                  style={{
+                    flexGrow: 1,
+                    padding: 8,
+                    borderRadius: 4,
+                    border: "1px solid #ccc",
                   }}
-                >
-                  <ChatBubbleOutlineIcon sx={{ fontSize: 80, mb: 2, opacity: 0.5 }} />
-                  <Typography variant="h4" gutterBottom sx={{ fontWeight: 700 }}>
-                    Welcome to Admin Chat
-                  </Typography>
-                  <Typography variant="h6" align="center" sx={{ maxWidth: 500, mb: 3, opacity: 0.8 }}>
-                    Select a conversation from the sidebar to start chatting with your users. Manage all your customer
-                    communications in one place.
-                  </Typography>
-                  <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
-                    <Chip icon={<PersonIcon />} label={`${rooms.length} Active Users`} color="primary" />
-                    <Chip icon={<ChatBubbleOutlineIcon />} label="Real‑time Messaging" color="secondary" />
-                    <Chip icon={<NotificationsIcon />} label="Instant Notifications" color="success" />
-                  </Box>
-                </Paper>
-              )}
-            </Grid>
-          </Grid>
-        </Container>
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") sendMessage();
+                  }}
+                />
+                <button onClick={sendMessage} disabled={!newMessage.trim()}>
+                  Send
+                </button>
+              </div>
+            </>
+          ) : (
+            <p>Select a chat to see messages</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
-        {/* --------------------------------------------------------------------- */}
-        {/* Mobile drawer                                                        */}
-        {/* --------------------------------------------------------------------- */}
-        {isMobile && (
-          <Drawer
-            anchor="left"
-            open={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-            PaperProps={{ sx: { width: "85%", maxWidth: 360 } }}
-          >
-            {/* You can place the same sidebar content here if desired */}
-            <Box sx={{ height: "100%" }} />
-          </Drawer>
-        )}
-
-        {/* --------------------------------------------------------------------- */}
-        {/* Message context menu                                                 */}
-        {/* --------------------------------------------------------------------- */}
-        <Menu
-          anchorEl={messageMenuAnchor}
-          open={Boolean(messageMenuAnchor)}
-          onClose={handleCloseMessageMenu}
-          transformOrigin={{ horizontal: "right", vertical: "top" }}
-          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        >
-          <MenuItem onClick={handleDeleteMessage}>
-            <DeleteIcon sx={{ mr: 1 }} />
-            Delete Message
-          </MenuItem>
-        </Menu>
-
-        {/* --------------------------------------------------------------------- */}
-        {/* Delete confirmation                                                  */}
-        {/* --------------------------------------------------------------------- */}
-        <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="xs" fullWidth>
-          <DialogTitle>Delete Message</DialogTitle>
-          <DialogContent>
-            <Typography>Are you sure you want to delete this message? This action cannot be undone.</Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-            <Button onClick={confirmDeleteMessage} color="error" variant="contained">
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Click‑outside overlay for emoji picker */}
-        {showEmojiPicker && (
-          <Box
-            sx={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }}
-            onClick={() => setShowEmojiPicker(false)}
-          />
-        )}
-      </Box>
-    </ThemeProvider>
-  )
-}
+export default ChatApp;

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, Box, Typography, Menu, Button, IconButton, MenuItem, ListItemIcon, ListItemText, useTheme } from '@mui/material';
+import { signOut } from "firebase/auth";
+import { auth } from "../../../firebase"; // adjust the path if needed
 
 import { IconListCheck, IconMail, IconUser } from '@tabler/icons-react';
 
@@ -101,7 +103,10 @@ const Profile = () => {
         </MenuItem> */}
         <Box mt={1} py={1} px={2}>
         <Box mt={1} py={1} px={2}>
-          <Button to="/auth/login" variant="outlined" color="primary" component={Link} fullWidth onClick={() => { localStorage.clear() }}>
+          <Button to="/auth/login" variant="outlined" color="primary" component={Link} fullWidth  onClick={async () => {
+    localStorage.clear();
+    // await signOut(auth);
+  }}>
             Logout
           </Button>
           </Box>
