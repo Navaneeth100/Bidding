@@ -4,7 +4,7 @@ import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth"; 
-import { VAPID_KEY } from "../../Bidding/src/utils/firebasevap";
+import { VAPID_KEY } from "../src/utils/firebasevap";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDSJ8r73OsF3b0aF27JzoHjHVfKHkYDMTs",
