@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, alpha, } from "@mui/material"
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Avatar, Typography, TextField, InputAdornment, Button, IconButton, Grid, Menu, MenuItem, Chip, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, TablePagination, Divider, CircularProgress, useTheme, alpha, FormControlLabel, } from "@mui/material"
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled } from '@tabler/icons-react';
@@ -139,15 +139,20 @@ const Subscription = () => {
         event.preventDefault();
 
         let submitData = {
-            name: formData.menu,
-            image: selectedFile
+            plan_name: formData.planname,
+            plan_type: formData.plantype,
+            days: formData.days,
+            price: formData.price,
+            description: formData.description,
+            start_date: formData.startdate,
+            end_date: formData.enddate,
         }
 
         try {
-            const response = await axios.post(`${url}/auth/service-categories/`, submitData, {
+            const response = await axios.post(`${url}/auth/subscriptions/subscribe/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "multipart/form-data",
+                    "Content-Type": "application/json",
                 },
                 withCredentials: false,
             });
@@ -224,15 +229,20 @@ const Subscription = () => {
         event.preventDefault();
 
         let submitData = {
-            name: editData.menu,
-            image: selectedFile || preview
-        };
+            plan_name: editData.plan_name,
+            plan_type: editData.plan_type,
+            days: editData.days,
+            price: editData.price,
+            description: editData.description,
+            start_date: editData.start_date,
+            end_date: editData.end_date,
+        }
 
         try {
-            const response = await axios.put(`${url}/auth/service-categories/${selectedId}/`, submitData, {
+            const response = await axios.put(`${url}/auth/subscriptions/subscribe/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "multipart/form-data",
+                    "Content-Type": "application/json",
                 },
                 withCredentials: false,
             });
@@ -268,7 +278,7 @@ const Subscription = () => {
 
     const handleDelete = async () => {
         try {
-            const response = await axios.delete(`${url}/auth/service-categories/${selectedId}/`, {
+            const response = await axios.delete(`${url}/subscriptions/subscribe/${selectedId}/`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
@@ -344,14 +354,14 @@ const Subscription = () => {
                                         sx: { borderRadius: 1 },
                                     }}
                                 />
-                                {/* <Button
+                                <Button
                                     variant="contained"
                                     startIcon={<IconPlus />}
                                     onClick={() => toggleModal("add")}
                                     sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" }, borderRadius: 1, boxShadow: "none" }}
                                 >
                                     Add
-                                </Button> */}
+                                </Button>
                             </Box>
                         </Box>
 
@@ -504,12 +514,12 @@ const Subscription = () => {
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { fetchSubscriptionId(item.id); toggleModal("view") }}>
                                                                 <IconEye fontSize="small" className="me-2" /> View
                                                             </MenuItem>
-                                                            {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); toggleModal("edit") }}>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); toggleModal("edit") }}>
                                                                 <IconPencil fontSize="small" className="me-2" /> Edit
-                                                            </MenuItem> */}
-                                                            {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
+                                                            </MenuItem>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
                                                                 <IconTrash fontSize="small" className="me-2" /> Delete
-                                                            </MenuItem> */}
+                                                            </MenuItem>
                                                         </Menu>
                                                     )}
                                                 </TableCell>
@@ -652,7 +662,7 @@ const Subscription = () => {
                 <form onSubmit={handleSubmit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={12}>
+                            {/* <Grid item xs={12} md={12}>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
                                     <Avatar
                                         src={preview ? preview : ""}
@@ -674,17 +684,106 @@ const Subscription = () => {
                                         </Button>
                                     </label>
                                 </Box>
-                            </Grid>
-                            <Grid item xs={12} md={12}>
+                            </Grid> */}
+                            <Grid item xs={6} md={6}>
                                 <TextField
                                     required
                                     fullWidth
-                                    name="menu"
-                                    label="Menu Name"
+                                    name="name"
+                                    label="Plan Name"
                                     type="text"
-                                    placeholder="Enter Menu Name"
-                                    onChange={(e) => { setFormData({ ...formData, menu: e.target.value }) }}
+                                    placeholder="Enter Plan Name"
+                                    onChange={(e) => { setFormData({ ...formData, planname: e.target.value }) }}
                                     sx={{ mt: 5 }}
+                                />
+                            </Grid>
+
+                            <Grid item xs={3} md={3}>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={formData.plantype === 'monthly'}
+                                            onChange={(e) => { setFormData({ ...formData, plantype: e.target.checked ? 'monthly' : '' }); }}
+                                        />
+                                    }
+                                    label="Monthly"
+                                    sx={{ mt: 5 }}
+                                />
+
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={formData.plantype === 'yearly'}
+                                            onChange={(e) => { setFormData({ ...formData, plantype: e.target.checked ? 'yearly' : '' }) }}
+                                        />
+                                    }
+                                    label="Yearly"
+                                    sx={{ mt: 5 }}
+                                />
+                            </Grid>
+
+                            {formData.plantype === 'monthly' && <>
+                                <Grid item xs={3} md={3}>
+                                    <TextField
+                                        required
+                                        fullWidth
+                                        name="days"
+                                        label="No of Days"
+                                        type="number"
+                                        placeholder="Enter No of Days"
+                                        onChange={(e) => { setFormData({ ...formData, days: e.target.value }) }}
+                                        sx={{ mt: 5 }}
+                                    />
+                                </Grid>
+                            </>}
+
+                            <Grid item xs={12} md={12}>
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    rows={2}
+                                    label="Description"
+                                    onChange={(e) => { setFormData({ ...formData, description: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="price"
+                                    label="Price"
+                                    type="number"
+                                    placeholder="Enter Price"
+                                    onChange={(e) => { setFormData({ ...formData, price: e.target.value }) }}
+                                    sx={{ mt: 5 }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="date"
+                                    label="Start Date"
+                                    type="date"
+                                    onChange={(e) => { setFormData({ ...formData, startdate: e.target.value }) }}
+                                    sx={{ mt: 5 }}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="date"
+                                    label="End Date"
+                                    type="date"
+                                    onChange={(e) => { setFormData({ ...formData, enddate: e.target.value }) }}
+                                    sx={{ mt: 5 }}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
                                 />
                             </Grid>
                         </Grid>
@@ -736,7 +835,7 @@ const Subscription = () => {
                 <form onSubmit={handleEdit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={12}>
+                            {/* <Grid item xs={12} md={12}>
                                 <Box sx={{ p: 2, textAlign: "center" }}>
                                     <Avatar
                                         src={preview ? preview : editData.image}
@@ -758,18 +857,110 @@ const Subscription = () => {
                                         </Button>
                                     </label>
                                 </Box>
-                            </Grid>
-                            <Grid item xs={12} md={12}>
+                            </Grid> */}
+                            <Grid item xs={6} md={6}>
                                 <TextField
                                     required
                                     fullWidth
-                                    name="menu"
-                                    label="Menu Name"
+                                    name="name"
+                                    label="Plan Name"
                                     type="text"
-                                    placeholder="Enter Menu Name"
-                                    defaultValue={editData.name}
-                                    onChange={(e) => { setEditData({ ...editData, menu: e.target.value }) }}
+                                    placeholder="Enter Plan Name"
+                                    defaultValue={editData.plan_name}
+                                    onChange={(e) => { setEditData({ ...editData, planname: e.target.value }) }}
                                     sx={{ mt: 5 }}
+                                />
+                            </Grid>
+                            <Grid item xs={3} md={3}>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={editData.plan_type === 'monthly'}
+                                            onChange={(e) => { setEditData({ ...editData, plan_type: e.target.checked ? 'monthly' : '' }) }}
+                                        />
+                                    }
+                                    label="Monthly"
+                                    sx={{ mt: 5 }}
+                                />
+
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={editData.plan_type === 'yearly'}
+                                            onChange={(e) => { setEditData({ ...editData, plan_type: e.target.checked ? 'yearly' : '' }) }}
+                                        />
+                                    }
+                                    label="Yearly"
+                                    sx={{ mt: 5 }}
+                                />
+                            </Grid>
+
+                            {editData.plan_type === 'monthly' && <>
+                                <Grid item xs={3} md={3}>
+                                    <TextField
+                                        required
+                                        fullWidth
+                                        name="days"
+                                        label="No of Days"
+                                        type="number"
+                                        placeholder="Enter No of Days"
+                                        onChange={(e) => { setEditData({ ...editData, days: e.target.value }) }}
+                                        sx={{ mt: 5 }}
+                                    />
+                                </Grid>
+                            </>}
+
+                            <Grid item xs={12} md={12}>
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    rows={2}
+                                    label="Description"
+                                    defaultValue={editData.description}
+                                    onChange={(e) => { setEditData({ ...editData, description: e.target.value }) }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="price"
+                                    label="Price"
+                                    type="number"
+                                    placeholder="Enter Price"
+                                    defaultValue={editData.price}
+                                    onChange={(e) => { setEditData({ ...editData, price: e.target.value }) }}
+                                    sx={{ mt: 5 }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="date"
+                                    label="Start Date"
+                                    type="date"
+                                    defaultValue={editData.start_date ? editData.start_date.slice(0, 10) : ''}
+                                    onChange={(e) => { setEditData({ ...editData, start_date: e.target.value }) }}
+                                    sx={{ mt: 5 }}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} md={6}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="date"
+                                    label="End Date"
+                                    type="date"
+                                    defaultValue={editData.end_date ? editData.end_date.slice(0, 10) : ''}
+                                    onChange={(e) => { setEditData({ ...editData, end_date: e.target.value }) }}
+                                    sx={{ mt: 5 }}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
                                 />
                             </Grid>
                         </Grid>
@@ -939,7 +1130,7 @@ const Subscription = () => {
                         <Typography variant="h6" sx={{ textAlign: "center", color: theme.palette.text.primary }}>
                             Are you sure you want to Delete the Subscription:{" "}
                             <Box component="span" sx={{ color: "red", fontWeight: 600 }}>
-                                {deleteData.name}&nbsp;
+                                {deleteData.plan_name}&nbsp;
                             </Box>
                             ?
                         </Typography>
