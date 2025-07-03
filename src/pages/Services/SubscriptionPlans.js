@@ -11,7 +11,7 @@ import { FirstPage, LastPage, ChevronLeft, ChevronRight } from "@mui/icons-mater
 import { hasPermission } from "../../../hasPermission";
 import PermissionDenied from "../PermissionDenied";
 
-const Subscription = () => {
+const SubscriptionPlans = () => {
 
     // AuthTokens
 
@@ -41,9 +41,9 @@ const Subscription = () => {
         setSelectedId(id)
     }
 
-    // Get Subscription
+    // Get SubscriptionPlans
 
-    const [Subscription, setSubscription] = useState([]);
+    const [SubscriptionPlans, setSubscriptionPlans] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
     const [nextPageUrl, setNextPageUrl] = useState(null);
@@ -53,17 +53,17 @@ const Subscription = () => {
     const [onsearchText, setonsearchText] = useState("")
     const [selectedId, setSelectedId] = useState(null)
 
-    const fetchPurchasedSubscription = () => {
+    const fetchSubscriptionPlans = () => {
         setLoading(true);
         axios
-            .get(`${url}/auth/subscriptions/subscribe/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+            .get(`${url}/auth/admin/subscriptions/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
             })
             .then((res) => {
-                setSubscription(res.data.results);
+                setSubscriptionPlans(res.data);
                 setNextPageUrl(res.data.next);
                 setPrevPageUrl(res.data.previous);
                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -78,13 +78,13 @@ const Subscription = () => {
                     axios.post(`${url}/api/token/refresh/`, { refresh }).then((res) => {
                         localStorage.setItem("authTokens", JSON.stringify(res.data));
                         axios
-                            .get(`${url}/auth/subscriptions/subscribe/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
+                            .get(`${url}/auth/admin/subscriptions/?search=${onsearchText}&page=${currentPage + 1}&page_size=${rowsPerPage}`, {
                                 headers: {
                                     Authorization: `Bearer ${res.data.access}`,
                                 },
                             })
                             .then((res) => {
-                                setSubscription(res.data.results);
+                                setSubscriptionPlans(res.data);
                                 setNextPageUrl(res.data.next);
                                 setPrevPageUrl(res.data.previous);
                                 setTotalPages(Math.ceil(res.data.count / rowsPerPage));
@@ -96,7 +96,7 @@ const Subscription = () => {
     };
 
     useEffect(() => {
-        fetchPurchasedSubscription();
+        fetchSubscriptionPlans();
     }, [currentPage, rowsPerPage, onsearchText]);
 
 
@@ -109,28 +109,11 @@ const Subscription = () => {
         setFormData([]);
         setEditData([]);
         setDeleteData([]);
-        setselectedFile("");
-        setPreview(null);
         setAnchorEl(null)
     };
 
 
-    // File Upload
-
-    const [selectedFile, setselectedFile] = useState("");
-    const [preview, setPreview] = useState(null);
-
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setselectedFile(file);
-            const imageUrl = URL.createObjectURL(file);
-            setPreview(imageUrl);
-        }
-    };
-
-
-    // Add Subscription
+    // Add Subscription Plan
 
     const [formData, setFormData] = useState([])
 
@@ -139,24 +122,24 @@ const Subscription = () => {
         event.preventDefault();
 
         let submitData = {
-            plan_name: formData.planname,
-            plan_type: formData.plantype,
-            days: formData.days,
-            price: formData.price,
+            name: formData.name,
             description: formData.description,
-            start_date: formData.startdate,
-            end_date: formData.enddate,
+            price: formData.price,
+            plan_type: formData.plantype,
+            duration_days: formData.days,
+            is_active: true,
+            discount: formData.discount,
         }
 
         try {
-            const response = await axios.post(`${url}/auth/subscriptions/subscribe/`, submitData, {
+            const response = await axios.post(`${url}/auth/admin/subscriptions/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
                 withCredentials: false,
             });
-            toast.success("Subscription Added Successfully", {
+            toast.success("Subscription Plan Added Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -168,7 +151,7 @@ const Subscription = () => {
 
             toggleModal('add')
             resetForm()
-            fetchPurchasedSubscription()
+            fetchSubscriptionPlans()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -182,44 +165,44 @@ const Subscription = () => {
         }
     };
 
-    //  View Subscription
+    //  View SubscriptionPlans
 
     const [viewData, setViewData] = useState([])
 
-    const fetchPurchasedSubscriptionId = (id) => {
-        axios
-            .get(`${url}/auth/subscriptions/subscribe/?subscription_id=${id}`, {
-                headers: {
-                    Authorization: `Bearer ${tokenStr}`,
-                    "Content-Type": "application/json",
-                },
-                withCredentials: false,
-            })
-            .then((res) => {
+    // const fetchSubscriptionPlansId = (id) => {
+    //     axios
+    //         .get(`${url}/auth/admin/subscriptions/?subscription_id=${id}`, {
+    //             headers: {
+    //                 Authorization: `Bearer ${tokenStr}`,
+    //                 "Content-Type": "application/json",
+    //             },
+    //             withCredentials: false,
+    //         })
+    //         .then((res) => {
 
-                setViewData(res.data);
-            })
-            .catch((error) => {
-                let refresh = String(authTokens.refresh);
-                axios.post(`${url}/api/token/refresh/`, { refresh: refresh }).then((res) => {
-                    localStorage.setItem("authTokens", JSON.stringify(res.data));
-                    //   setNewAuthTokens(JSON.stringify(res.data));
+    //             setViewData(res.data);
+    //         })
+    //         .catch((error) => {
+    //             let refresh = String(authTokens.refresh);
+    //             axios.post(`${url}/api/token/refresh/`, { refresh: refresh }).then((res) => {
+    //                 localStorage.setItem("authTokens", JSON.stringify(res.data));
+    //                 //   setNewAuthTokens(JSON.stringify(res.data));
 
-                    const new_headers = {
-                        Authorization: `Bearer ${res.data.access}`,
-                    };
-                    axios
-                        .get(`${url}/auth/subscriptions/subscribe/?subscription_id=${id}`, { headers: new_headers })
-                        .then((res) => {
+    //                 const new_headers = {
+    //                     Authorization: `Bearer ${res.data.access}`,
+    //                 };
+    //                 axios
+    //                     .get(`${url}/auth/admin/subscriptions/?subscription_id=${id}`, { headers: new_headers })
+    //                     .then((res) => {
 
-                            setViewData(res.data);
-                        });
-                });
-            });
-    };
+    //                         setViewData(res.data);
+    //                     });
+    //             });
+    //         });
+    // };
 
 
-    //  Edit Subscription
+    //  Edit Subscription Plan
 
     const [editData, setEditData] = useState([])
 
@@ -229,24 +212,25 @@ const Subscription = () => {
         event.preventDefault();
 
         let submitData = {
-            plan_name: editData.plan_name,
-            plan_type: editData.plan_type,
-            days: editData.days,
-            price: editData.price,
+            id: editData.id,
+            name: editData.name,
             description: editData.description,
-            start_date: editData.start_date,
-            end_date: editData.end_date,
+            price: editData.price,
+            plan_type: editData.plan_type,
+            duration_days: editData.duration_days,
+            is_active: true,
+            discount: editData.discount,
         }
 
         try {
-            const response = await axios.put(`${url}/auth/subscriptions/subscribe/`, submitData, {
+            const response = await axios.put(`${url}/auth/admin/subscriptions/`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
                 withCredentials: false,
             });
-            toast.success("Subscription Edited Successfully", {
+            toast.success("Subscription Plan Edited Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -257,7 +241,7 @@ const Subscription = () => {
             });
             toggleModal('edit');
             resetForm()
-            fetchPurchasedSubscription()
+            fetchSubscriptionPlans()
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
                 position: 'top-right',
@@ -272,20 +256,20 @@ const Subscription = () => {
     };
 
 
-    // Delete Subscription
+    // Delete Subscription Plan
 
     const [deleteData, setDeleteData] = useState([])
 
     const handleDelete = async () => {
         try {
-            const response = await axios.delete(`${url}/subscriptions/subscribe/${selectedId}/`, {
+            const response = await axios.delete(`${url}/auth/admin/subscriptions/${selectedId}/`, {
                 headers: {
                     Authorization: `Bearer ${tokenStr}`,
                     "Content-Type": "application/json",
                 },
                 withCredentials: false,
             });
-            toast.success("Subscription Deleted Successfully", {
+            toast.success("Subscription Plan Deleted Successfully", {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -295,10 +279,10 @@ const Subscription = () => {
 
             });
             toggleModal('delete')
-            if (Subscription.length === 1 && currentPage > 0) {
+            if (SubscriptionPlans.length === 1 && currentPage > 0) {
                 setCurrentPage(currentPage - 1);
             } else {
-                fetchPurchasedSubscription();
+                fetchSubscriptionPlans();
             }
         } catch (error) {
             toast.error(`${error.response.data.error}`, {
@@ -320,9 +304,9 @@ const Subscription = () => {
     }
 
     return (
-        <PageContainer title="Purchased Subscriptions" description="Purchased Subscriptions"  >
+        <PageContainer title="Subscription Plans" description="Subscription Plans"  >
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
-                Purchased Subscriptions
+                Subscription Plans
             </Typography>
             <DashboardCard>
                 <Grid container>
@@ -354,14 +338,14 @@ const Subscription = () => {
                                         sx: { borderRadius: 1 },
                                     }}
                                 />
-                                {/* <Button
+                                <Button
                                     variant="contained"
                                     startIcon={<IconPlus />}
                                     onClick={() => toggleModal("add")}
                                     sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" }, borderRadius: 1, boxShadow: "none" }}
                                 >
                                     Add
-                                </Button> */}
+                                </Button>
                             </Box>
                         </Box>
 
@@ -400,13 +384,10 @@ const Subscription = () => {
                                             Price
                                         </TableCell>
                                         <TableCell align="center">
-                                            Start Date
+                                            Duration
                                         </TableCell>
                                         <TableCell align="center">
-                                            End Date
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            Vendor
+                                            Discount
                                         </TableCell>
                                         <TableCell align="center">
                                             Status
@@ -419,7 +400,7 @@ const Subscription = () => {
                                 <TableBody>
                                     {loading ? (
                                         <TableRow>
-                                            <TableCell colSpan={8} align="center">
+                                            <TableCell colSpan={10} align="center">
                                                 <Box
                                                     display="flex"
                                                     justifyContent="center"
@@ -430,8 +411,8 @@ const Subscription = () => {
                                                 </Box>
                                             </TableCell>
                                         </TableRow>
-                                    ) : Subscription && Subscription.length > 0 ? (
-                                        Subscription.map((item, index) => (
+                                    ) : SubscriptionPlans && SubscriptionPlans.length > 0 ? (
+                                        SubscriptionPlans.map((item, index) => (
                                             <TableRow
                                                 hover
                                                 role="checkbox"
@@ -446,7 +427,7 @@ const Subscription = () => {
                                                     {currentPage * rowsPerPage + index + 1}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {item.plan_name}
+                                                    {item.name}
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     {item.plan_type}
@@ -458,13 +439,10 @@ const Subscription = () => {
                                                     {item.price}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {item.start_date ? new Date(item.start_date).toLocaleDateString('en-GB') : "N/A"}
+                                                    {item.duration_days ? `${item.duration_days} Days` : "N/A"}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {item.end_date ? new Date(item.end_date).toLocaleDateString('en-GB') : "N/A"}
-                                                </TableCell>
-                                                <TableCell align="center">
-                                                    {item.vendor}
+                                                    {item.discount || "N/A"}
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     <Chip
@@ -511,12 +489,12 @@ const Subscription = () => {
                                                             }}
                                                             PaperProps={{ sx: { px: 1, } }}
                                                         >
-                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { fetchPurchasedSubscriptionId(item.id); toggleModal("view") }}>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setViewData(item); toggleModal("view") }}>
                                                                 <IconEye fontSize="small" className="me-2" /> View
                                                             </MenuItem>
-                                                            {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); toggleModal("edit") }}>
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setEditData(item); toggleModal("edit") }}>
                                                                 <IconPencil fontSize="small" className="me-2" /> Edit
-                                                            </MenuItem> */}
+                                                            </MenuItem>
                                                             {/* <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => { setDeleteData(item); toggleModal("delete") }}>
                                                                 <IconTrash fontSize="small" className="me-2" /> Delete
                                                             </MenuItem> */}
@@ -657,34 +635,11 @@ const Subscription = () => {
                 }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Setup Subscription
+                    Setup Subscription Plan
                 </DialogTitle>
                 <form onSubmit={handleSubmit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3}>
-                            {/* <Grid item xs={12} md={12}>
-                                <Box sx={{ p: 2, textAlign: "center" }}>
-                                    <Avatar
-                                        src={preview ? preview : ""}
-                                        alt=""
-                                        sx={{ width: 100, height: 100, margin: "0 auto" }}
-                                    />
-                                </Box>
-                                <Box sx={{ p: 2, textAlign: "center" }}>
-                                    <input
-                                        accept="image/*"
-                                        id="file-upload"
-                                        type="file"
-                                        style={{ display: "none" }}
-                                        onChange={(e) => { handleFileChange(e) }}
-                                    />
-                                    <label htmlFor="file-upload">
-                                        <Button variant="contained" component="span">
-                                            Choose File
-                                        </Button>
-                                    </label>
-                                </Box>
-                            </Grid> */}
                             <Grid item xs={6} md={6}>
                                 <TextField
                                     required
@@ -693,7 +648,7 @@ const Subscription = () => {
                                     label="Plan Name"
                                     type="text"
                                     placeholder="Enter Plan Name"
-                                    onChange={(e) => { setFormData({ ...formData, planname: e.target.value }) }}
+                                    onChange={(e) => { setFormData({ ...formData, name: e.target.value }) }}
                                     sx={{ mt: 5 }}
                                 />
                             </Grid>
@@ -762,28 +717,12 @@ const Subscription = () => {
                                 <TextField
                                     required
                                     fullWidth
-                                    name="date"
-                                    label="Start Date"
-                                    type="date"
-                                    onChange={(e) => { setFormData({ ...formData, startdate: e.target.value }) }}
+                                    name="discount"
+                                    label="Discount"
+                                    type="number"
+                                    placeholder="Enter Discount"
+                                    onChange={(e) => { setFormData({ ...formData, discount: e.target.value }) }}
                                     sx={{ mt: 5 }}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={6} md={6}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    name="date"
-                                    label="End Date"
-                                    type="date"
-                                    onChange={(e) => { setFormData({ ...formData, enddate: e.target.value }) }}
-                                    sx={{ mt: 5 }}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
                                 />
                             </Grid>
                         </Grid>
@@ -830,34 +769,11 @@ const Subscription = () => {
                 }}
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
-                    Edit Subscription
+                    Edit Subscription Plan
                 </DialogTitle>
                 <form onSubmit={handleEdit}>
                     <DialogContent sx={{ p: 3 }}>
                         <Grid container spacing={3}>
-                            {/* <Grid item xs={12} md={12}>
-                                <Box sx={{ p: 2, textAlign: "center" }}>
-                                    <Avatar
-                                        src={preview ? preview : editData.image}
-                                        alt=""
-                                        sx={{ width: 100, height: 100, margin: "0 auto" }}
-                                    />
-                                </Box>
-                                <Box sx={{ p: 2, textAlign: "center" }}>
-                                    <input
-                                        accept="image/*"
-                                        id="file-upload"
-                                        type="file"
-                                        style={{ display: "none" }}
-                                        onChange={(e) => { handleFileChange(e) }}
-                                    />
-                                    <label htmlFor="file-upload">
-                                        <Button variant="contained" component="span">
-                                            Choose File
-                                        </Button>
-                                    </label>
-                                </Box>
-                            </Grid> */}
                             <Grid item xs={6} md={6}>
                                 <TextField
                                     required
@@ -866,8 +782,8 @@ const Subscription = () => {
                                     label="Plan Name"
                                     type="text"
                                     placeholder="Enter Plan Name"
-                                    defaultValue={editData.plan_name}
-                                    onChange={(e) => { setEditData({ ...editData, planname: e.target.value }) }}
+                                    defaultValue={editData.name}
+                                    onChange={(e) => { setEditData({ ...editData, name: e.target.value }) }}
                                     sx={{ mt: 5 }}
                                 />
                             </Grid>
@@ -904,7 +820,8 @@ const Subscription = () => {
                                         label="No of Days"
                                         type="number"
                                         placeholder="Enter No of Days"
-                                        onChange={(e) => { setEditData({ ...editData, days: e.target.value }) }}
+                                        defaultValue={editData.duration_days}
+                                        onChange={(e) => { setEditData({ ...editData, duration_days: e.target.value }) }}
                                         sx={{ mt: 5 }}
                                     />
                                 </Grid>
@@ -937,30 +854,13 @@ const Subscription = () => {
                                 <TextField
                                     required
                                     fullWidth
-                                    name="date"
-                                    label="Start Date"
-                                    type="date"
-                                    defaultValue={editData.start_date ? editData.start_date.slice(0, 10) : ''}
-                                    onChange={(e) => { setEditData({ ...editData, start_date: e.target.value }) }}
+                                    name="discount"
+                                    label="Discount"
+                                    type="number"
+                                    placeholder="Enter Discount"
+                                    defaultValue={editData.discount}
+                                    onChange={(e) => { setEditData({ ...editData, discount: e.target.value }) }}
                                     sx={{ mt: 5 }}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={6} md={6}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    name="date"
-                                    label="End Date"
-                                    type="date"
-                                    defaultValue={editData.end_date ? editData.end_date.slice(0, 10) : ''}
-                                    onChange={(e) => { setEditData({ ...editData, end_date: e.target.value }) }}
-                                    sx={{ mt: 5 }}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
                                 />
                             </Grid>
                         </Grid>
@@ -1016,7 +916,7 @@ const Subscription = () => {
                         fontSize: '1.5rem',
                     }}
                 >
-                    Purchased Plan Information
+                    Subscription Plan Information
                 </DialogTitle>
 
                 <DialogContent
@@ -1042,7 +942,7 @@ const Subscription = () => {
                                 }}
                             >
                                 <Typography variant="subtitle2" color="text.secondary">Plan Name</Typography>
-                                <Typography>{viewData?.plan_name || 'N/A'}</Typography>
+                                <Typography>{viewData?.name || 'N/A'}</Typography>
 
                                 <Typography variant="subtitle2" color="text.secondary">Plan Type</Typography>
                                 <Typography>{viewData?.plan_type || 'N/A'}</Typography>
@@ -1050,10 +950,6 @@ const Subscription = () => {
                                 <Typography variant="subtitle2" color="text.secondary">Description</Typography>
                                 <Typography>{viewData?.description || 'N/A'}</Typography>
 
-                                <Typography variant="subtitle2" color="text.secondary">Price</Typography>
-                                <Typography>
-                                    {viewData?.price !== undefined ? viewData.price : 'N/A'}
-                                </Typography>
                             </Box>
                         </Grid>
 
@@ -1071,25 +967,19 @@ const Subscription = () => {
                                     gap: 2,
                                 }}
                             >
-                                <Typography variant="subtitle2" color="text.secondary">Start Date</Typography>
-                                <Typography>
-                                    {viewData?.start_date
-                                        ? new Date(viewData.start_date).toLocaleDateString('en-GB')
-                                        : 'N/A'}
-                                </Typography>
 
-                                <Typography variant="subtitle2" color="text.secondary">End Date</Typography>
+                                <Typography variant="subtitle2" color="text.secondary">Price</Typography>
                                 <Typography>
-                                    {viewData?.end_date
-                                        ? new Date(viewData.end_date).toLocaleDateString('en-GB')
-                                        : 'N/A'}
+                                    {viewData?.price !== undefined ? viewData.price : 'N/A'}
+                                </Typography>
+                                <Typography variant="subtitle2" color="text.secondary">Discount</Typography>
+                                <Typography>
+                                    {viewData?.discount || 'N/A'}
                                 </Typography>
 
                                 <Typography variant="subtitle2" color="text.secondary">Is Active</Typography>
                                 <Typography>{viewData?.is_active ? 'Yes' : 'No'}</Typography>
 
-                                <Typography variant="subtitle2" color="text.secondary">Vendor</Typography>
-                                <Typography>{viewData?.vendor || 'N/A'}</Typography>
                             </Box>
                         </Grid>
                     </Grid>
@@ -1121,16 +1011,16 @@ const Subscription = () => {
             >
                 <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: theme.palette.text.primary, }}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Delete Subscription
+                        Delete Subscription Plan
                     </Typography>
                 </DialogTitle>
                 <DialogContent sx={{ p: 3 }}>
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, p: 2, borderRadius: 1, mt: 2, color: theme.palette.text.primary, }}>
                         <IconAlertCircleFilled size={50} style={{ color: "red" }} />
                         <Typography variant="h6" sx={{ textAlign: "center", color: theme.palette.text.primary }}>
-                            Are you sure you want to Delete the Subscription:{" "}
+                            Are you sure you want to Delete the Subscription Plan:{" "}
                             <Box component="span" sx={{ color: "red", fontWeight: 600 }}>
-                                {deleteData.plan_name}&nbsp;
+                                {deleteData.name}&nbsp;
                             </Box>
                             ?
                         </Typography>
@@ -1157,4 +1047,4 @@ const Subscription = () => {
     );
 };
 
-export default Subscription;
+export default SubscriptionPlans;
