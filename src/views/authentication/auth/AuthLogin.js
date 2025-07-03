@@ -16,6 +16,8 @@ import { toast } from 'react-toastify';
 import { IconEye } from '@tabler/icons-react';
 import { IconEyeClosed } from '@tabler/icons-react';
 import { registerDevice } from '../../../utils/registerDevice'; // Adjust the relative path
+import { auth } from '../../../firebase'; // adjust path to your firebase.js
+import { signInWithCustomToken } from "firebase/auth";
 
 const AuthLogin = ({ title, subtitle, subtext }) => {
 
@@ -60,32 +62,36 @@ const handleSubmit = async () => {
         draggable: true,
       });
 
-      // ✅ Save tokens to localStorage
+      // Save tokens to localStorage
       localStorage.setItem('authTokens', JSON.stringify(data));
 
-      // ✅ Extract token from response
-      const tokenStr = data.token || data.access || data.access_token;
-      if (tokenStr) {
-        // ✅ Register FCM device
-        await registerDevice(tokenStr);
+      // Firebase custom token from backend response
+      const firebaseCustomToken = data.firebaseCustomToken; // <-- backend must send this
+
+      if (firebaseCustomToken) {
+        // Sign in Firebase Auth with custom token
+        await signInWithCustomToken(auth, firebaseCustomToken);
+        console.log("Firebase signed in with custom token");
       } else {
-        console.warn('No valid token found for FCM registration.');
+        console.warn("No firebase custom token received from backend.");
       }
 
-      // ✅ Handle mode: use backend's or preserve existing
+      // Your existing FCM registration, mode setting, theme sync, etc.
+      const tokenStr = data.token || data.access || data.access_token;
+      if (tokenStr) {
+        await registerDevice(tokenStr);
+      }
+
       const previousMode = localStorage.getItem('mode');
       const loginMode = data.mode !== undefined ? data.mode.toString() : previousMode || '0';
       localStorage.setItem('mode', loginMode);
 
-      // ✅ Sync theme after login
       const currentTheme = window.__themeMode;
       const targetTheme = loginMode === '1' ? 'dark' : 'light';
-
       if (currentTheme && currentTheme !== targetTheme) {
         window.__toggleTheme?.();
       }
 
-      // ✅ Navigate after short delay
       setTimeout(() => {
         navigate("/dashboard");
       }, 1500);
@@ -101,6 +107,7 @@ const handleSubmit = async () => {
     });
   }
 };
+
 
     return (
         <>

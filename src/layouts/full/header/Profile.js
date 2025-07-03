@@ -105,7 +105,7 @@ const Profile = () => {
         <Box mt={1} py={1} px={2}>
           <Button to="/auth/login" variant="outlined" color="primary" component={Link} fullWidth  onClick={async () => {
     localStorage.clear();
-    // await signOut(auth);
+    await signOut(auth);
   }}>
             Logout
           </Button>
