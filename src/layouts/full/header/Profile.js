@@ -152,7 +152,7 @@ const Profile = () => {
               {employeeData.username || 'Admin'}
             </Typography>
             <Typography variant="caption">
-              {userData.email}
+              {employeeData.email}
             </Typography>
           </Box>
         </Box>
