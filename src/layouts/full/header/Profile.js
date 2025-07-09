@@ -60,7 +60,7 @@ const Profile = () => {
 
     } catch (error) {
       // console.error("🔴 Failed to fetch employee data:", error);
-      toast.error("Failed to fetch employee details.");
+      // toast.error("Failed to fetch employee details.");
     } finally {
       setLoading(false);
     }
