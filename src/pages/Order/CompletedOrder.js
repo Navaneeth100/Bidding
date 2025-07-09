@@ -449,13 +449,13 @@ const [selectedImg, setSelectedImg] = useState(0);
                                             >
                                                 <TableCell align="center">{currentPage * rowsPerPage + index + 1}</TableCell>
                                                 {/* <TableCell align="center">{order.id}</TableCell> */}
-                                                <TableCell align="center">{order.vendor.first_name} {order.vendor?.last_name} </TableCell>
-                                                <TableCell align="center">{order.customer?.first_name} {order.customer?.last_name}</TableCell>
-                                                <TableCell align="center">{order.related_post.title}</TableCell>
-                                                <TableCell align="center">{new Date(order.start_date).toLocaleDateString()}</TableCell>
-                                                <TableCell align="center">{new Date(order.deadline).toLocaleDateString()}</TableCell>
-                                                <TableCell align="center">{order.final_amount} {order.related_post.currency}</TableCell>
-                                                <TableCell align="center">{order.pricing_method}</TableCell>
+                                                <TableCell align="center">{order?.vendor?.first_name} {order?.vendor?.last_name} </TableCell>
+                                                <TableCell align="center">{order.customer?.first_name} {order?.customer?.last_name}</TableCell>
+                                                <TableCell align="center">{order?.related_post?.title}</TableCell>
+                                                <TableCell align="center">{new Date(order?.start_date).toLocaleDateString()}</TableCell>
+                                                <TableCell align="center">{new Date(order?.deadline).toLocaleDateString()}</TableCell>
+                                                <TableCell align="center">{order?.final_amount} {order?.related_post?.currency}</TableCell>
+                                                <TableCell align="center">{order?.pricing_method}</TableCell>
 
                                                 <TableCell align="right">
                                                     <IconButton

@@ -111,12 +111,7 @@ export default function ChatPage() {
   const [otherTyping, setOtherTyping] = useState(false);
   const { access, firebase_token } = JSON.parse(localStorage.getItem('authTokens') || '{}');
 
-  // --- Notification permission ---
-  useEffect(() => {
-    if (window.Notification && Notification.permission !== 'granted') {
-      Notification.requestPermission();
-    }
-  }, []);
+
 
   // Load cached sidebar (instant)
   useEffect(() => {
@@ -273,7 +268,7 @@ export default function ChatPage() {
       });
     });
     return unsub;
-  // eslint-disable-next-line
+    // eslint-disable-next-line
   }, [myAppUserId, employees.length, selectedEmployee, isTyping]); // add isTyping!
 
   // Load messages and listen to typing
@@ -616,27 +611,31 @@ export default function ChatPage() {
                 >
                   <Badge
                     color="error"
-                    overlap="circular"
                     badgeContent={e.unread || 0}
                     invisible={!e.unread}
                     anchorOrigin={{
                       vertical: 'top',
                       horizontal: 'right',
                     }}
+                    sx={{
+                      '& .MuiBadge-badge': {
+                        transform: 'translate(1000%, -50%)', // move further out
+                      },
+                    }}
                   >
                     <Avatar
                       sx={{
                         mr: 2,
                         background: `linear-gradient(135deg, ${[
-                          '#ff9966,#ff5e62',
-                          '#36d1c4,#6d8efd',
-                          '#c471f5,#fa71cd',
-                          '#f7971e,#ffd200',
-                          '#43e97b,#38f9d7',
-                          '#fc6076,#ff9a44',
-                          '#30cfd0,#330867',
-                          '#f953c6,#b91d73',
-                        ][(e.username?.charCodeAt(0) || 65) % 8]
+                            '#ff9966,#ff5e62',
+                            '#36d1c4,#6d8efd',
+                            '#c471f5,#fa71cd',
+                            '#f7971e,#ffd200',
+                            '#43e97b,#38f9d7',
+                            '#fc6076,#ff9a44',
+                            '#30cfd0,#330867',
+                            '#f953c6,#b91d73',
+                          ][(e.username?.charCodeAt(0) || 65) % 8]
                           })`,
                         color: '#fff',
                         fontWeight: 700,
@@ -647,6 +646,7 @@ export default function ChatPage() {
                       {(e.username?.[0] || '?').toUpperCase()}
                     </Avatar>
                   </Badge>
+
                   <ListItemText
                     primary={e.username}
                     secondary={
