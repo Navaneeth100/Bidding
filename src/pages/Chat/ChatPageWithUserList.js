@@ -12,6 +12,7 @@ import {
   orderBy,
   serverTimestamp,
   doc,
+  getDoc,
   writeBatch,
   deleteDoc,
   updateDoc,
@@ -313,7 +314,10 @@ export default function ChatPage() {
         unsub = onSnapshot(
           query(collection(db, 'chats', chatDocId, 'messages'), orderBy('timestamp', 'asc')),
           (s) => {
-            const arr = s.docs.map((d) => d.data());
+            const arr = s.docs.map((docu) => ({
+              ...docu.data(),
+              docId: docu.id,
+            }));
             setMessages(arr);
             const myMsgs = arr.filter(m => m.senderId === myAppUserId);
             if (myMsgs.length) setLastMyMsgId(myMsgs[myMsgs.length - 1].id);
@@ -416,8 +420,10 @@ export default function ChatPage() {
 
     const text = msgInput.trim();
     if (!text || !selectedEmployee?.id) return;
+
     try {
       let id = chatId;
+
       if (!id) {
         const ref = await addDoc(collection(db, 'chats'), {
           users: [myAppUserId, selectedEmployee.id],
@@ -425,11 +431,14 @@ export default function ChatPage() {
         });
         id = ref.id;
         setChatId(id);
-        onSnapshot(query(collection(db, 'chats', id, 'messages'), orderBy('timestamp', 'asc')), (s) =>
-          setMessages(s.docs.map((d) => d.data())),
+        onSnapshot(
+          query(collection(db, 'chats', id, 'messages'), orderBy('timestamp', 'asc')),
+          (s) => setMessages(s.docs.map((d) => d.data()))
         );
       }
+
       const newMsgId = doc(collection(db, '_')).id;
+
       await addDoc(collection(db, 'chats', id, 'messages'), {
         id: newMsgId,
         senderId: myAppUserId,
@@ -439,23 +448,37 @@ export default function ChatPage() {
         timestamp: serverTimestamp(),
         read: false,
         chatId: id,
+
+        // 🔽 Soft delete flags (initially 0)
+        dltSender: 0,
+        dltReceiver: 0,
       });
+
       setLastMyMsgId(newMsgId);
       fetchSidebarData();
     } catch (e) {
-      //
+      console.error('Send message failed:', e);
     }
   };
 
-  const handleDelete = async (msgId) => {
-    if (!chatId) return;
-    try {
-      await deleteDoc(doc(db, 'chats', chatId, 'messages', msgId));
-      fetchSidebarData();
-    } catch (e) {
-      //
-    }
-  };
+const handleDelete = async (msgId) => {
+  if (!chatId) {
+    console.warn('handleDelete: no chatId available – cannot delete message', msgId);
+    return;
+  }
+  try {
+    console.log('Attempting to delete message:', msgId, 'in chat:', chatId);
+    await deleteDoc(doc(db, 'chats', chatId, 'messages', msgId));
+    console.log('Message deleted successfully:', msgId);
+    fetchSidebarData();
+  } catch (e) {
+    console.error('Error deleting message', msgId, 'in chat:', chatId, e);
+  }
+};
+
+
+
+
 
   const filteredEmployees = useMemo(
     () =>
@@ -627,15 +650,15 @@ export default function ChatPage() {
                       sx={{
                         mr: 2,
                         background: `linear-gradient(135deg, ${[
-                            '#ff9966,#ff5e62',
-                            '#36d1c4,#6d8efd',
-                            '#c471f5,#fa71cd',
-                            '#f7971e,#ffd200',
-                            '#43e97b,#38f9d7',
-                            '#fc6076,#ff9a44',
-                            '#30cfd0,#330867',
-                            '#f953c6,#b91d73',
-                          ][(e.username?.charCodeAt(0) || 65) % 8]
+                          '#ff9966,#ff5e62',
+                          '#36d1c4,#6d8efd',
+                          '#c471f5,#fa71cd',
+                          '#f7971e,#ffd200',
+                          '#43e97b,#38f9d7',
+                          '#fc6076,#ff9a44',
+                          '#30cfd0,#330867',
+                          '#f953c6,#b91d73',
+                        ][(e.username?.charCodeAt(0) || 65) % 8]
                           })`,
                         color: '#fff',
                         fontWeight: 700,
@@ -932,7 +955,7 @@ export default function ChatPage() {
                             },
                           }}
                           onClick={() => {
-                            handleDelete(m.id);
+                            handleDelete(m.docId);
                             setShowDeleteFor(null);
                           }}
                         >
@@ -942,7 +965,8 @@ export default function ChatPage() {
                     </motion.div>
                   );
                 })}
-                {/* Typing indicator */}
+
+
                 {otherTyping && (
                   <Box
                     sx={{
