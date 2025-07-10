@@ -4,6 +4,7 @@ import OngoingOrder from './OngoingOrder';
 import Order from './Order';
 import CompletedOrders from './CompletedOrder';
 import CancelledOrders from './CancelledOrders';
+import PendingOrders from "./PendingOrders";
 function CompletedPage() {
   return <div>Completed Page Content</div>;
 }
@@ -13,12 +14,13 @@ function CancelledPage() {
 
 // Color codes for each tab
 const PAGES = [
-  { label: "Ongoing", color: "#f59e42", component: <OngoingOrder /> },   // Orange-500
-  { label: "Active", color: "#22c55e", component: <Order /> },    
-  { label: "Cancelled", color: "#dc2626", component: <CancelledOrders />},       // Green-500
-  { label: "Completed", color: "#3b82f6", component: <CompletedOrders />}, // Blue-500
-   // Red-600
+  { label: "Ongoing", color: "#facc15", component: <OngoingOrder /> },      // Yellow-400
+  { label: "Pending", color: "#f97316", component: <PendingOrders /> },     // Orange-500
+  { label: "Active", color: "#22c55e", component: <Order /> },              // Green-500
+  { label: "Cancelled", color: "#ef4444", component: <CancelledOrders /> }, // Red-500
+  { label: "Completed", color: "#3b82f6", component: <CompletedOrders /> }, // Blue-500
 ];
+
 
 const TAB_INDEX_KEY = "simpleTabsOnly.activeTabIndex";
 
