@@ -111,6 +111,8 @@ export default function ChatPage() {
   const [lastMyMsgId, setLastMyMsgId] = useState(null);
   const [otherTyping, setOtherTyping] = useState(false);
   const { access, firebase_token } = JSON.parse(localStorage.getItem('authTokens') || '{}');
+  const [editingMsgId, setEditingMsgId] = useState(null);
+  const [editInput, setEditInput] = useState('');
 
 
 
@@ -461,20 +463,20 @@ export default function ChatPage() {
     }
   };
 
-const handleDelete = async (msgId) => {
-  if (!chatId) {
-    console.warn('handleDelete: no chatId available – cannot delete message', msgId);
-    return;
-  }
-  try {
-    console.log('Attempting to delete message:', msgId, 'in chat:', chatId);
-    await deleteDoc(doc(db, 'chats', chatId, 'messages', msgId));
-    console.log('Message deleted successfully:', msgId);
-    fetchSidebarData();
-  } catch (e) {
-    console.error('Error deleting message', msgId, 'in chat:', chatId, e);
-  }
-};
+  const handleDelete = async (msgId) => {
+    if (!chatId) {
+      console.warn('handleDelete: no chatId available – cannot delete message', msgId);
+      return;
+    }
+    try {
+      console.log('Attempting to delete message:', msgId, 'in chat:', chatId);
+      await deleteDoc(doc(db, 'chats', chatId, 'messages', msgId));
+      console.log('Message deleted successfully:', msgId);
+      fetchSidebarData();
+    } catch (e) {
+      console.error('Error deleting message', msgId, 'in chat:', chatId, e);
+    }
+  };
 
 
 

@@ -49,6 +49,8 @@ const Tickets = Loadable(lazy(() => import('../pages/Services/Tickets')));
 const TicketChat = Loadable(lazy(() => import('../pages/Services/TicketChat')));
 const Subscriptions = Loadable(lazy(() => import('../pages/Services/Subscription')));
 const SubscriptionPlans = Loadable(lazy(() => import('../pages/Services/SubscriptionPlans')));
+const Paymenttransactions = Loadable(lazy(() => import('../pages/Services/Payment-transactions')));
+const Subscriptioninvoices = Loadable(lazy(() => import('../pages/Services/SubscriptionInvoices')));
 
 const user = JSON.parse(localStorage.getItem('authTokens'));
 const Router = [
@@ -91,6 +93,9 @@ const Router = [
       { path: '/ticket_chat/:id', exact: true, element: <TicketChat /> },
       { path: '/subscriptions', exact: true, element: <Subscriptions /> },
       { path: '/subscription_plans', exact: true, element: <SubscriptionPlans /> },
+      { path: '/payment-transactions', exact: true, element: <Paymenttransactions /> },
+      { path: '/subscript-ioninvoices', exact: true, element: <Subscriptioninvoices /> },
+
       // { path: '/ui/typography', exact: true, element: <TypographyPage /> },
       // { path: '/ui/shadow', exact: true, element: <Shadow /> },
       { path: '*', element: <Navigate to="/auth/404" replace /> },
