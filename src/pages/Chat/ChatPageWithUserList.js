@@ -146,86 +146,89 @@ export default function ChatPage() {
   }, [firebase_token]);
 
   // Fetch all sidebar data and cache it
+  // Simplified fetchSidebarData:
   const fetchSidebarData = async () => {
     setLoadingPage(true);
-    const empRes = await axios.get(`${url}/auth/employees/?data=list`, {
-      headers: { Authorization: `Bearer ${access}` },
-    });
-    const rawList = empRes.data;
-    let list = myAppUserId ? rawList.filter((e) => e.id !== myAppUserId) : rawList;
-    list = list.map(e => ({
-      ...e,
-      lastMsg: '',
-      lastMsgObj: null,
-      lastMsgTime: null,
-      chatDocId: null,
-      unread: 0,
-      loadingMsg: true,
-    }));
-    setEmployees(list);
-
-    const chatQ = query(collection(db, 'chats'), where('users', 'array-contains', myAppUserId));
-    const chatSnap = await getDocs(chatQ);
-
-    let chatMap = {};
-    chatSnap.forEach(docu => {
-      const users = docu.data().users;
-      const otherId = users.find(u => u !== myAppUserId);
-      if (otherId) chatMap[otherId] = docu.id;
-    });
-
-    const updated = [...list];
-    for (let i = 0; i < updated.length; i++) {
-      const e = updated[i];
-      let chatId = chatMap[e.id];
-      let lastMsgObj = null, lastMsg = '', lastMsgTime = null, unread = 0;
-      if (chatId) {
-        const msgSnap = await getDocs(query(
-          collection(db, 'chats', chatId, 'messages'),
-          orderBy('timestamp', 'desc')
-        ));
-        if (!msgSnap.empty) {
-          lastMsgObj = msgSnap.docs[0].data();
-          lastMsg = lastMsgObj.content;
-          lastMsgTime = lastMsgObj.timestamp;
-        }
-        const unreadSnap = await getDocs(query(
-          collection(db, 'chats', chatId, 'messages'),
-          where('receiverId', '==', myAppUserId),
-          where('senderId', '==', e.id),
-          where('read', '==', false)
-        ));
-        unread = unreadSnap.size;
-      }
-      updated[i] = {
-        ...e,
-        chatDocId: chatId || null,
-        lastMsgObj,
-        lastMsg,
-        lastMsgTime,
-        unread,
-        loadingMsg: false,
-      };
-      setEmployees(prev => {
-        const arr = [...prev];
-        arr[i] = updated[i];
-        arr.sort((a, b) => {
-          const tA = a.lastMsgTime?.seconds || 0;
-          const tB = b.lastMsgTime?.seconds || 0;
-          return tB - tA;
-        });
-        return arr;
+    try {
+      const empRes = await axios.get(`${url}/auth/employees/?data=list`, {
+        headers: { Authorization: `Bearer ${access}` },
       });
+      let list = empRes.data;
+      if (myAppUserId) list = list.filter(e => e.id !== myAppUserId);
+
+      // Fetch all chats involving me
+      const chatQ = query(collection(db, 'chats'), where('users', 'array-contains', myAppUserId));
+      const chatSnap = await getDocs(chatQ);
+
+      // Map of otherUserId => chatDocId
+      let chatMap = {};
+      chatSnap.forEach(docu => {
+        const users = docu.data().users || [];
+        const otherId = users.find(u => u !== myAppUserId);
+        if (otherId) chatMap[otherId] = docu.id;
+      });
+
+      // For each employee, get last message & unread count in one go
+      // Prepare promises
+      const empPromises = list.map(async (e) => {
+        const chatDocId = chatMap[e.id];
+        if (!chatDocId) {
+          return {
+            ...e,
+            lastMsg: '',
+            lastMsgTime: null,
+            unread: 0,
+            chatDocId: null,
+            lastMsgObj: null,
+          };
+        }
+        // Get last message
+        const msgSnap = await getDocs(
+          query(collection(db, 'chats', chatDocId, 'messages'), orderBy('timestamp', 'desc'), /*limit 1?*/)
+        );
+
+        const lastMsgObj = msgSnap.empty ? null : msgSnap.docs[0].data();
+        const lastMsg = lastMsgObj?.content || '';
+        const lastMsgTime = lastMsgObj?.timestamp || null;
+
+        // Count unread messages
+        const unreadSnap = await getDocs(
+          query(
+            collection(db, 'chats', chatDocId, 'messages'),
+            where('receiverId', '==', myAppUserId),
+            where('senderId', '==', e.id),
+            where('read', '==', false)
+          )
+        );
+
+        return {
+          ...e,
+          lastMsg,
+          lastMsgTime,
+          unread: unreadSnap.size,
+          chatDocId,
+          lastMsgObj,
+        };
+      });
+
+      const updated = await Promise.all(empPromises);
+
+      // Sort by last message timestamp descending
+      updated.sort((a, b) => {
+        const tA = a.lastMsgTime?.seconds || 0;
+        const tB = b.lastMsgTime?.seconds || 0;
+        return tB - tA;
+      });
+
+      setEmployees(updated);
+      localStorage.setItem('chatSidebarCache', JSON.stringify(updated));
+    } catch (e) {
+      console.error('Failed to fetch sidebar data:', e);
+    } finally {
+      setLoadingPage(false);
     }
-    updated.sort((a, b) => {
-      const tA = a.lastMsgTime?.seconds || 0;
-      const tB = b.lastMsgTime?.seconds || 0;
-      return tB - tA;
-    });
-    setEmployees(updated);
-    localStorage.setItem('chatSidebarCache', JSON.stringify(updated));
-    setLoadingPage(false);
   };
+
 
   // Fetch sidebar after login
   useEffect(() => {
@@ -243,7 +246,6 @@ export default function ChatPage() {
       where('receiverId', '==', myAppUserId)
     );
 
-    let lastNotified = {};
     const unsub = onSnapshot(q, (snap) => {
       fetchSidebarData();
       // Show notification for added docs (not if you are the sender)
@@ -601,212 +603,116 @@ export default function ChatPage() {
           />
         </Box>
         <List sx={{ flex: 1, p: 1 }}>
-          {filteredEmployees.map((e) =>
-            e.lastMsg && !e.loadingMsg ? (
-              <Tooltip
-                key={e.id}
-                title={
-                  <Typography sx={{ fontWeight: 500 }}>
-                    {e.lastMsgObj?.senderId === myAppUserId ? 'You: ' : ''}
-                    {e.lastMsg}
-                  </Typography>
-                }
-                placement="right"
-                arrow
-              >
-                <ListItemButton
-                  selected={selectedEmployee?.id === e.id}
-                  onClick={() => setSelectedEmployee(e)}
+          {filteredEmployees.map((e) => (
+            <ListItemButton
+              key={e.id}
+              selected={selectedEmployee?.id === e.id}
+              onClick={() => setSelectedEmployee(e)}
+              sx={{
+                borderRadius: 2,
+                my: 0.5,
+                px: 2,
+                transition: 'background 0.2s, color 0.2s',
+                '&.Mui-selected': {
+                  bgcolor: theme.palette.primary.main,
+                  color: theme.palette.primary.contrastText,
+                  '&:hover': {
+                    bgcolor: theme.palette.primary.dark,
+                  },
+                },
+                '&:hover': {
+                  bgcolor: theme.palette.action.hover,
+                },
+              }}
+            >
+                   <Avatar
+                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                   sx={{
-                    borderRadius: 2,
-                    my: 0.5,
-                    px: 2,
-                    transition: 'background 0.2s, color 0.2s',
-                    '&.Mui-selected': {
-                      bgcolor: theme.palette.primary.main,
-                      color: theme.palette.primary.contrastText,
-                      '&:hover': {
-                        bgcolor: theme.palette.primary.dark,
-                      },
-                    },
-                    '&:hover': {
-                      bgcolor: theme.palette.action.hover,
-                    },
+                    mr: 2,
+                    background: `linear-gradient(135deg, ${[
+                      '#ff9966,#ff5e62',
+                      '#36d1c4,#6d8efd',
+                      '#c471f5,#fa71cd',
+                      '#f7971e,#ffd200',
+                      '#43e97b,#38f9d7',
+                      '#fc6076,#ff9a44',
+                      '#30cfd0,#330867',
+                      '#f953c6,#b91d73',
+                    ][(e.username?.charCodeAt(0) || 65) % 8]
+                      })`,
+                    color: '#fff',
+                    fontWeight: 700,
+                    border: `2px solid ${theme.palette.background.paper}`,
+                    boxShadow: theme.shadows[2],
                   }}
                 >
-                  <Badge
-                    color="error"
-                    badgeContent={e.unread || 0}
-                    invisible={!e.unread}
-                    anchorOrigin={{
-                      vertical: 'top',
-                      horizontal: 'right',
-                    }}
-                    sx={{
-                      '& .MuiBadge-badge': {
-                        transform: 'translate(1000%, -50%)', // move further out
-                      },
-                    }}
-                  >
-                    <Avatar
-                      sx={{
-                        mr: 2,
-                        background: `linear-gradient(135deg, ${[
-                          '#ff9966,#ff5e62',
-                          '#36d1c4,#6d8efd',
-                          '#c471f5,#fa71cd',
-                          '#f7971e,#ffd200',
-                          '#43e97b,#38f9d7',
-                          '#fc6076,#ff9a44',
-                          '#30cfd0,#330867',
-                          '#f953c6,#b91d73',
-                        ][(e.username?.charCodeAt(0) || 65) % 8]
-                          })`,
-                        color: '#fff',
-                        fontWeight: 700,
-                        border: `2px solid ${theme.palette.background.paper}`,
-                        boxShadow: theme.shadows[2],
-                      }}
-                    >
-                      {(e.username?.[0] || '?').toUpperCase()}
-                    </Avatar>
-                  </Badge>
-
-                  <ListItemText
-                    primary={e.username}
-                    secondary={
-                      <Box sx={{
-                        width: '95%',
-                        whiteSpace: 'nowrap',
-                        textOverflow: 'ellipsis',
-                        overflow: 'hidden',
-                        fontSize: 13,
-                        color: 'text.secondary',
-                        display: 'inline-block'
-                      }}>
-                        {e.lastMsgObj?.senderId === myAppUserId ? (
-                          <>
-                            <span style={{ color: theme.palette.text.secondary, fontWeight: 600 }}>You: </span>
-                            {e.lastMsg}
-                          </>
-                        ) : (
-                          e.lastMsg
-                        )}
-                      </Box>
-                    }
-                    primaryTypographyProps={{ fontWeight: 600 }}
-                  />
-                </ListItemButton>
-              </Tooltip>
-            ) : (
-              <ListItemButton
-                key={e.id}
-                selected={selectedEmployee?.id === e.id}
-                onClick={() => setSelectedEmployee(e)}
+                  {(e.username?.[0] || '?').toUpperCase()}
+                </Avatar>
+              <Badge
+                color="error"
+                badgeContent={e.unread || 0}
+                invisible={!e.unread}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                 sx={{
-                  borderRadius: 2,
-                  my: 0.5,
-                  px: 2,
-                  transition: 'background 0.2s, color 0.2s',
-                  '&.Mui-selected': {
-                    bgcolor: theme.palette.primary.main,
-                    color: theme.palette.primary.contrastText,
-                    '&:hover': {
-                      bgcolor: theme.palette.primary.dark,
-                    },
-                  },
-                  '&:hover': {
-                    bgcolor: theme.palette.action.hover,
-                  },
+                  left: 200,
+                  Top:100  // Moves 20px from the right edge
                 }}
               >
-                <Badge
-                  color="error"
-                  overlap="circular"
-                  badgeContent={e.unread || 0}
-                  invisible={!e.unread}
-                  anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                >
-                  <Avatar
-                    sx={{
-                      mr: 2,
-                      background: `linear-gradient(135deg, ${[
-                        '#ff9966,#ff5e62',
-                        '#36d1c4,#6d8efd',
-                        '#c471f5,#fa71cd',
-                        '#f7971e,#ffd200',
-                        '#43e97b,#38f9d7',
-                        '#fc6076,#ff9a44',
-                        '#30cfd0,#330867',
-                        '#f953c6,#b91d73',
-                      ][(e.username?.charCodeAt(0) || 65) % 8]
-                        })`,
-                      color: '#fff',
-                      fontWeight: 700,
-                      border: `2px solid ${theme.palette.background.paper}`,
-                      boxShadow: theme.shadows[2],
-                    }}
-                  >
-                    {(e.username?.[0] || '?').toUpperCase()}
-                  </Avatar>
-                </Badge>
-                <ListItemText
-                  primary={e.username}
-                  secondary={
-                    e.loadingMsg ? (
-                      <Skeleton
-                        variant="text"
-                        width={90}
-                        height={10}
-                        sx={{
-                          fontSize: '1rem',
-                          bgcolor: theme.palette.mode === 'dark' ? '#272930' : '#ececec',
-                        }}
-                      />
-                    ) : e.lastMsg ? (
-                      <Box sx={{
+           
+              </Badge>
+              <ListItemText
+                primary={e.username}
+                secondary={
+                  e.lastMsg ? (
+                    <Box
+                      sx={{
                         width: '95%',
                         whiteSpace: 'nowrap',
                         textOverflow: 'ellipsis',
                         overflow: 'hidden',
                         fontSize: 13,
                         color: 'text.secondary',
-                        display: 'inline-block'
-                      }}>
-                        {e.lastMsgObj?.senderId === myAppUserId ? (
-                          <>
-                            <span style={{ color: theme.palette.text.secondary, fontWeight: 600 }}>You: </span>
-                            {e.lastMsg}
-                          </>
-                        ) : (
-                          e.lastMsg
-                        )}
-                      </Box>
-                    ) : (
-                      (!selectedEmployee || selectedEmployee.id !== e.id) && (
-                        <Box sx={{
-                          width: '95%',
-                          whiteSpace: 'nowrap',
-                          textOverflow: 'ellipsis',
-                          overflow: 'hidden',
-                          fontSize: 13,
-                          color: 'text.secondary',
-                          display: 'inline-block'
-                        }}>
-                          <span style={{ color: '#ccc' }}>No messages yet</span>
-                        </Box>
-                      )
-                    )
-                  }
-                  primaryTypographyProps={{ fontWeight: 600 }}
-                />
-              </ListItemButton>
-            )
-          )}
+                        display: 'inline-block',
+                      }}
+                    >
+                      {e.lastMsgObj?.senderId === myAppUserId ? (
+                        <>
+                          <span
+                            style={{
+                              color: theme.palette.text.secondary,
+                              fontWeight: 600,
+                            }}
+                          >
+                            You:{' '}
+                          </span>
+                          {e.lastMsg}
+                        </>
+                      ) : (
+                        e.lastMsg
+                      )}
+                    </Box>
+                  ) : (
+                    <Box
+                      sx={{
+                        width: '95%',
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        overflow: 'hidden',
+                        fontSize: 13,
+                        color: '#ccc',
+                        display: 'inline-block',
+                      }}
+                    >
+                      No messages yet
+                    </Box>
+                  )
+                }
+                primaryTypographyProps={{ fontWeight: 600 }}
+              />
+            </ListItemButton>
+          ))}
         </List>
+
       </Paper>
 
       {/* Chat pane */}

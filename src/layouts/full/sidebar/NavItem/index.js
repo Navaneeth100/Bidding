@@ -1,7 +1,4 @@
-/* ------------------------------------------------------
-   src/layouts/full/sidebar/NavItem.js
-   ------------------------------------------------------ */
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import {
@@ -16,16 +13,12 @@ import {
 } from '@mui/material';
 import { IconChevronRight, IconChevronDown } from '@tabler/icons-react';
 
-/* ---------- colour helpers ---------- */
 const getColours = (theme) => ({
-  highlight: theme.palette.primary.main,          // ZDCO green
-  parentBg: theme.palette.action.selected,        // grey pill background
+  highlight: theme.palette.primary.main,
+  parentBg: theme.palette.action.selected,
   muted: theme.palette.text.secondary,
 });
 
-/* ======================================================
-   STYLED LIST-ITEM
-   ====================================================== */
 const StyledItem = styled(ListItem, {
   shouldForwardProp: (prop) => prop !== 'ownerState',
 })(({ theme, ownerState }) => {
@@ -34,75 +27,67 @@ const StyledItem = styled(ListItem, {
 
   return {
     transition: 'none !important',
-    /* -------- layout spacing -------- */
     whiteSpace: 'nowrap',
-    marginBottom: collapsed ? theme.spacing(0.25)        // 16 px gap when collapsed
-                            : theme.spacing(0.25),     // 4 px when expanded
-    padding: collapsed ? theme.spacing(1)             // icon pill
-                       : theme.spacing(1, 1.5),       // full-width row
+    marginBottom: theme.spacing(0.25),
+    padding: collapsed ? theme.spacing(1) : theme.spacing(1, 1.5),
 
-    /* extra left indent for children (open sidebar) */
     ...(level > 0 && !collapsed && {
-      paddingLeft: theme.spacing(3),     
-                   // 32 px
+      paddingLeft: theme.spacing(3),
     }),
-  
+
     borderRadius: theme.shape.borderRadius * 2,
     justifyContent: collapsed ? 'center' : 'flex-start',
 
-    /* -------- parent row (e.g. “Driver”) -------- */
     ...(level === 0 && {
       backgroundColor: parentBg,
       color: highlight,
-      marginTop:"9px"
+      marginTop: '9px',
     }),
 
-    /* -------- child rows -------- */
     ...(level > 0 && {
       backgroundColor: 'transparent',
       color: active ? highlight : muted,
       '& .MuiTypography-root': {
-        fontSize: theme.typography.body2.fontSize, 
-           // smaller font
+        fontSize: theme.typography.body2.fontSize,
       },
     }),
 
-    /* -------- hover -------- */
     '&:hover': {
       backgroundColor: level === 0 ? parentBg : 'transparent',
       color: highlight,
     },
 
-    /* -------- first top-level item margin (collapsed) -------- */
     ...(collapsed &&
       level === 0 && {
         '&:first-of-type': {
-          marginTop: theme.spacing(2),  
-                        // 32 px space above the first icon
+          marginTop: theme.spacing(2),
         },
       }),
   };
 });
 
-/* ======================================================
-   COMPONENT
-   ====================================================== */
 const NavItem = ({
   item,
   pathDirect,
   collapsed,
   level = 0,
   onClick,
+  openId,
+  setOpenId,
 }) => {
   const theme = useTheme();
-  const [open, setOpen] = useState(false);
 
-  const Icon = item.icon;
+  // Determine if this item is open
+  const isOpen = openId === item.id;
+
+  const toggleOpen = () => {
+    if (item.children) {
+      setOpenId(isOpen ? null : item.id);
+    }
+  };
+
   const isActive = pathDirect === item.href;
 
-  const toggleOpen = () => item.children && setOpen((prev) => !prev);
-
-  /* ---------- list-item button ---------- */
   const Button = (
     <StyledItem
       button
@@ -116,6 +101,8 @@ const NavItem = ({
         toggleOpen();
         onClick?.(e);
       }}
+      aria-expanded={item.children ? isOpen : undefined}
+      aria-controls={item.children ? `submenu-${item.id}` : undefined}
     >
       <ListItemIcon
         sx={{
@@ -124,14 +111,18 @@ const NavItem = ({
           justifyContent: 'center',
         }}
       >
-        {React.isValidElement(item.icon) ? item.icon : <item.icon size="1.25rem" stroke={1.5} />}
+        {React.isValidElement(item.icon) ? (
+          item.icon
+        ) : item.icon ? (
+          <item.icon size="1.25rem" stroke={1.5} />
+        ) : null}
       </ListItemIcon>
 
       {!collapsed && (
         <>
           <ListItemText primary={item.title} />
           {item.children &&
-            (open ? (
+            (isOpen ? (
               <IconChevronDown size="1rem" />
             ) : (
               <IconChevronRight size="1rem" />
@@ -141,7 +132,6 @@ const NavItem = ({
     </StyledItem>
   );
 
-  /* ---------- tooltip when collapsed ---------- */
   const WrappedButton = collapsed ? (
     <Tooltip title={item.title} placement="right" arrow>
       {Button}
@@ -150,16 +140,19 @@ const NavItem = ({
     Button
   );
 
-  /* ---------- render ---------- */
   return (
     <>
       <List component="li" disablePadding>
         {WrappedButton}
       </List>
 
-      {/* nested children — only shown when sidebar is open */}
       {item.children && (
-        <Collapse in={open && !collapsed} timeout="auto" unmountOnExit>
+        <Collapse
+          in={isOpen && !collapsed}
+          timeout="auto"
+          unmountOnExit
+          id={`submenu-${item.id}`}
+        >
           <List component="div" disablePadding>
             {item.children.map((child) => (
               <NavItem
@@ -168,6 +161,9 @@ const NavItem = ({
                 pathDirect={pathDirect}
                 collapsed={collapsed}
                 level={level + 1}
+                onClick={onClick}
+                openId={openId}
+                setOpenId={setOpenId}
               />
             ))}
           </List>
@@ -183,6 +179,8 @@ NavItem.propTypes = {
   collapsed: PropTypes.bool,
   level: PropTypes.number,
   onClick: PropTypes.func,
+  openId: PropTypes.string,
+  setOpenId: PropTypes.func,
 };
 
 export default NavItem;
