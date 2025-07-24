@@ -49,6 +49,9 @@ import { url } from '../../../mainurl';
 import DoneIcon from '@mui/icons-material/Done';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import { motion, useAnimation } from 'framer-motion';
+import Picker from '@emoji-mart/react';
+import data from '@emoji-mart/data';
+import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDSJ8r73OsF3b0aF27JzoHjHVfKHkYDMTs',
@@ -113,6 +116,7 @@ export default function ChatPage() {
   const { access, firebase_token } = JSON.parse(localStorage.getItem('authTokens') || '{}');
   const [editingMsgId, setEditingMsgId] = useState(null);
   const [editInput, setEditInput] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
 
 
@@ -480,6 +484,9 @@ export default function ChatPage() {
     }
   };
 
+  useEffect(() => {
+    setShowEmojiPicker(false);
+  }, [selectedEmployee]);
 
 
 
@@ -625,29 +632,29 @@ export default function ChatPage() {
                 },
               }}
             >
-                   <Avatar
-                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                  sx={{
-                    mr: 2,
-                    background: `linear-gradient(135deg, ${[
-                      '#ff9966,#ff5e62',
-                      '#36d1c4,#6d8efd',
-                      '#c471f5,#fa71cd',
-                      '#f7971e,#ffd200',
-                      '#43e97b,#38f9d7',
-                      '#fc6076,#ff9a44',
-                      '#30cfd0,#330867',
-                      '#f953c6,#b91d73',
-                    ][(e.username?.charCodeAt(0) || 65) % 8]
-                      })`,
-                    color: '#fff',
-                    fontWeight: 700,
-                    border: `2px solid ${theme.palette.background.paper}`,
-                    boxShadow: theme.shadows[2],
-                  }}
-                >
-                  {(e.username?.[0] || '?').toUpperCase()}
-                </Avatar>
+              <Avatar
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                sx={{
+                  mr: 2,
+                  background: `linear-gradient(135deg, ${[
+                    '#ff9966,#ff5e62',
+                    '#36d1c4,#6d8efd',
+                    '#c471f5,#fa71cd',
+                    '#f7971e,#ffd200',
+                    '#43e97b,#38f9d7',
+                    '#fc6076,#ff9a44',
+                    '#30cfd0,#330867',
+                    '#f953c6,#b91d73',
+                  ][(e.username?.charCodeAt(0) || 65) % 8]
+                    })`,
+                  color: '#fff',
+                  fontWeight: 700,
+                  border: `2px solid ${theme.palette.background.paper}`,
+                  boxShadow: theme.shadows[2],
+                }}
+              >
+                {(e.username?.[0] || '?').toUpperCase()}
+              </Avatar>
               <Badge
                 color="error"
                 badgeContent={e.unread || 0}
@@ -655,10 +662,10 @@ export default function ChatPage() {
                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                 sx={{
                   left: 200,
-                  Top:100  // Moves 20px from the right edge
+                  Top: 100  // Moves 20px from the right edge
                 }}
               >
-           
+
               </Badge>
               <ListItemText
                 primary={e.username}
@@ -940,6 +947,21 @@ export default function ChatPage() {
               boxShadow: '0 -1px 8px 0 rgba(0,0,0,0.04)',
             }}
           >
+            <IconButton onClick={() => setShowEmojiPicker((prev) => !prev)}>
+              <EmojiEmotionsIcon color="primary" />
+            </IconButton>
+
+            <Box sx={{ position: 'relative' }}>
+              {showEmojiPicker && (
+                <Box sx={{ position: 'absolute', bottom: '50px', left: 0, zIndex: 10 }}>
+                  <Picker data={data} onEmojiSelect={(e) => {
+                    setMsgInput((prev) => prev + e.native);
+                    setShowEmojiPicker(false);
+                  }} />
+                </Box>
+              )}
+            </Box>
+
             <TextField
               fullWidth
               size="medium"
@@ -955,6 +977,7 @@ export default function ChatPage() {
                 input: { py: 1.3 },
               }}
             />
+
             <Button
               variant="contained"
               sx={{
