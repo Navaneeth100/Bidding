@@ -231,10 +231,10 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
             mb={1}
             sx={{ color: '#3b4d61' }}
           >
-            Pin
+            {/* Pin */}
           </Typography>
           <Typography variant="body1" color="text.secondary" mb={4}>
-            Get access to the recipes now, become a member today
+            {/* Get access to the recipes now, become a member today */}
           </Typography>
 
           <form>

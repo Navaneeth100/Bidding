@@ -1,16 +1,15 @@
-import React from "react"
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { url } from "../../../mainurl";
+
 import {
   Box,
-  Container,
-  Grid,
   Typography,
   Avatar,
   Button,
   Card,
   CardContent,
   CardHeader,
-  Divider,
   List,
   ListItem,
   ListItemAvatar,
@@ -18,36 +17,46 @@ import {
   IconButton,
   Chip,
   LinearProgress,
-  Tab,
-  Tabs,
+  Tooltip,
+  Badge,
+  useTheme,
+  Skeleton,
   Menu,
   MenuItem,
-  useTheme,
-  useMediaQuery,
-  Skeleton,
-} from "@mui/material"
+} from "@mui/material";
+import { darken } from "@mui/material/styles";
 import {
   TrendingUp,
-  People,
   AttachMoney,
   BarChart as BarChartIcon,
   MoreVert,
-  ArrowUpward,
   ArrowDownward,
-  CheckCircle,
-  Schedule,
-  CalendarToday,
+  ArrowUpward,
   Refresh,
-  FilterList,
   Download,
-} from "@mui/icons-material"
+  Star,
+  Cancel,
+  SupervisorAccount,
+  ReceiptLong,
+  Person,
+  Store,
+  LocalAtm,
+  Insights,
+  ShowChart,
+  InsertChart,
+  EmojiEvents,
+  Leaderboard,
+  Dashboard as DashboardIcon,
+  AccountTree,
+  PersonAdd,
+} from "@mui/icons-material";
 import {
   AreaChart,
   Area,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -55,568 +64,880 @@ import {
   BarChart,
   Bar,
   Legend,
-} from "recharts"
+  RadialBarChart,
+  RadialBar,
+} from "recharts";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-// Mock data for the dashboard
-const fetchDashboardData = () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        user: {
-          name: "Admin",
-          role: "Product Manager",
-          avatar: "/placeholder.svg?height=128&width=128",
-          email: "alex.johnson@example.com",
-          notifications: 5,
-        },
-        stats: {
-          revenue: 24580,
-          revenueIncrease: 12.5,
-          users: 1250,
-          usersIncrease: 18.2,
-          orders: 520,
-          conversion: 28.6,
-          conversionIncrease: 4.6,
-        },
-        revenueData: [
-          { name: "Jan", value: 4000 },
-          { name: "Feb", value: 3000 },
-          { name: "Mar", value: 5000 },
-          { name: "Apr", value: 4000 },
-          { name: "May", value: 6000 },
-          { name: "Jun", value: 5500 },
-          { name: "Jul", value: 7000 },
-          { name: "Aug", value: 8000 },
-          { name: "Sep", value: 7500 },
-          { name: "Oct", value: 9000 },
-          { name: "Nov", value: 8500 },
-          { name: "Dec", value: 10000 },
-        ],
-        trafficData: [
-          { name: "Direct", value: 35 },
-          { name: "Social", value: 25 },
-          { name: "Referral", value: 20 },
-          { name: "Organic", value: 15 },
-          { name: "Other", value: 5 },
-        ],
-        deviceData: [
-          { name: "Desktop", value: 55 },
-          { name: "Mobile", value: 35 },
-          { name: "Tablet", value: 10 },
-        ],
-        recentTransactions: [
-          { id: 1, customer: "John Doe", status: "Completed", date: "2023-10-15" },
-          { id: 2, customer: "Jane Smith", status: "Pending", date: "2023-10-14" },
-          { id: 3, customer: "Robert Johnson", status: "Completed", date: "2023-10-13" },
-          { id: 4, customer: "Emily Davis", status: "Failed", date: "2023-10-12" },
-          { id: 5, customer: "Michael Brown", amount: 540, status: "Completed", date: "2023-10-11" },
-        ],
-        tasks: [
-          { id: 1, title: "Review marketing strategy", status: "Completed", dueDate: "2023-10-10" },
-          { id: 2, title: "Prepare quarterly report", status: "In Progress", dueDate: "2023-10-20" },
-          { id: 3, title: "Update product roadmap", status: "Pending", dueDate: "2023-10-25" },
-          { id: 4, title: "Customer feedback analysis", status: "In Progress", dueDate: "2023-10-18" },
-        ],
-        performance: {
-          sales: 78,
-          marketing: 65,
-          support: 82,
-          development: 91,
-        },
-      })
-    }, 1000) // Simulate network delay
-  })
-}
+/*
+ * This component extends the original dashboard by adding several new
+ * statistic cards and comparative charts.  New metrics include total
+ * users, active users last week, new vendors this month and total
+ * customers.  Additional charts visualize the breakdown of revenue vs
+ * commission vs subscription invoices across different time periods,
+ * and compare active versus cancelled orders and subscriptions.  The
+ * overall aesthetic is kept consistent with the existing cards and
+ * GlassCard styling while leveraging Material‑UI and Recharts for a
+ * responsive, modern interface.  See the README for more details on
+ * data shape expected from the API.
+ */
 
-// Stat Card Component
-const StatCard = ({ title, value, increase, icon, color }) => {
+// GlassCard with forwardRef
+const GlassCard = React.forwardRef(function GlassCard(
+  { children, color, hover = true, highlight, sx = {}, ...props },
+  ref
+) {
+  const theme = useTheme();
+  const glassBorder = `1.5px solid ${theme.palette.primary.light}44`;
+  const bg = color || theme.palette.background.paper;
+
   return (
-    <Card sx={{ height: "100%" }}>
-      <CardContent>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-              {title}
-            </Typography>
-            <Typography variant="h4" component="div" sx={{ fontWeight: "bold", mb: 1 }}>
-              {typeof value === "number" && title.includes("Revenue")
-                ? `$${value.toLocaleString()}`
-                : value.toLocaleString()}
-            </Typography>
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              {increase > 0 ? (
-                <ArrowUpward sx={{ fontSize: 16, color: "success.main", mr: 0.5 }} />
-              ) : (
-                <ArrowDownward sx={{ fontSize: 16, color: "error.main", mr: 0.5 }} />
-              )}
-              <Typography
-                variant="body2"
+    <Card
+      {...props}
+      ref={ref}
+      sx={{
+        background: bg,
+        border: glassBorder,
+        boxShadow: theme.shadows[1],
+        borderRadius: 5,
+        transition: "all 0.2s cubic-bezier(.4,2,.7,1)",
+        ...(hover && {
+          "&:hover": {
+            boxShadow: theme.shadows[6],
+            transform: "translateY(-4px) scale(1.022)",
+            borderColor: highlight ? theme.palette.warning.main : undefined,
+            background: color
+              ? darken(color, 0.05)
+              : theme.palette.action.hover,
+          },
+        }),
+        ...sx,
+      }}
+      elevation={0}
+    >
+      {children}
+    </Card>
+  );
+});
+
+// StatCard
+const StatCard = ({
+  title,
+  value,
+  subtitle,
+  icon,
+  color,
+  trend,
+  progress,
+  tooltip,
+  badge,
+  highlight,
+  avatarBgColor,  // NEW: Accept avatar background color
+  iconColor,      // NEW: Accept icon color
+}) => {
+  const theme = useTheme();
+  const glassBorder = `1.5px solid ${theme.palette.primary.light}44`;
+  return (
+    <Tooltip title={tooltip || ""} arrow>
+      <span>
+        <GlassCard
+          color={color}
+          highlight={highlight}
+          sx={{
+            p: 0,
+            border: highlight ? `2px solid ${theme.palette.warning.main}` : glassBorder,
+            position: "relative",
+            overflow: "visible",
+          }}
+        >
+          <CardContent sx={{ pb: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
+              <Avatar
                 sx={{
-                  color: increase > 0 ? "success.main" : "error.main",
-                  fontWeight: "medium",
+                  bgcolor: avatarBgColor || theme.palette.primary.light,
+                  color: iconColor || theme.palette.warning.main,
+                  mr: 2,
+                  width: 50,
+                  height: 50,
+                  boxShadow: 2,
+                  fontSize: 32,
+                  border: highlight ? `2.5px solid ${theme.palette.warning.main}` : "none",
                 }}
               >
-                {Math.abs(increase)}%
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
-                vs last month
-              </Typography>
+                {icon}
+              </Avatar>
+              <Box>
+                <Typography variant="subtitle2" sx={{ color: theme.palette.text.secondary, fontWeight: 700 }}>
+                  {title}
+                </Typography>
+                <Typography variant="h4" sx={{ fontWeight: "bold", color: theme.palette.text.primary, lineHeight: 1.2 }}>
+                  {badge ? (
+                    <Badge badgeContent={badge} color="error" sx={{ mr: 1 }}>
+                      {value}
+                    </Badge>
+                  ) : (
+                    value
+                  )}
+                  {trend &&
+                    (trend > 0 ? (
+                      <ArrowUpward fontSize="inherit" sx={{ color: theme.palette.success.main }} />
+                    ) : trend < 0 ? (
+                      <ArrowDownward fontSize="inherit" sx={{ color: theme.palette.error.main }} />
+                    ) : null)}
+                </Typography>
+                {subtitle && (
+                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                    {subtitle}
+                  </Typography>
+                )}
+                {progress !== undefined && (
+                  <LinearProgress
+                    value={progress}
+                    variant="determinate"
+                    sx={{
+                      height: 7,
+                      borderRadius: 5,
+                      mt: 1,
+                      backgroundColor: theme.palette.action.selected,
+                      "& .MuiLinearProgress-bar": { backgroundColor: theme.palette.info.main },
+                    }}
+                  />
+                )}
+              </Box>
             </Box>
-          </Box>
-          <Avatar sx={{ bgcolor: `${color}.light`, color: `${color}.main`, p: 1.5 }}>{icon}</Avatar>
-        </Box>
-      </CardContent>
-    </Card>
-  )
-}
+          </CardContent>
+        </GlassCard>
+      </span>
+    </Tooltip>
+  );
+};
 
-// Transaction Status Component
-const TransactionStatus = ({ status }) => {
-  let color = "default"
-  let icon = null
-
-  switch (status) {
-    case "Completed":
-      color = "success"
-      icon = <CheckCircle fontSize="small" />
-      break
-    case "Pending":
-      color = "warning"
-      icon = <Schedule fontSize="small" />
-      break
-    case "Failed":
-      color = "error"
-      icon = <ArrowDownward fontSize="small" />
-      break
-    default:
-      color = "default"
-  }
-
-  return <Chip label={status} color={color} size="small" icon={icon} variant="outlined" />
-}
-
-// Performance Indicator Component
-const PerformanceIndicator = ({ label, value }) => {
-  let color = "primary"
-
-  if (value >= 80) color = "success"
-  else if (value >= 60) color = "primary"
-  else if (value >= 40) color = "warning"
-  else color = "error"
-
-  return (
-    <Box sx={{ mb: 2 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-        <Typography variant="body2">{label}</Typography>
-        <Typography variant="body2" fontWeight="medium">
-          {value}%
-        </Typography>
-      </Box>
-      <LinearProgress variant="determinate" value={value} color={color} sx={{ height: 8, borderRadius: 5 }} />
-    </Box>
-  )
-}
-
-// Main Dashboard Component
+// Main Dashboard component
 export default function Dashboard() {
-  const [dashboardData, setDashboardData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState(0)
-  const [anchorEl, setAnchorEl] = useState(null)
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"))
+  const theme = useTheme();
 
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"]
+  // State
+  const [authTokens] = useState(() => JSON.parse(localStorage.getItem("authTokens")));
+  const tokenStr = authTokens?.access ? String(authTokens.access) : "";
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const data = await fetchDashboardData()
-        setDashboardData(data)
-      } catch (error) {
-        console.error("Error loading dashboard data:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
+  const [activeChart, setActiveChart] = useState("by_day");
+  const [anchorEl, setAnchorEl] = useState(null);
 
-    loadData()
-  }, [])
-
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue)
-  }
-
-  const handleMenuClick = (event) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleMenuClose = () => {
-    setAnchorEl(null)
-  }
-
-  const handleRefresh = async () => {
-    setLoading(true)
+  // Fetch dashboard data
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    setError(false);
     try {
-      const data = await fetchDashboardData()
-      setDashboardData(data)
-    } catch (error) {
-      console.error("Error refreshing dashboard data:", error)
-    } finally {
-      setLoading(false)
+      const res = await axios.get(`${url}/auth/dashboard/`, {
+        headers: { Authorization: `Bearer ${tokenStr}` },
+      });
+      setDashboard(res.data);
+    } catch (err) {
+      setError(true);
     }
-  }
+    setLoading(false);
+  };
 
-  if (loading) {
-    return (
-      <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Skeleton variant="rectangular" height={80} />
-          </Grid>
-          {[1, 2, 3, 4].map((item) => (
-            <Grid item xs={12} sm={6} md={3} key={item}>
-              <Skeleton variant="rectangular" height={120} />
-            </Grid>
-          ))}
-          <Grid item xs={12} md={8}>
-            <Skeleton variant="rectangular" height={300} />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Skeleton variant="rectangular" height={300} />
-          </Grid>
-          <Grid item xs={12}>
-            <Skeleton variant="rectangular" height={250} />
-          </Grid>
-        </Grid>
-      </Container>
-    )
-  }
+  useEffect(() => { fetchDashboardData(); }, []);
 
+  // Data transforms
+  const chartByDay = dashboard?.chart_data?.by_day?.map((d) => ({
+    name: new Date(d.day).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    count: d.count,
+  })) || [];
+  const chartByWeek = dashboard?.chart_data?.by_week?.map((d) => ({
+    name: "Wk " + new Date(d.week).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    count: d.count,
+  })) || [];
+  const chartByMonth = dashboard?.chart_data?.by_month?.map((d) => ({
+    name: new Date(d.month).toLocaleDateString("en-US", { month: "short", year: "2-digit" }),
+    count: d.count,
+  })) || [];
+  const trafficPie = [
+    { name: "Vendors", value: dashboard?.users?.vendors ?? 0 },
+    { name: "Customers", value: dashboard?.users?.customers ?? 0 },
+  ];
+
+  const subscriptionUsed =
+    dashboard?.subscriptions?.total > 0
+      ? Math.round(
+        100 - (dashboard?.subscriptions?.cancelled ?? 0) / (dashboard?.subscriptions?.total || 1) * 100
+      )
+      : 100;
+
+  const orderProgress =
+    (dashboard?.orders?.total || 0) > 0
+      ? Math.round(((dashboard?.orders?.last_week || 0) / (dashboard?.orders?.total || 1)) * 100)
+      : 0;
+  const vendorProgress =
+    (dashboard?.users?.total || 0) > 0
+      ? Math.round(((dashboard?.users?.vendors || 0) / (dashboard?.users?.total || 1)) * 100)
+      : 0;
+
+  // New statistics calculations
+  const totalUsers = dashboard?.users?.total || 0;
+  const lastMonthUsers = dashboard?.users?.last_month || 0;
+  const activeLastWeekUsers = dashboard?.users?.active_last_week || 0;
+  const newVendors = dashboard?.users?.new_vendors_monthly || 0;
+  const totalCustomers = dashboard?.users?.customers || 0;
+
+  const usersProgress = totalUsers > 0 ? Math.round((lastMonthUsers / totalUsers) * 100) : 0;
+  const activeUsersProgress = totalUsers > 0 ? Math.round((activeLastWeekUsers / totalUsers) * 100) : 0;
+  const newVendorsProgress = (dashboard?.users?.vendors || 0) > 0
+    ? Math.round((newVendors / (dashboard?.users?.vendors || 1)) * 100)
+    : 0;
+  const customersProgress = totalUsers > 0 ? Math.round((totalCustomers / totalUsers) * 100) : 0;
+
+  // Revenue breakdown chart data
+  const revenueChart = [
+    {
+      name: "Total",
+      Revenue: dashboard?.revenue?.total || 0,
+      Commission: dashboard?.commission?.total || 0,
+      Subscriptions: dashboard?.subscription_invoice?.total || 0,
+    },
+    {
+      name: "Last Month",
+      Revenue: dashboard?.revenue?.last_month || 0,
+      Commission: dashboard?.commission?.last_month || 0,
+      Subscriptions: dashboard?.subscription_invoice?.last_month || 0,
+    },
+    {
+      name: "Last Year",
+      Revenue: dashboard?.revenue?.last_year || 0,
+      Commission: dashboard?.commission?.last_year || 0,
+      Subscriptions: dashboard?.subscription_invoice?.last_year || 0,
+    },
+  ];
+
+  // Orders and Subscriptions status chart data
+  const statusChart = [
+    {
+      name: "Orders",
+      Active: (dashboard?.orders?.total || 0) - (dashboard?.orders?.cancelled || 0),
+      Cancelled: dashboard?.orders?.cancelled || 0,
+    },
+    {
+      name: "Subscriptions",
+      Active: (dashboard?.subscriptions?.total || 0) - (dashboard?.subscriptions?.cancelled || 0),
+      Cancelled: dashboard?.subscriptions?.cancelled || 0,
+    },
+  ];
+
+  // Loading state
+  if (loading) return (
+    <Box className="container-fluid py-5" sx={{ background: theme.palette.background.default }}>
+      <Skeleton variant="rounded" height={60} sx={{ mb: 3, borderRadius: 3 }} />
+      <div className="row">
+        {[...Array(4)].map((_, i) => (
+          <div className="col-12 col-md-6 col-lg-3 mb-3" key={i}>
+            <Skeleton variant="rounded" height={100} sx={{ borderRadius: 4 }} />
+          </div>
+        ))}
+      </div>
+      <Skeleton variant="rounded" height={380} sx={{ mt: 3, borderRadius: 3 }} />
+    </Box>
+  );
+
+  if (error) return (
+    <Box className="container py-5" sx={{ background: theme.palette.background.default }}>
+      <Typography variant="h5" color="error" align="center" gutterBottom>
+        Error loading dashboard data
+      </Typography>
+      <Box textAlign="center">
+        <Button onClick={fetchDashboardData} startIcon={<Refresh />}>
+          Retry
+        </Button>
+      </Box>
+    </Box>
+  );
+
+  // --- Main Modern Dashboard ---
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      {/* Header */}
+    <Box
+      className="container-fluid py-5"
+      sx={{
+        minHeight: "100vh",
+        background: theme.palette.background.default,
+        backgroundAttachment: "fixed",
+        pb: 10,
+      }}
+    >
+      {/* OVERVIEW HEADER */}
       <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 4,
-          flexDirection: isMobile ? "column" : "row",
-          gap: isMobile ? 2 : 0,
-        }}
+        className="mb-4 d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between"
       >
         <Box>
-          <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
-            Dashboard
+          <Typography variant="h3" fontWeight="bold" sx={{ color: theme.palette.text.primary }}>
+            <DashboardIcon sx={{ mr: 1, mb: "-5px", color: theme.palette.info.main }} fontSize="large" />
+            Business Dashboard
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Welcome back, {dashboardData.user.name}! Here's what's happening today.
+          <Typography variant="body1" sx={{ color: theme.palette.text.secondary }}>
+            Welcome! Here’s your up-to-date business snapshot.
           </Typography>
         </Box>
         <Box sx={{ display: "flex", gap: 2 }}>
-          <Button variant="outlined" startIcon={<Download />} sx={{ borderRadius: 2 }}>
-            Export
-          </Button>
-          <Button variant="contained" startIcon={<Refresh />} onClick={handleRefresh} sx={{ borderRadius: 2 }}>
+          <Button
+            variant="contained"
+            startIcon={<Refresh />}
+            onClick={fetchDashboardData}
+            sx={{
+              borderRadius: 3,
+              background: theme.palette.primary.main,
+              color: "#fff",
+              fontWeight: 600,
+              boxShadow: theme.shadows[2],
+              ":hover": { background: theme.palette.primary.dark },
+            }}
+          >
             Refresh
           </Button>
         </Box>
       </Box>
 
-      {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+      {/* OVERVIEW STATS */}
+      <div className="row gy-4 mb-4">
+        <div className="col-12 col-sm-6 col-lg-3">
           <StatCard
-            title="Total Service Revenue"
-            value={dashboardData.stats.revenue}
-            increase={dashboardData.stats.revenueIncrease}
-            icon={<AttachMoney />}
-            color="primary"
+            title="Total Revenue"
+            value={"USD " + (dashboard?.revenue?.total ?? "-")}
+            subtitle={`This Month: USD ${dashboard?.revenue?.last_month ?? "-"}`}
+            icon={<LocalAtm fontSize="large" />}
+            progress={Math.round(
+              ((dashboard?.revenue?.last_month || 0) / (dashboard?.revenue?.total || 1)) * 100
+            )}
+            tooltip="Total revenue to date"
+            highlight
+            avatarBgColor={theme.palette.info.light}    // light blue
+            iconColor={theme.palette.info.dark}
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        </div>
+        <div className="col-12 col-sm-6 col-lg-3">
           <StatCard
-            title="Total Vendors"
-            value={dashboardData.stats.users}
-            increase={dashboardData.stats.usersIncrease}
-            icon={<People />}
-            color="success"
+            title="Vendors"
+            value={dashboard?.users?.vendors ?? "-"}
+            subtitle={`Active Last Week: ${dashboard?.users?.active_last_week ?? "-"}`}
+            icon={<Store fontSize="large" />}
+            progress={vendorProgress}
+            tooltip="Total registered vendors"
+            avatarBgColor={theme.palette.warning.light} // yellow/orange
+            iconColor={theme.palette.warning.dark}
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        </div>
+        <div className="col-12 col-sm-6 col-lg-3">
           <StatCard
-            title="New Service Categories"
-            value={dashboardData.stats.orders}
-            increase={dashboardData.stats.ordersIncrease}
-            icon={<BarChartIcon />}
-            color="warning"
+            title="Orders"
+            value={dashboard?.orders?.total ?? "-"}
+            subtitle={`Last Week: ${dashboard?.orders?.last_week ?? "0"}`}
+            icon={<InsertChart fontSize="large" />}
+            progress={orderProgress}
+            tooltip="Orders placed"
+            badge={dashboard?.orders?.cancelled > 0 ? dashboard?.orders?.cancelled : null}
+            avatarBgColor={theme.palette.success.light} // light green
+            iconColor={theme.palette.success.dark}
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        </div>
+        <div className="col-12 col-sm-6 col-lg-3">
           <StatCard
-            title="Service Completion Rate"
-            value={`${dashboardData.stats.conversion}%`}
-            increase={dashboardData.stats.conversionIncrease}
-            icon={<TrendingUp />}
-            color="info"
+            title="Subscriptions"
+            value={dashboard?.subscriptions?.total ?? "-"}
+            subtitle={`Active: ${(dashboard?.subscriptions?.total ?? 0) - (dashboard?.subscriptions?.cancelled ?? 0)}`}
+            icon={<ReceiptLong fontSize="large" />}
+            progress={subscriptionUsed}
+            tooltip="All time & active subscriptions"
+            avatarBgColor={theme.palette.error.light}   // light red
+            iconColor={theme.palette.error.dark}
           />
-        </Grid>
-      </Grid>
+        </div>
+      </div>
 
-      {/* Charts */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={8}>
-          <Card sx={{ height: "100%" }}>
+      {/* NEW USER STATISTICS ROW */}
+      <div className="row gy-4 mb-4">
+        <div className="col-12 col-sm-6 col-lg-3">
+          <StatCard
+            title="Total Users"
+            value={totalUsers}
+            subtitle={`Last Month: ${lastMonthUsers}`}
+            icon={<SupervisorAccount fontSize="large" />}
+            progress={usersProgress}
+            tooltip="Total registered users"
+            avatarBgColor={theme.palette.primary.light}
+            iconColor={theme.palette.primary.dark}
+          />
+        </div>
+        <div className="col-12 col-sm-6 col-lg-3">
+          <StatCard
+            title="Active Last Week"
+            value={activeLastWeekUsers}
+            subtitle={`${activeUsersProgress}% of all users`}
+            icon={<ShowChart fontSize="large" />}
+            progress={activeUsersProgress}
+            tooltip="Users active in the last week"
+            avatarBgColor={theme.palette.info.light}
+            iconColor={theme.palette.info.dark}
+          />
+        </div>
+        <div className="col-12 col-sm-6 col-lg-3">
+          <StatCard
+            title="New Vendors"
+            value={newVendors}
+            subtitle={`${newVendorsProgress}% of vendors`}
+            icon={<PersonAdd fontSize="large" />}
+            progress={newVendorsProgress}
+            tooltip="New vendors registered this month"
+            avatarBgColor={theme.palette.warning.light}
+            iconColor={theme.palette.warning.dark}
+          />
+        </div>
+        <div className="col-12 col-sm-6 col-lg-3">
+          <StatCard
+            title="Customers"
+            value={totalCustomers}
+            subtitle={`${customersProgress}% of users`}
+            icon={<Person fontSize="large" />}
+            progress={customersProgress}
+            tooltip="Total customers registered"
+            avatarBgColor={theme.palette.success.light}
+            iconColor={theme.palette.success.dark}
+          />
+        </div>
+      </div>
+
+      {/* BIG CHARTS SECTION */}
+      <div className="row gy-4 mb-4">
+        <div className="col-12 col-lg-8">
+          <GlassCard color={theme.palette.background.paper}>
             <CardHeader
-              title="Service Revenue Overview"
-              subheader="Monthly service revenue for the current year"
+              avatar={<ShowChart sx={{ color: theme.palette.info.main }} />}
+              title="Order Activity"
+              subheader={activeChart === "by_day" ? "Per Day" : "Per Month"}
               action={
-                <IconButton aria-label="settings" onClick={handleMenuClick}>
-                  <MoreVert />
-                </IconButton>
+                <>
+                  <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ color: theme.palette.info.main }}>
+                    <MoreVert />
+                  </IconButton>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={() => setAnchorEl(null)}
+                  >
+                    <MenuItem onClick={() => { setActiveChart("by_day"); setAnchorEl(null); }}>
+                      By Day
+                    </MenuItem>
+                    <MenuItem onClick={() => { setActiveChart("by_month"); setAnchorEl(null); }}>
+                      By Month
+                    </MenuItem>
+                  </Menu>
+                </>
               }
+              sx={{
+                borderBottom: `1.5px solid ${theme.palette.divider}`,
+                background: theme.palette.background.default,
+              }}
             />
-            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-              <MenuItem onClick={handleMenuClose}>Last 6 months</MenuItem>
-              <MenuItem onClick={handleMenuClose}>Last year</MenuItem>
-              <MenuItem onClick={handleMenuClose}>All time</MenuItem>
-            </Menu>
-            <Divider />
-            <CardContent sx={{ height: 300 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={dashboardData.revenueData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <CardContent sx={{ height: 310 }}>
+              <ResponsiveContainer width="100%" height="95%">
+                <AreaChart data={activeChart === "by_day" ? chartByDay : chartByMonth}>
                   <defs>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+                    <linearGradient id="colorOrder" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={theme.palette.info.light} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={theme.palette.info.dark} stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <Tooltip formatter={(value) => [`$${value}`, "Revenue"]} />
-                  <Area type="monotone" dataKey="value" stroke="#8884d8" fillOpacity={1} fill="url(#colorRevenue)" />
+                  <XAxis dataKey="name" stroke={theme.palette.text.secondary} />
+                  <YAxis allowDecimals={false} stroke={theme.palette.text.secondary} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+                  <RechartsTooltip />
+                  <Area
+                    type="monotone"
+                    dataKey="count"
+                    stroke={theme.palette.info.main}
+                    fillOpacity={1}
+                    fill="url(#colorOrder)"
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: "100%" }}>
-            <CardHeader title="Service Categories" subheader="Distribution of service categories" />
-            <Divider />
-            <CardContent sx={{ height: 300, display: "flex", justifyContent: "center", alignItems: "center" }}>
-              <ResponsiveContainer width="100%" height="100%">
+          </GlassCard>
+        </div>
+        <div className="col-12 col-lg-4">
+          <GlassCard color={theme.palette.background.paper}>
+            <CardHeader
+              avatar={<SupervisorAccount sx={{ color: theme.palette.info.main }} />}
+              title="User Distribution"
+              subheader="Vendors vs Customers"
+              sx={{
+                borderBottom: `1.5px solid ${theme.palette.divider}`,
+                background: theme.palette.background.default,
+              }}
+            />
+            <CardContent sx={{ height: 310 }}>
+              <ResponsiveContainer width="100%" height="90%">
                 <PieChart>
                   <Pie
-                    data={dashboardData.trafficData}
+                    data={trafficPie}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
                     outerRadius={80}
-                    fill="#8884d8"
+                    fill="#1976d2" // MUI blue as default fill (can be any)
                     dataKey="value"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }) =>
+                      `${name}: ${(percent * 100).toFixed(0)}%`
+                    }
                   >
-                    {dashboardData.trafficData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    {trafficPie.map((entry, idx) => (
+                      <Cell
+                        key={`cell-${idx}`}
+                        fill={idx === 0 ? "#1976d2" : "#ffa726"} // Blue for first, Orange for second
+                      />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => [`${value}%`, "Traffic"]} />
+                  <RechartsTooltip />
+                  <Legend />
                 </PieChart>
+
               </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      {/* Transactions and Tasks */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} lg={8}>
-          <Card>
-            <CardHeader
-              title="Recent Service Requests"
-              subheader="Your latest service activities"
-              action={
-                <Button size="small" endIcon={<FilterList />}>
-                  Filter
-                </Button>
-              }
-            />
-            <Divider />
-            <Box sx={{ overflow: "auto", maxHeight: 350 }}>
-              <List sx={{ width: "100%" }}>
-                {dashboardData.recentTransactions.map((transaction) => (
-                  <React.Fragment key={transaction.id}>
-                    <ListItem secondaryAction={<TransactionStatus status={transaction.status} />}>
-                      <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: "primary.light" }}>{transaction.customer.charAt(0)}</Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={transaction.customer}
-                        secondary={
-                          <Typography variant="body2" color="text.secondary">
-                            {new Date(transaction.date).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </Typography>
-                        }
-                      />
-                      <Typography variant="body1" fontWeight="medium" sx={{ ml: 2 }}>
-                        {/* ${transaction.amount.toLocaleString()} */}
-                      </Typography>
-                    </ListItem>
-                    <Divider variant="inset" component="li" />
-                  </React.Fragment>
-                ))}
-              </List>
-            </Box>
-            <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
-              <Button color="primary">View All Service Requests</Button>
-            </Box>
-          </Card>
-        </Grid>
-        <Grid item xs={12} lg={4}>
-          <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-            <CardHeader title="Vendor Performance Metrics" subheader="Key vendor performance indicators" />
-            <Divider />
-            <CardContent sx={{ flexGrow: 1 }}>
-              <PerformanceIndicator label="Vendor Performance" value={dashboardData.performance.sales} />
-              <PerformanceIndicator label="Service Quality" value={dashboardData.performance.marketing} />
-              <PerformanceIndicator label="Customer Satisfaction" value={dashboardData.performance.support} />
-              <PerformanceIndicator label="Service Delivery" value={dashboardData.performance.development} />
-            </CardContent>
-            <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
-              <Button color="primary">View Vendor Detailed Report</Button>
-            </Box>
-          </Card>
-        </Grid>
-      </Grid>
-
-      {/* Device Distribution */}
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Card>
-            <CardHeader title="Service Subcategory Distribution" subheader="Service subcategory breakdown" />
-            <Divider />
-            <CardContent>
-              <Box sx={{ height: 300 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={dashboardData.deviceData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`${value}%`, "Usage"]} />
-                    <Legend />
-                    <Bar dataKey="value" name="Percentage" fill="#8884d8" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+              <Box sx={{ mt: 1, width: "100%" }}>
+                <LinearProgress
+                  variant="determinate"
+                  value={vendorProgress}
+                  sx={{ height: 8, borderRadius: 3, background: theme.palette.primary.dark }}
+                />
+                <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
+                  <Store fontSize="small" /> Vendors: {dashboard?.users?.vendors} &nbsp;&nbsp;
+                  <Person fontSize="small" /> Customers: {dashboard?.users?.customers}
+                </Typography>
               </Box>
             </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+          </GlassCard>
+        </div>
+      </div>
 
-      {/* Tasks Section */}
-      <Grid container spacing={3} sx={{ mt: 2 }}>
-        <Grid item xs={12}>
-          <Card>
-            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-              <Tabs value={activeTab} onChange={handleTabChange} aria-label="task tabs">
-                <Tab label="All Tasks" />
-                <Tab label="In Progress" />
-                <Tab label="Completed" />
-                <Tab label="Pending" />
-              </Tabs>
-            </Box>
-            <List sx={{ width: "100%" }}>
-              {dashboardData.tasks
-                .filter((task) => {
-                  if (activeTab === 0) return true
-                  if (activeTab === 1) return task.status === "In Progress"
-                  if (activeTab === 2) return task.status === "Completed"
-                  if (activeTab === 3) return task.status === "Pending"
-                  return true
-                })
-                .map((task) => (
-                  <React.Fragment key={task.id}>
-                    <ListItem
-                      secondaryAction={
-                        <Chip
-                          label={task.status}
-                          color={
-                            task.status === "Completed"
-                              ? "success"
-                              : task.status === "In Progress"
-                                ? "primary"
-                                : "warning"
-                          }
-                          size="small"
-                        />
-                      }
-                    >
+      {/* REVENUE AND ORDERS CONTAINERS */}
+      <div className="row gy-4 mb-4">
+        <div className="col-12 col-lg-6">
+          <GlassCard color={theme.palette.background.paper}>
+            <CardHeader
+              avatar={<AttachMoney sx={{ color: theme.palette.success.main }} />}
+              title="Commission & Invoices"
+              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
+            />
+            <CardContent>
+              <div className="row">
+                <div className="col-12 col-md-6 mb-2">
+                  <StatCard
+                    title="Total Commission"
+                    value={"USD " + (dashboard?.commission?.total ?? "-")}
+                    subtitle={`This Month: USD ${dashboard?.commission?.last_month ?? "-"}`}
+                    icon={<Insights />}
+                    avatarBgColor={theme.palette.success.light}
+                    iconColor={theme.palette.success.dark}
+                  />
+                </div>
+                <div className="col-12 col-md-6 mb-2">
+                  <StatCard
+                    title="Subscription Invoice"
+                    value={"USD " + (dashboard?.subscription_invoice?.total ?? "-")}
+                    subtitle={`This Month: USD ${dashboard?.subscription_invoice?.last_month ?? "-"}`}
+                    icon={<ReceiptLong />}
+                    avatarBgColor={theme.palette.primary.light}
+                    iconColor={theme.palette.primary.dark}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </GlassCard>
+        </div>
+        <div className="col-12 col-lg-6">
+          <GlassCard color={theme.palette.background.paper}>
+            <CardHeader
+              avatar={<Cancel sx={{ color: theme.palette.error.light }} />}
+              title="Cancellations"
+              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
+            />
+            <CardContent>
+              <div className="row">
+                <div className="col-12 col-md-6 mb-2">
+                  <StatCard
+                    title="Cancelled Orders"
+                    value={dashboard?.orders?.cancelled ?? 0}
+                    icon={<Cancel />}
+                    badge={dashboard?.orders?.cancelled > 0 ? dashboard?.orders?.cancelled : null}
+                    avatarBgColor={theme.palette.error.light}
+                    iconColor={theme.palette.error.dark}
+                  />
+                </div>
+                <div className="col-12 col-md-6 mb-2">
+                  <StatCard
+                    title="Cancelled Subs."
+                    value={dashboard?.subscriptions?.cancelled ?? 0}
+                    icon={<Cancel />}
+                    badge={dashboard?.subscriptions?.cancelled > 0 ? dashboard?.subscriptions?.cancelled : null}
+                    avatarBgColor={theme.palette.secondary.light}
+                    iconColor={theme.palette.secondary.dark}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </GlassCard>
+        </div>
+      </div>
+
+      {/* TOP CUSTOMERS & VENDORS */}
+      <div className="row gy-4 mb-4">
+        <div className="col-12 col-lg-6">
+          <GlassCard color={theme.palette.background.paper}>
+            <CardHeader
+              avatar={<EmojiEvents sx={{ color: theme.palette.warning.main }} />}
+              title="Top Customer"
+              subheader="By total value"
+              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
+            />
+            <CardContent>
+              {dashboard?.top?.customers?.length > 0 ? (
+                <List>
+                  {dashboard.top.customers.map((cust, idx) => (
+                    <ListItem key={cust.customer__id}>
                       <ListItemAvatar>
-                        <Avatar
-                          sx={{
-                            bgcolor:
-                              task.status === "Completed"
-                                ? "success.light"
-                                : task.status === "In Progress"
-                                  ? "primary.light"
-                                  : "warning.light",
-                          }}
-                        >
-                          {task.status === "Completed" ? <CheckCircle /> : <Schedule />}
+                        <Avatar sx={{ bgcolor: theme.palette.info.light, color: theme.palette.info.dark }}>
+                          <Person />
                         </Avatar>
                       </ListItemAvatar>
                       <ListItemText
-                        primary={task.title}
-                        secondary={
-                          <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
-                            <CalendarToday sx={{ fontSize: 14, mr: 0.5, color: "text.secondary" }} />
-                            <Typography variant="body2" color="text.secondary">
-                              Due:{" "}
-                              {new Date(task.dueDate).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              })}
-                            </Typography>
-                          </Box>
-                        }
+                        primary={cust.customer__email}
+                        secondary={`Total: USD ${cust.total}`}
+                        sx={{ color: theme.palette.text.primary }}
                       />
+                      {idx === 0 && (
+                        <Tooltip title="Top Customer">
+                          <span><Star color="warning" sx={{ ml: 2 }} /></span>
+                        </Tooltip>
+                      )}
                     </ListItem>
-                    <Divider variant="inset" component="li" />
-                  </React.Fragment>
-                ))}
-            </List>
-            {activeTab === 0 && dashboardData.tasks.length === 0 && (
-              <Box sx={{ p: 4, textAlign: "center" }}>
-                <Typography variant="body1" color="text.secondary">
-                  No tasks available
+                  ))}
+                </List>
+              ) : (
+                <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  No customer data.
+                </Typography>
+              )}
+            </CardContent>
+          </GlassCard>
+        </div>
+        <div className="col-12 col-lg-6">
+          <GlassCard color={theme.palette.background.paper}>
+            <CardHeader
+              avatar={<Leaderboard sx={{ color: theme.palette.success.main }} />}
+              title="Top Vendor"
+              subheader="By total value"
+              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
+            />
+            <CardContent>
+              {dashboard?.top?.vendors?.length > 0 ? (
+                <List>
+                  {dashboard.top.vendors.map((ven, idx) => (
+                    <ListItem key={ven.vendor__id}>
+                      <ListItemAvatar>
+                        <Avatar sx={{ bgcolor: theme.palette.success.light, color: theme.palette.success.dark }}>
+                          <Store />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={ven.vendor__email}
+                        secondary={`Total: USD ${ven.total}`}
+                        sx={{ color: theme.palette.text.primary }}
+                      />
+                      {idx === 0 && (
+                        <Tooltip title="Top Vendor">
+                          <span><Star color="warning" sx={{ ml: 2 }} /></span>
+                        </Tooltip>
+                      )}
+                    </ListItem>
+                  ))}
+                </List>
+              ) : (
+                <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  No vendor data.
+                </Typography>
+              )}
+            </CardContent>
+          </GlassCard>
+        </div>
+      </div>
+
+      {/* BOTTOM: ORDERS CHART & SUBSCRIPTION RADIAL */}
+      <div className="row gy-4 mb-4">
+        <div className="col-12 col-md-7">
+          <GlassCard color={theme.palette.background.paper}>
+            <CardHeader
+              avatar={<BarChartIcon sx={{ color: theme.palette.warning.main }} />}
+              title="Orders by Week"
+              subheader="Weekly order counts"
+              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
+            />
+            <CardContent sx={{ height: 280 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartByWeek}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+                  <XAxis dataKey="name" stroke={theme.palette.text.secondary} />
+                  <YAxis stroke={theme.palette.text.secondary} />
+                  <RechartsTooltip />
+                  <Legend />
+                  <Bar dataKey="count" name="Orders" fill={theme.palette.warning.main} radius={[10, 10, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </GlassCard>
+        </div>
+        <div className="col-12 col-md-5">
+          <GlassCard color={theme.palette.background.paper}>
+            <CardHeader
+              avatar={<TrendingUp sx={{ color: theme.palette.info.main }} />}
+              title="Subscriptions Status"
+              subheader="Total vs Cancelled"
+              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
+            />
+            <CardContent sx={{ height: 280, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <ResponsiveContainer width="100%" height="90%">
+                <RadialBarChart
+                  innerRadius="80%"
+                  outerRadius="100%"
+                  data={[
+                    { name: "Active", value: dashboard?.subscriptions?.total - dashboard?.subscriptions?.cancelled, fill: theme.palette.info.main },
+                    { name: "Cancelled", value: dashboard?.subscriptions?.cancelled, fill: theme.palette.error.main },
+                  ]}
+                  startAngle={90}
+                  endAngle={-270}
+                >
+                  <RadialBar
+                    minAngle={15}
+                    background
+                    clockWise
+                    dataKey="value"
+                  />
+                  <Legend
+                    iconSize={12}
+                    width={100}
+                    height={50}
+                    layout="vertical"
+                    verticalAlign="middle"
+                    align="right"
+                  />
+                  <RechartsTooltip />
+                </RadialBarChart>
+              </ResponsiveContainer>
+              <Box sx={{ textAlign: "center", position: "absolute", left: "62%", top: "45%" }}>
+                <Typography variant="h4" sx={{ color: theme.palette.info.main }}>
+                  {dashboard?.subscriptions?.total ?? "-"}
+                </Typography>
+                <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  Subscriptions
                 </Typography>
               </Box>
-            )}
-            {activeTab !== 0 &&
-              dashboardData.tasks.filter((task) => {
-                if (activeTab === 1) return task.status === "In Progress"
-                if (activeTab === 2) return task.status === "Completed"
-                if (activeTab === 3) return task.status === "Pending"
-                return true
-              }).length === 0 && (
-                <Box sx={{ p: 4, textAlign: "center" }}>
-                  <Typography variant="body1" color="text.secondary">
-                    No tasks in this category
-                  </Typography>
-                </Box>
-              )}
-          </Card>
-        </Grid>
-      </Grid>
-    </Container>
-  )
-}
+            </CardContent>
+          </GlassCard>
+        </div>
+      </div>
 
+      {/* TOP COMPLETED CATEGORIES */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <GlassCard color={theme.palette.background.paper}>
+            <CardHeader
+              avatar={<AccountTree sx={{ color: theme.palette.warning.main }} />}
+              title="Top Completed Category"
+              subheader="By time period"
+              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
+            />
+            <CardContent>
+              <div className="row">
+                <div className="col-12 col-md-4 mb-2">
+                  <Chip
+                    label={`Last Week: ${dashboard?.top_completed_categories?.last_week ?? "-"}`}
+                    color="success"
+                    variant="filled"
+                    icon={<Insights />}
+                  />
+                </div>
+                <div className="col-12 col-md-4 mb-2">
+                  <Chip
+                    label={`Last Month: ${dashboard?.top_completed_categories?.last_month ?? "-"}`}
+                    color="info"
+                    variant="filled"
+                    icon={<Insights />}
+                  />
+                </div>
+                <div className="col-12 col-md-4 mb-2">
+                  <Chip
+                    label={`Last Year: ${dashboard?.top_completed_categories?.last_year ?? "-"}`}
+                    color="warning"
+                    variant="filled"
+                    icon={<Insights />}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </GlassCard>
+        </div>
+      </div>
+
+      {/* NEW COMPARATIVE CHARTS */}
+      <div className="row gy-4 mb-4">
+        {/* Financial Breakdown Bar Chart */}
+        <div className="col-12 col-md-6">
+          <GlassCard color={theme.palette.background.paper}>
+            <CardHeader
+              avatar={<BarChartIcon sx={{ color: theme.palette.primary.main }} />}
+              title="Financial Breakdown"
+              subheader="Total vs Last Month vs Last Year"
+              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
+            />
+            <CardContent sx={{ height: 300 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={revenueChart} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+                  <XAxis dataKey="name" stroke={theme.palette.text.secondary} />
+                  <YAxis stroke={theme.palette.text.secondary} />
+                  <RechartsTooltip />
+                  <Legend />
+                  <Bar dataKey="Revenue" fill={theme.palette.success.main} name="Revenue" />
+                  <Bar dataKey="Commission" fill={theme.palette.info.main} name="Commission" />
+                  <Bar dataKey="Subscriptions" fill={theme.palette.warning.main} name="Subscriptions" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </GlassCard>
+        </div>
+        {/* Orders & Subscriptions Status Bar Chart */}
+        <div className="col-12 col-md-6">
+          <GlassCard color={theme.palette.background.paper}>
+            <CardHeader
+              avatar={<InsertChart sx={{ color: theme.palette.secondary.main }} />}
+              title="Orders & Subs Status"
+              subheader="Active vs Cancelled"
+              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
+            />
+            <CardContent sx={{ height: 300 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={statusChart} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+                  <XAxis dataKey="name" stroke={theme.palette.text.secondary} />
+                  <YAxis stroke={theme.palette.text.secondary} />
+                  <RechartsTooltip />
+                  <Legend />
+                  <Bar dataKey="Active" stackId="a" fill={theme.palette.success.main} name="Active" />
+                  <Bar dataKey="Cancelled" stackId="a" fill={theme.palette.error.main} name="Cancelled" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </GlassCard>
+        </div>
+      </div>
+
+    </Box>
+  );
+}
