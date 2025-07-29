@@ -496,17 +496,11 @@ export default function DashboardNew() {
             mb: 4,
             p: 3,
             borderRadius: 3,
-            background:
-              theme.palette.mode === 'dark'
-                ? 'linear-gradient(90deg, #011634ff, #9fc9f3ff)' // dark blue gradient for dark mode
-                : `linear-gradient(90deg, ${lighten(
-                  customTheme.palette.primary.light,
-                  0.9
-                )}, ${lighten(
-                  customTheme.palette.warning.light ||
-                  customTheme.palette.secondary.light,
-                  0.8
-                )})`,
+           background:
+  theme.palette.mode === 'dark'
+    ? 'linear-gradient(90deg, #002251ff, #9fc9f3ff)' // dark blue gradient for dark mode
+    : 'linear-gradient(90deg, #cfeedfff, #198754)', // same static gradient for light mode
+
             boxShadow: '0 8px 16px rgba(0,0,0,0.05)',
           })}
         >
