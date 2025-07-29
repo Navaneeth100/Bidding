@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
-import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled, IconH6, IconBan, IconUserCheck } from '@tabler/icons-react';
+import { IconEye, IconPencil, IconTrash, IconDots, IconSearch, IconPlus, IconAlertCircleFilled, IconH6, IconBan, IconUserCheck, IconLockAccess } from '@tabler/icons-react';
 import axios from "axios";
 import {  url } from "../../../mainurl";
 import { toast } from "react-toastify";
@@ -29,7 +29,7 @@ const Employees = () => {
 
     // States
     const [mainImgIdx, setMainImgIdx] = useState(0);
-    const [modal, setModal] = useState({ add: false, view: false, edit: false, delete: false });
+    const [modal, setModal] = useState({ add: false, view: false, edit: false, delete: false , changepassowrd: false });
     const [anchorEl, setAnchorEl] = useState(null);
     const [employeeList, setEmployeeList] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -154,6 +154,8 @@ const Employees = () => {
         languages: "",
         dob: "",
         experience: "",
+        newotp:"",
+        newpassword:"",
     });
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -369,6 +371,71 @@ const Employees = () => {
         color: theme.palette.text.secondary,
     }));
 
+    //  Change Password
+
+    const [step, setStep] = useState(1); 
+
+    const handleChangePassword = async (event) => {
+    event.preventDefault();
+
+    if (step === 1) {
+
+        const submitData = { email: formData.email };
+        try {
+        const response = await axios.post(`${url}/auth/update-email/`, submitData, {
+            headers: {
+            Authorization: `Bearer ${tokenStr}`,
+            "Content-Type": "application/json",
+            },
+        });
+        toast.success(response.data.message);
+        setStep(2);
+        } catch (error) {
+        toast.error(error?.response?.data?.error);
+        }
+    }
+
+    else if (step === 2 ) {
+        const submitData = {
+        email: formData.email,
+        otp: formData.newotp,
+        };
+        try {
+        const response = await axios.post(`${url}/auth/update-email/`, submitData, {
+            headers: {
+            Authorization: `Bearer ${tokenStr}`,
+            "Content-Type": "application/json",
+            },
+        });
+        toast.success(response.data.message);
+        setStep(3); 
+        } catch (error) {
+        toast.error(error?.response?.data?.error);
+        }
+    }
+        else if (step === 3 ) {
+        const submitData = {
+        email: formData.email,
+        otp: formData.newotp,
+        password: formData.newpassword
+        };
+        try {
+        const response = await axios.post(`${url}/auth/reenter-password/`, submitData, {
+            headers: {
+            "Content-Type": "application/json",
+            },
+        });
+        toast.success(response.data.message);
+        setModal(prev => ({ ...prev, changepassword: false }))
+        fetchService()
+        } catch (error) {
+        toast.error(error?.response?.data?.error);
+        }
+    }
+    };
+
+        
+
     return (
         <PageContainer title="Employees" description="Employees">
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: "25px" }}>
@@ -515,6 +582,14 @@ const Employees = () => {
                                                                     <IconUserCheck fontSize="small" className="me-2" /> Unblock
                                                                 </MenuItem>
                                                             </>}
+
+                                                            <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {
+                                                                setModal(prev => ({ ...prev, changepassword: true }));
+                                                                setSelectedId(item.id); setAnchorEl(null);
+                                                            }}>
+                                                                <IconLockAccess fontSize="small" className="me-2" /> Change Password
+                                                            </MenuItem>
+
                                                             <MenuItem sx={{ py: 1.7, px: 2 }} onClick={() => {
                                                                 setDeleteData(item); setModal(prev => ({ ...prev, delete: true }));
                                                                 setSelectedId(item.id); setAnchorEl(null);
@@ -1035,6 +1110,111 @@ const Employees = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/*  Change Password */}
+
+                        <Dialog
+                            open={modal.changepassword}
+                            onClose={() => setModal(prev => ({ ...prev, changepassword: false }))}
+                            maxWidth="sm"
+                            fullWidth
+                            PaperProps={{
+                                sx: {
+                                    borderRadius: 4,
+                                    p: 0,
+                                    backdropFilter: 'blur(8px)',
+                                    boxShadow: 24
+                                }
+                            }}
+                            BackdropProps={{
+                                sx: {
+                                    backdropFilter: 'blur(4px)',
+                                    bgcolor: alpha(theme.palette.background.default, 0.8)
+                                }
+                            }}
+                        >
+                            <DialogTitle sx={{ borderBottom: "1px solid #e5e9f2", p: 3, color: "#364a63", fontWeight: 600, color: theme.palette.text.primary, }}>
+                                Change Password
+                            </DialogTitle>
+                            <form onSubmit={handleChangePassword}>
+                                <DialogContent sx={{ p: 3 }}>
+                                    <Grid container spacing={3}>
+                                    {step >= 1 && (
+                                        <Grid item xs={12} md={12}>
+                                            <TextField
+                                                required
+                                                fullWidth
+                                                name="email"
+                                                label="Email"
+                                                type="email"
+                                                placeholder="Enter Email"
+                                                onChange={(e) => { setFormData({ ...formData, email: e.target.value }) }}
+                                                sx={{ mt: 5 }}
+                                                disabled={step > 1}
+                                        />
+                                    </Grid>
+                                    )}
+                                    
+                                    {step >= 2 && (
+                                        <Grid item xs={12} md={12}>
+                                            <TextField
+                                                required
+                                                fullWidth
+                                                name="otp"
+                                                label="OTP"
+                                                type="number"
+                                                placeholder="Enter OTP"
+                                                onChange={(e) => { setFormData({ ...formData, newotp: e.target.value }) }}
+                                                inputProps={{
+                                                inputMode: "numeric",
+                                                pattern: "[0-9]*",
+                                                maxLength: 4
+                                                }}
+                                                sx={{ mt: 2 }}
+                                                disabled={step > 2}
+                                            />
+                                        </Grid>
+                                        )}
+
+                                        {step >= 3 && (
+                                        <Grid item xs={12} md={12}>
+                                            <TextField
+                                                required
+                                                fullWidth
+                                                name="password"
+                                                label="Password"
+                                                type="password"
+                                                placeholder="Enter Password"
+                                                onChange={(e) => { setFormData({ ...formData, newpassword: e.target.value }) }}
+                                                sx={{ mt: 2 }}
+                                                disabled={step > 3}
+                                            />
+                                        </Grid>
+                                        )}
+
+                                    </Grid>
+                                </DialogContent>
+                                <DialogActions sx={{ p: 3, borderTop: "1px solid #e5e9f2", gap: 1 }}>
+                                    <Button
+                                        onClick={() => setModal(prev => ({ ...prev, changepassword: false }))}
+                                        variant="outlined"
+                                        sx={{
+                                            borderColor: "#e5e9f2",
+                                            color: "#364a63",
+                                            "&:hover": { borderColor: "#6e82a5", backgroundColor: "#f5f6fa" },
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button type="submit" variant="contained" sx={{ bgcolor: "#519380", "&:hover": { bgcolor: "#7DAA8D" } }}>
+                                        Submit
+                                    </Button>
+            
+                                </DialogActions>
+                            </form>
+                        </Dialog>
+
+
         </PageContainer>
     );
 };
