@@ -1,232 +1,289 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { url } from "../../../mainurl";
-
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { url } from '../../../mainurl';
 import {
   Box,
-  Typography,
-  Avatar,
-  Button,
+  Grid,
   Card,
-  CardContent,
-  CardHeader,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  IconButton,
-  Chip,
+  Avatar,
+  Typography,
   LinearProgress,
-  Tooltip,
-  Badge,
-  useTheme,
+  Button,
   Skeleton,
+  IconButton,
   Menu,
   MenuItem,
-} from "@mui/material";
-import { darken } from "@mui/material/styles";
+  Tooltip,
+  useTheme,
+  ThemeProvider,
+  createTheme,
+} from '@mui/material';
 import {
-  TrendingUp,
-  AttachMoney,
-  BarChart as BarChartIcon,
-  MoreVert,
-  ArrowDownward,
-  ArrowUpward,
-  Refresh,
-  Download,
-  Star,
-  Cancel,
-  SupervisorAccount,
-  ReceiptLong,
-  Person,
-  Store,
   LocalAtm,
-  Insights,
-  ShowChart,
+  Store,
   InsertChart,
+  ReceiptLong,
+  SupervisorAccount,
+  ShowChart,
+  PersonAdd,
+  Person,
+  Cancel,
+  Insights,
   EmojiEvents,
   Leaderboard,
-  Dashboard as DashboardIcon,
+  TrendingUp,
   AccountTree,
-  PersonAdd,
-} from "@mui/icons-material";
+  BarChart as BarChartIcon,
+  MoreVert,
+  Refresh,
+  AttachMoney,
+} from '@mui/icons-material';
 import {
   AreaChart,
   Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
   BarChart,
   Bar,
+  PieChart,
+  Pie,
   Legend,
   RadialBarChart,
   RadialBar,
-} from "recharts";
-import 'bootstrap/dist/css/bootstrap.min.css';
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts';
+import { lighten, darken } from '@mui/material/styles';
 
-/*
- * This component extends the original dashboard by adding several new
- * statistic cards and comparative charts.  New metrics include total
- * users, active users last week, new vendors this month and total
- * customers.  Additional charts visualize the breakdown of revenue vs
- * commission vs subscription invoices across different time periods,
- * and compare active versus cancelled orders and subscriptions.  The
- * overall aesthetic is kept consistent with the existing cards and
- * GlassCard styling while leveraging Material‑UI and Recharts for a
- * responsive, modern interface.  See the README for more details on
- * data shape expected from the API.
- */
-
-// GlassCard with forwardRef
-const GlassCard = React.forwardRef(function GlassCard(
-  { children, color, hover = true, highlight, sx = {}, ...props },
-  ref
-) {
-  const theme = useTheme();
-  const glassBorder = `1.5px solid ${theme.palette.primary.light}44`;
-  const bg = color || theme.palette.background.paper;
-
-  return (
-    <Card
-      {...props}
-      ref={ref}
-      sx={{
-        background: bg,
-        border: glassBorder,
-        boxShadow: theme.shadows[1],
-        borderRadius: 5,
-        transition: "all 0.2s cubic-bezier(.4,2,.7,1)",
-        ...(hover && {
-          "&:hover": {
-            boxShadow: theme.shadows[6],
-            transform: "translateY(-4px) scale(1.022)",
-            borderColor: highlight ? theme.palette.warning.main : undefined,
-            background: color
-              ? darken(color, 0.05)
-              : theme.palette.action.hover,
-          },
-        }),
-        ...sx,
-      }}
-      elevation={0}
-    >
-      {children}
-    </Card>
-  );
-});
-
-// StatCard
-const StatCard = ({
+/* A card for high‑level metrics, with a gradient background, icon and optional progress bar */
+const MetricCard = ({
   title,
   value,
   subtitle,
   icon,
   color,
-  trend,
   progress,
-  tooltip,
-  badge,
-  highlight,
-  avatarBgColor,  // NEW: Accept avatar background color
-  iconColor,      // NEW: Accept icon color
+  progressColor,
 }) => {
   const theme = useTheme();
-  const glassBorder = `1.5px solid ${theme.palette.primary.light}44`;
+  const isDark = theme.palette.mode === 'dark';
+
+  // Default color (from prop) or fallback to primary.main
+  const baseColor = color || theme.palette.primary.main;
+
+  // In dark mode, override baseColor to a lighter/brighter shade for better contrast
+  const adjustedColor = isDark
+    ? lighten(baseColor, 0.3) // brighten for dark mode
+    : baseColor;
+
+  // Progress bar color fallback
+  const adjustedProgressColor = isDark
+    ? lighten(progressColor || darken(baseColor, 0.2), 0.3)
+    : progressColor || darken(baseColor, 0.2);
+
+  // Gradients for card background
+  const gradientStart = lighten(adjustedColor, isDark ? 0.4 : 0.7);
+  const gradientEnd = lighten(adjustedColor, isDark ? 0.2 : 0.5);
+
   return (
-    <Tooltip title={tooltip || ""} arrow>
-      <span>
-        <GlassCard
-          color={color}
-          highlight={highlight}
+    <Card
+      sx={{
+        p: 2,
+        borderRadius: 3,
+        background: `linear-gradient(135deg, ${gradientStart}, ${gradientEnd})`,
+        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+        height: '100%',
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            {title}
+          </Typography>
+          <Typography
+            variant="h4"
+            sx={{ fontWeight: 700, mt: 0.5, lineHeight: 1.2 }}
+          >
+            {value}
+          </Typography>
+          {subtitle && (
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              {subtitle}
+            </Typography>
+          )}
+        </Box>
+        <Avatar
           sx={{
-            p: 0,
-            border: highlight ? `2px solid ${theme.palette.warning.main}` : glassBorder,
-            position: "relative",
-            overflow: "visible",
+            bgcolor: darken(adjustedColor, 0.1),
+            color: '#fff',
+            width: 48,
+            height: 48,
           }}
         >
-          <CardContent sx={{ pb: 1 }}>
-            <Box sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
+          {icon}
+        </Avatar>
+      </Box>
+      {progress !== undefined && (
+        <Box sx={{ mt: 2 }}>
+          <LinearProgress
+            variant="determinate"
+            value={progress}
+            sx={{
+              height: 6,
+              borderRadius: 3,
+              backgroundColor: lighten(adjustedColor, 0.4),
+              '& .MuiLinearProgress-bar': {
+                backgroundColor: adjustedProgressColor,
+              },
+            }}
+          />
+        </Box>
+      )}
+    </Card>
+  );
+};
+
+/* A wrapper for charts/lists: soft gradient background with optional title & icon */
+const PanelCard = ({ title, icon, subtitle, children }) => {
+  const theme = useTheme();
+  return (
+    <Card
+      sx={{
+        p: 2,
+        borderRadius: 3,
+        background: `linear-gradient(135deg, ${lighten(
+          theme.palette.background.paper,
+          0.05
+        )}, ${lighten(theme.palette.background.paper, 0.1)})`,
+        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+        height: '100%',
+      }}
+    >
+      {(title || icon) && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            mb: 2,
+            justifyContent: 'space-between',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {icon && (
               <Avatar
                 sx={{
-                  bgcolor: avatarBgColor || theme.palette.primary.light,
-                  color: iconColor || theme.palette.warning.main,
-                  mr: 2,
-                  width: 50,
-                  height: 50,
-                  boxShadow: 2,
-                  fontSize: 32,
-                  border: highlight ? `2.5px solid ${theme.palette.warning.main}` : "none",
+                  bgcolor: theme.palette.secondary.main,
+                  color: '#fff',
+                  width: 32,
+                  height: 32,
+                  mr: 1,
                 }}
               >
                 {icon}
               </Avatar>
-              <Box>
-                <Typography variant="subtitle2" sx={{ color: theme.palette.text.secondary, fontWeight: 700 }}>
+            )}
+            <Box>
+              {title && (
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                   {title}
                 </Typography>
-                <Typography variant="h4" sx={{ fontWeight: "bold", color: theme.palette.text.primary, lineHeight: 1.2 }}>
-                  {badge ? (
-                    <Badge badgeContent={badge} color="error" sx={{ mr: 1 }}>
-                      {value}
-                    </Badge>
-                  ) : (
-                    value
-                  )}
-                  {trend &&
-                    (trend > 0 ? (
-                      <ArrowUpward fontSize="inherit" sx={{ color: theme.palette.success.main }} />
-                    ) : trend < 0 ? (
-                      <ArrowDownward fontSize="inherit" sx={{ color: theme.palette.error.main }} />
-                    ) : null)}
+              )}
+              {subtitle && (
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  {subtitle}
                 </Typography>
-                {subtitle && (
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                    {subtitle}
-                  </Typography>
-                )}
-                {progress !== undefined && (
-                  <LinearProgress
-                    value={progress}
-                    variant="determinate"
-                    sx={{
-                      height: 7,
-                      borderRadius: 5,
-                      mt: 1,
-                      backgroundColor: theme.palette.action.selected,
-                      "& .MuiLinearProgress-bar": { backgroundColor: theme.palette.info.main },
-                    }}
-                  />
-                )}
-              </Box>
+              )}
             </Box>
-          </CardContent>
-        </GlassCard>
-      </span>
-    </Tooltip>
+          </Box>
+        </Box>
+      )}
+      {children}
+    </Card>
   );
 };
 
-// Main Dashboard component
-export default function Dashboard() {
-  const theme = useTheme();
+/* The revamped dashboard */
+export default function DashboardNew() {
+  const parentTheme = useTheme();
+  const currentMode = parentTheme.palette.mode;
 
-  // State
-  const [authTokens] = useState(() => JSON.parse(localStorage.getItem("authTokens")));
-  const tokenStr = authTokens?.access ? String(authTokens.access) : "";
+  /* Extend the parent theme with softer backgrounds */
+  const customTheme = React.useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: currentMode,
+          background: {
+            default: currentMode === 'dark' ? '#0c1625' : '#ffffffff',
+            paper: currentMode === 'dark' ? '#112340' : '#FFFFFF',
+          },
+
+          primary: {
+            light: '#6ec6ff',
+            main: '#2196f3',
+            dark: '#0069c0',
+            contrastText: '#fff',
+          },
+
+          secondary: {
+            light: '#ff6090',
+            main: '#f50057',
+            dark: '#ab003c',
+            contrastText: '#fff',
+          },
+
+          success: {
+            light: '#81c784',
+            main: '#4caf50',
+            dark: '#388e3c',
+            contrastText: '#fff',
+          },
+
+          warning: {
+            light: '#f99d13ff',
+            main: '#ffc56eff',
+            dark: '#f57c00',
+            contrastText: '#fff',
+          },
+
+          error: {
+            light: '#e57373',
+            main: '#f44336',
+            dark: '#d32f2f',
+            contrastText: '#fff',
+          },
+
+          info: {
+            light: '#64b5f6',
+            main: '#2196f3',
+            dark: '#1769aa',
+            contrastText: '#fff',
+          },
+        },
+      }),
+    [currentMode]
+  );
+
+
+  /* State and data fetching */
+  const [authTokens] = useState(() =>
+    JSON.parse(localStorage.getItem('authTokens'))
+  );
+  const tokenStr = authTokens?.access ? String(authTokens.access) : '';
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-
-  const [activeChart, setActiveChart] = useState("by_day");
+  const [activeChart, setActiveChart] = useState('by_day');
   const [anchorEl, setAnchorEl] = useState(null);
 
-  // Fetch dashboard data
   const fetchDashboardData = async () => {
     setLoading(true);
     setError(false);
@@ -241,703 +298,1027 @@ export default function Dashboard() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchDashboardData(); }, []);
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
-  // Data transforms
-  const chartByDay = dashboard?.chart_data?.by_day?.map((d) => ({
-    name: new Date(d.day).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    count: d.count,
-  })) || [];
-  const chartByWeek = dashboard?.chart_data?.by_week?.map((d) => ({
-    name: "Wk " + new Date(d.week).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    count: d.count,
-  })) || [];
-  const chartByMonth = dashboard?.chart_data?.by_month?.map((d) => ({
-    name: new Date(d.month).toLocaleDateString("en-US", { month: "short", year: "2-digit" }),
-    count: d.count,
-  })) || [];
+  /* Transformations for charts */
+  const chartByDay =
+    dashboard?.chart_data?.by_day?.map((d) => ({
+      name: new Date(d.day).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }),
+      count: d.count,
+    })) || [];
+  const chartByWeek =
+    dashboard?.chart_data?.by_week?.map((d) => ({
+      name:
+        'Wk ' +
+        new Date(d.week).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        }),
+      count: d.count,
+    })) || [];
+  const chartByMonth =
+    dashboard?.chart_data?.by_month?.map((d) => ({
+      name: new Date(d.month).toLocaleDateString('en-US', {
+        month: 'short',
+        year: '2-digit',
+      }),
+      count: d.count,
+    })) || [];
   const trafficPie = [
-    { name: "Vendors", value: dashboard?.users?.vendors ?? 0 },
-    { name: "Customers", value: dashboard?.users?.customers ?? 0 },
+    { name: 'Vendors', value: dashboard?.users?.vendors ?? 0 },
+    { name: 'Customers', value: dashboard?.users?.customers ?? 0 },
   ];
 
+  /* Progress calculations */
   const subscriptionUsed =
     dashboard?.subscriptions?.total > 0
       ? Math.round(
-        100 - (dashboard?.subscriptions?.cancelled ?? 0) / (dashboard?.subscriptions?.total || 1) * 100
+        100 -
+        ((dashboard?.subscriptions?.cancelled ?? 0) /
+          (dashboard?.subscriptions?.total || 1)) *
+        100
       )
       : 100;
-
   const orderProgress =
     (dashboard?.orders?.total || 0) > 0
-      ? Math.round(((dashboard?.orders?.last_week || 0) / (dashboard?.orders?.total || 1)) * 100)
+      ? Math.round(
+        ((dashboard?.orders?.last_week || 0) /
+          (dashboard?.orders?.total || 1)) *
+        100
+      )
       : 0;
   const vendorProgress =
     (dashboard?.users?.total || 0) > 0
-      ? Math.round(((dashboard?.users?.vendors || 0) / (dashboard?.users?.total || 1)) * 100)
+      ? Math.round(
+        ((dashboard?.users?.vendors || 0) /
+          (dashboard?.users?.total || 1)) *
+        100
+      )
       : 0;
 
-  // New statistics calculations
+  /* Additional user stats */
   const totalUsers = dashboard?.users?.total || 0;
   const lastMonthUsers = dashboard?.users?.last_month || 0;
   const activeLastWeekUsers = dashboard?.users?.active_last_week || 0;
   const newVendors = dashboard?.users?.new_vendors_monthly || 0;
   const totalCustomers = dashboard?.users?.customers || 0;
+  const usersProgress =
+    totalUsers > 0 ? Math.round((lastMonthUsers / totalUsers) * 100) : 0;
+  const activeUsersProgress =
+    totalUsers > 0
+      ? Math.round((activeLastWeekUsers / totalUsers) * 100)
+      : 0;
+  const newVendorsProgress =
+    (dashboard?.users?.vendors || 0) > 0
+      ? Math.round(
+        (newVendors / (dashboard?.users?.vendors || 1)) * 100
+      )
+      : 0;
+  const customersProgress =
+    totalUsers > 0
+      ? Math.round((totalCustomers / totalUsers) * 100)
+      : 0;
 
-  const usersProgress = totalUsers > 0 ? Math.round((lastMonthUsers / totalUsers) * 100) : 0;
-  const activeUsersProgress = totalUsers > 0 ? Math.round((activeLastWeekUsers / totalUsers) * 100) : 0;
-  const newVendorsProgress = (dashboard?.users?.vendors || 0) > 0
-    ? Math.round((newVendors / (dashboard?.users?.vendors || 1)) * 100)
-    : 0;
-  const customersProgress = totalUsers > 0 ? Math.round((totalCustomers / totalUsers) * 100) : 0;
-
-  // Revenue breakdown chart data
+  /* Financial and status charts */
   const revenueChart = [
     {
-      name: "Total",
+      name: 'Total',
       Revenue: dashboard?.revenue?.total || 0,
       Commission: dashboard?.commission?.total || 0,
       Subscriptions: dashboard?.subscription_invoice?.total || 0,
     },
     {
-      name: "Last Month",
+      name: 'Last Month',
       Revenue: dashboard?.revenue?.last_month || 0,
       Commission: dashboard?.commission?.last_month || 0,
       Subscriptions: dashboard?.subscription_invoice?.last_month || 0,
     },
     {
-      name: "Last Year",
+      name: 'Last Year',
       Revenue: dashboard?.revenue?.last_year || 0,
       Commission: dashboard?.commission?.last_year || 0,
       Subscriptions: dashboard?.subscription_invoice?.last_year || 0,
     },
   ];
-
-  // Orders and Subscriptions status chart data
   const statusChart = [
     {
-      name: "Orders",
-      Active: (dashboard?.orders?.total || 0) - (dashboard?.orders?.cancelled || 0),
+      name: 'Orders',
+      Active:
+        (dashboard?.orders?.total || 0) -
+        (dashboard?.orders?.cancelled || 0),
       Cancelled: dashboard?.orders?.cancelled || 0,
     },
     {
-      name: "Subscriptions",
-      Active: (dashboard?.subscriptions?.total || 0) - (dashboard?.subscriptions?.cancelled || 0),
+      name: 'Subscriptions',
+      Active:
+        (dashboard?.subscriptions?.total || 0) -
+        (dashboard?.subscriptions?.cancelled || 0),
       Cancelled: dashboard?.subscriptions?.cancelled || 0,
     },
   ];
 
-  // Loading state
-  if (loading) return (
-    <Box className="container-fluid py-5" sx={{ background: theme.palette.background.default }}>
-      <Skeleton variant="rounded" height={60} sx={{ mb: 3, borderRadius: 3 }} />
-      <div className="row">
-        {[...Array(4)].map((_, i) => (
-          <div className="col-12 col-md-6 col-lg-3 mb-3" key={i}>
-            <Skeleton variant="rounded" height={100} sx={{ borderRadius: 4 }} />
-          </div>
-        ))}
-      </div>
-      <Skeleton variant="rounded" height={380} sx={{ mt: 3, borderRadius: 3 }} />
-    </Box>
-  );
-
-  if (error) return (
-    <Box className="container py-5" sx={{ background: theme.palette.background.default }}>
-      <Typography variant="h5" color="error" align="center" gutterBottom>
-        Error loading dashboard data
-      </Typography>
-      <Box textAlign="center">
-        <Button onClick={fetchDashboardData} startIcon={<Refresh />}>
-          Retry
-        </Button>
-      </Box>
-    </Box>
-  );
-
-  // --- Main Modern Dashboard ---
-  return (
-    <Box
-      className="container-fluid py-5"
-      sx={{
-        minHeight: "100vh",
-        background: theme.palette.background.default,
-        backgroundAttachment: "fixed",
-        pb: 10,
-      }}
-    >
-      {/* OVERVIEW HEADER */}
+  /* Loading and error handling */
+  if (loading) {
+    return (
       <Box
-        className="mb-4 d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between"
+        className="container-fluid py-5"
+        sx={{
+          background: customTheme.palette.background.default,
+          minHeight: '100vh',
+        }}
       >
-        <Box>
-          <Typography variant="h3" fontWeight="bold" sx={{ color: theme.palette.text.primary }}>
-            <DashboardIcon sx={{ mr: 1, mb: "-5px", color: theme.palette.info.main }} fontSize="large" />
-            Business Dashboard
-          </Typography>
-          <Typography variant="body1" sx={{ color: theme.palette.text.secondary }}>
-            Welcome! Here’s your up-to-date business snapshot.
-          </Typography>
-        </Box>
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <Button
-            variant="contained"
-            startIcon={<Refresh />}
-            onClick={fetchDashboardData}
-            sx={{
-              borderRadius: 3,
-              background: theme.palette.primary.main,
-              color: "#fff",
-              fontWeight: 600,
-              boxShadow: theme.shadows[2],
-              ":hover": { background: theme.palette.primary.dark },
-            }}
-          >
-            Refresh
+        <Skeleton
+          variant="rectangular"
+          height={70}
+          sx={{ mb: 3, borderRadius: 3 }}
+        />
+        <Grid container spacing={2}>
+          {[...Array(4)].map((_, i) => (
+            <Grid item xs={12} md={6} lg={3} key={i}>
+              <Skeleton
+                variant="rectangular"
+                height={120}
+                sx={{ borderRadius: 3 }}
+              />
+            </Grid>
+          ))}
+        </Grid>
+        <Skeleton
+          variant="rectangular"
+          height={350}
+          sx={{ mt: 3, borderRadius: 3 }}
+        />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box
+        className="container py-5"
+        sx={{ background: customTheme.palette.background.default }}
+      >
+        <Typography
+          variant="h5"
+          color="error"
+          align="center"
+          gutterBottom
+        >
+          Error loading dashboard data
+        </Typography>
+        <Box textAlign="center">
+          <Button onClick={fetchDashboardData} startIcon={<Refresh />}>
+            Retry
           </Button>
         </Box>
       </Box>
+    );
+  }
 
-      {/* OVERVIEW STATS */}
-      <div className="row gy-4 mb-4">
-        <div className="col-12 col-sm-6 col-lg-3">
-          <StatCard
-            title="Total Revenue"
-            value={"USD " + (dashboard?.revenue?.total ?? "-")}
-            subtitle={`This Month: USD ${dashboard?.revenue?.last_month ?? "-"}`}
-            icon={<LocalAtm fontSize="large" />}
-            progress={Math.round(
-              ((dashboard?.revenue?.last_month || 0) / (dashboard?.revenue?.total || 1)) * 100
-            )}
-            tooltip="Total revenue to date"
-            highlight
-            avatarBgColor={theme.palette.info.light}    // light blue
-            iconColor={theme.palette.info.dark}
-          />
-        </div>
-        <div className="col-12 col-sm-6 col-lg-3">
-          <StatCard
-            title="Vendors"
-            value={dashboard?.users?.vendors ?? "-"}
-            subtitle={`Active Last Week: ${dashboard?.users?.active_last_week ?? "-"}`}
-            icon={<Store fontSize="large" />}
-            progress={vendorProgress}
-            tooltip="Total registered vendors"
-            avatarBgColor={theme.palette.warning.light} // yellow/orange
-            iconColor={theme.palette.warning.dark}
-          />
-        </div>
-        <div className="col-12 col-sm-6 col-lg-3">
-          <StatCard
-            title="Orders"
-            value={dashboard?.orders?.total ?? "-"}
-            subtitle={`Last Week: ${dashboard?.orders?.last_week ?? "0"}`}
-            icon={<InsertChart fontSize="large" />}
-            progress={orderProgress}
-            tooltip="Orders placed"
-            badge={dashboard?.orders?.cancelled > 0 ? dashboard?.orders?.cancelled : null}
-            avatarBgColor={theme.palette.success.light} // light green
-            iconColor={theme.palette.success.dark}
-          />
-        </div>
-        <div className="col-12 col-sm-6 col-lg-3">
-          <StatCard
-            title="Subscriptions"
-            value={dashboard?.subscriptions?.total ?? "-"}
-            subtitle={`Active: ${(dashboard?.subscriptions?.total ?? 0) - (dashboard?.subscriptions?.cancelled ?? 0)}`}
-            icon={<ReceiptLong fontSize="large" />}
-            progress={subscriptionUsed}
-            tooltip="All time & active subscriptions"
-            avatarBgColor={theme.palette.error.light}   // light red
-            iconColor={theme.palette.error.dark}
-          />
-        </div>
-      </div>
+  /* The main layout */
+  return (
+    <ThemeProvider theme={customTheme}>
+      <Box
+        className="container-fluid py-5"
+        sx={{
+          minHeight: '100vh',
+          background: customTheme.palette.background.default,
+        }}
+      >
+        {/* Header */}
+        <Box
+          sx={(theme) => ({
+            mb: 4,
+            p: 3,
+            borderRadius: 3,
+            background:
+              theme.palette.mode === 'dark'
+                ? 'linear-gradient(90deg, #011634ff, #9fc9f3ff)' // dark blue gradient for dark mode
+                : `linear-gradient(90deg, ${lighten(
+                  customTheme.palette.primary.light,
+                  0.9
+                )}, ${lighten(
+                  customTheme.palette.warning.light ||
+                  customTheme.palette.secondary.light,
+                  0.8
+                )})`,
+            boxShadow: '0 8px 16px rgba(0,0,0,0.05)',
+          })}
+        >
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>
+            Welcome Back!
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{ mt: 0.5, color: 'text.secondary' }}
+          >
+            Here is your business snapshot with the latest metrics and
+            insights.
+          </Typography>
+        </Box>
 
-      {/* NEW USER STATISTICS ROW */}
-      <div className="row gy-4 mb-4">
-        <div className="col-12 col-sm-6 col-lg-3">
-          <StatCard
-            title="Total Users"
-            value={totalUsers}
-            subtitle={`Last Month: ${lastMonthUsers}`}
-            icon={<SupervisorAccount fontSize="large" />}
-            progress={usersProgress}
-            tooltip="Total registered users"
-            avatarBgColor={theme.palette.primary.light}
-            iconColor={theme.palette.primary.dark}
-          />
-        </div>
-        <div className="col-12 col-sm-6 col-lg-3">
-          <StatCard
-            title="Active Last Week"
-            value={activeLastWeekUsers}
-            subtitle={`${activeUsersProgress}% of all users`}
-            icon={<ShowChart fontSize="large" />}
-            progress={activeUsersProgress}
-            tooltip="Users active in the last week"
-            avatarBgColor={theme.palette.info.light}
-            iconColor={theme.palette.info.dark}
-          />
-        </div>
-        <div className="col-12 col-sm-6 col-lg-3">
-          <StatCard
-            title="New Vendors"
-            value={newVendors}
-            subtitle={`${newVendorsProgress}% of vendors`}
-            icon={<PersonAdd fontSize="large" />}
-            progress={newVendorsProgress}
-            tooltip="New vendors registered this month"
-            avatarBgColor={theme.palette.warning.light}
-            iconColor={theme.palette.warning.dark}
-          />
-        </div>
-        <div className="col-12 col-sm-6 col-lg-3">
-          <StatCard
-            title="Customers"
-            value={totalCustomers}
-            subtitle={`${customersProgress}% of users`}
-            icon={<Person fontSize="large" />}
-            progress={customersProgress}
-            tooltip="Total customers registered"
-            avatarBgColor={theme.palette.success.light}
-            iconColor={theme.palette.success.dark}
-          />
-        </div>
-      </div>
-
-      {/* BIG CHARTS SECTION */}
-      <div className="row gy-4 mb-4">
-        <div className="col-12 col-lg-8">
-          <GlassCard color={theme.palette.background.paper}>
-            <CardHeader
-              avatar={<ShowChart sx={{ color: theme.palette.info.main }} />}
-              title="Order Activity"
-              subheader={activeChart === "by_day" ? "Per Day" : "Per Month"}
-              action={
-                <>
-                  <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ color: theme.palette.info.main }}>
-                    <MoreVert />
-                  </IconButton>
-                  <Menu
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={() => setAnchorEl(null)}
-                  >
-                    <MenuItem onClick={() => { setActiveChart("by_day"); setAnchorEl(null); }}>
-                      By Day
-                    </MenuItem>
-                    <MenuItem onClick={() => { setActiveChart("by_month"); setAnchorEl(null); }}>
-                      By Month
-                    </MenuItem>
-                  </Menu>
-                </>
+        {/* Row 1: Primary metrics */}
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          <Grid item xs={12} sm={6} lg={3}>
+            <MetricCard
+              title="Total Revenue"
+              value={
+                dashboard?.revenue?.total !== undefined
+                  ? `USD ${dashboard?.revenue?.total}`
+                  : '-'
               }
-              sx={{
-                borderBottom: `1.5px solid ${theme.palette.divider}`,
-                background: theme.palette.background.default,
-              }}
+              subtitle={
+                dashboard?.revenue?.last_month !== undefined
+                  ? `Last Month: USD ${dashboard?.revenue?.last_month}`
+                  : ''
+              }
+              icon={<LocalAtm />}
+              color={customTheme.palette.info.main}
+              progress={
+                (dashboard?.revenue?.last_month || 0) /
+                (dashboard?.revenue?.total || 1) *
+                100
+              }
+              progressColor={customTheme.palette.info.dark}
             />
-            <CardContent sx={{ height: 310 }}>
-              <ResponsiveContainer width="100%" height="95%">
-                <AreaChart data={activeChart === "by_day" ? chartByDay : chartByMonth}>
-                  <defs>
-                    <linearGradient id="colorOrder" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={theme.palette.info.light} stopOpacity={0.8} />
-                      <stop offset="95%" stopColor={theme.palette.info.dark} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="name" stroke={theme.palette.text.secondary} />
-                  <YAxis allowDecimals={false} stroke={theme.palette.text.secondary} />
-                  <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
-                  <RechartsTooltip />
-                  <Area
-                    type="monotone"
-                    dataKey="count"
-                    stroke={theme.palette.info.main}
-                    fillOpacity={1}
-                    fill="url(#colorOrder)"
+          </Grid>
+          <Grid item xs={12} sm={6} lg={3}>
+            <MetricCard
+              title="Vendors"
+              value={dashboard?.users?.vendors ?? '-'}
+              subtitle={
+                dashboard?.users?.active_last_week
+                  ? `Active Last Week: ${dashboard?.users?.active_last_week}`
+                  : ''
+              }
+              icon={<Store />}
+              color={customTheme.palette.warning.main}
+              progress={vendorProgress}
+              progressColor={customTheme.palette.warning.dark}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} lg={3}>
+            <MetricCard
+              title="Orders"
+              value={dashboard?.orders?.total ?? '-'}
+              subtitle={
+                dashboard?.orders?.last_week
+                  ? `Last Week: ${dashboard?.orders?.last_week}`
+                  : ''
+              }
+              icon={<InsertChart />}
+              color={customTheme.palette.success.main}
+              progress={orderProgress}
+              progressColor={customTheme.palette.success.dark}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} lg={3}>
+            <MetricCard
+              title="Subscriptions"
+              value={dashboard?.subscriptions?.total ?? '-'}
+              subtitle={`Active: ${(dashboard?.subscriptions?.total ?? 0) -
+                (dashboard?.subscriptions?.cancelled ?? 0)
+                }`}
+              icon={<ReceiptLong />}
+              color={customTheme.palette.error.main}
+              progress={subscriptionUsed}
+              progressColor={customTheme.palette.error.dark}
+            />
+          </Grid>
+        </Grid>
+
+        {/* Row 2: User stats and distribution */}
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          {/* User statistics */}
+          <Grid item xs={12} md={6}>
+            <PanelCard
+              title="User Statistics"
+              icon={<SupervisorAccount />}
+            >
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <MetricCard
+                    title="Total Users"
+                    value={totalUsers}
+                    subtitle={`Last Month: ${lastMonthUsers}`}
+                    icon={<SupervisorAccount />}
+                    color={customTheme.palette.primary.main}
+                    progress={usersProgress}
+                    progressColor={customTheme.palette.primary.dark}
                   />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </GlassCard>
-        </div>
-        <div className="col-12 col-lg-4">
-          <GlassCard color={theme.palette.background.paper}>
-            <CardHeader
-              avatar={<SupervisorAccount sx={{ color: theme.palette.info.main }} />}
+                </Grid>
+                <Grid item xs={6}>
+                  <MetricCard
+                    title="Active Last Week"
+                    value={activeLastWeekUsers}
+                    subtitle={`${activeUsersProgress}% of all users`}
+                    icon={<ShowChart />}
+                    color={customTheme.palette.info.main}
+                    progress={activeUsersProgress}
+                    progressColor={customTheme.palette.info.dark}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <MetricCard
+                    title="New Vendors"
+                    value={newVendors}
+                    subtitle={`${newVendorsProgress}% of vendors`}
+                    icon={<PersonAdd />}
+                    color={customTheme.palette.warning.main}
+                    progress={newVendorsProgress}
+                    progressColor={customTheme.palette.warning.dark}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <MetricCard
+                    title="Customers"
+                    value={totalCustomers}
+                    subtitle={`${customersProgress}% of users`}
+                    icon={<Person />}
+                    color={customTheme.palette.success.main}
+                    progress={customersProgress}
+                    progressColor={customTheme.palette.success.dark}
+                  />
+                </Grid>
+              </Grid>
+            </PanelCard>
+          </Grid>
+
+          {/* User distribution pie */}
+          <Grid item xs={12} md={6}>
+            <PanelCard
               title="User Distribution"
-              subheader="Vendors vs Customers"
-              sx={{
-                borderBottom: `1.5px solid ${theme.palette.divider}`,
-                background: theme.palette.background.default,
-              }}
-            />
-            <CardContent sx={{ height: 310 }}>
-              <ResponsiveContainer width="100%" height="90%">
-                <PieChart>
-                  <Pie
-                    data={trafficPie}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#1976d2" // MUI blue as default fill (can be any)
-                    dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name}: ${(percent * 100).toFixed(0)}%`
+              subtitle="Vendors vs Customers"
+              icon={<SupervisorAccount />}
+            >
+              <Box sx={{ height: 240, position: 'relative' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={trafficPie}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={70}
+                      innerRadius={40}
+                      dataKey="value"
+                      label={({ name, percent }) =>
+                        `${name}: ${(percent * 100).toFixed(0)}%`
+                      }
+                    >
+                      {trafficPie.map((entry, idx) => (
+                        <Cell
+                          key={`cell-${idx}`}
+                          fill={
+                            idx === 0
+                              ? customTheme.palette.primary.main
+                              : customTheme.palette.warning.main
+                          }
+                        />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+                <Box sx={{ mt: 1 }}>
+                  <LinearProgress
+                    variant="determinate"
+                    value={vendorProgress}
+                    sx={{
+                      height: 8,
+                      borderRadius: 4,
+                      backgroundColor: lighten(
+                        customTheme.palette.primary.main,
+                        0.7
+                      ),
+                      '& .MuiLinearProgress-bar': {
+                        backgroundColor:
+                          customTheme.palette.primary.dark,
+                      },
+                    }}
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{ color: 'text.secondary', mt: 0.5 }}
+                  >
+                    <Store fontSize="inherit" /> Vendors:{' '}
+                    {dashboard?.users?.vendors} &nbsp;&nbsp;
+                    <Person fontSize="inherit" /> Customers:{' '}
+                    {dashboard?.users?.customers}
+                  </Typography>
+                </Box>
+              </Box>
+            </PanelCard>
+          </Grid>
+        </Grid>
+
+        {/* Row 3: Order activity and revenue details */}
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          {/* Order activity */}
+          <Grid item xs={12} md={7}>
+            <PanelCard
+              title="Order Activity"
+              subtitle={
+                activeChart === 'by_day' ? 'Per Day' : 'Per Month'
+              }
+              icon={<ShowChart />}
+            >
+              <Box sx={{ position: 'relative' }}>
+                {/* Switch chart type */}
+                <IconButton
+                  onClick={(e) => setAnchorEl(e.currentTarget)}
+                  sx={{
+                    position: 'absolute',
+                    right: 0,
+                    top: 0,
+                    zIndex: 1,
+                    color: customTheme.palette.text.secondary,
+                  }}
+                >
+                  <MoreVert />
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={() => setAnchorEl(null)}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      setActiveChart('by_day');
+                      setAnchorEl(null);
+                    }}
+                  >
+                    By Day
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      setActiveChart('by_month');
+                      setAnchorEl(null);
+                    }}
+                  >
+                    By Month
+                  </MenuItem>
+                </Menu>
+              </Box>
+              <Box sx={{ height: 280, mt: 2 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={
+                      activeChart === 'by_day'
+                        ? chartByDay
+                        : chartByMonth
                     }
                   >
-                    {trafficPie.map((entry, idx) => (
-                      <Cell
-                        key={`cell-${idx}`}
-                        fill={idx === 0 ? "#1976d2" : "#ffa726"} // Blue for first, Orange for second
-                      />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip />
-                  <Legend />
-                </PieChart>
-
-              </ResponsiveContainer>
-              <Box sx={{ mt: 1, width: "100%" }}>
-                <LinearProgress
-                  variant="determinate"
-                  value={vendorProgress}
-                  sx={{ height: 8, borderRadius: 3, background: theme.palette.primary.dark }}
-                />
-                <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
-                  <Store fontSize="small" /> Vendors: {dashboard?.users?.vendors} &nbsp;&nbsp;
-                  <Person fontSize="small" /> Customers: {dashboard?.users?.customers}
-                </Typography>
+                    <defs>
+                      <linearGradient
+                        id="colorOrderArea"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor={customTheme.palette.info.light}
+                          stopOpacity={0.8}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor={customTheme.palette.info.dark}
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke={customTheme.palette.divider}
+                    />
+                    <XAxis
+                      dataKey="name"
+                      stroke={customTheme.palette.text.secondary}
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      stroke={customTheme.palette.text.secondary}
+                    />
+                    <RechartsTooltip />
+                    <Area
+                      type="monotone"
+                      dataKey="count"
+                      stroke={customTheme.palette.info.main}
+                      fillOpacity={1}
+                      fill="url(#colorOrderArea)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </Box>
-            </CardContent>
-          </GlassCard>
-        </div>
-      </div>
+            </PanelCard>
+          </Grid>
 
-      {/* REVENUE AND ORDERS CONTAINERS */}
-      <div className="row gy-4 mb-4">
-        <div className="col-12 col-lg-6">
-          <GlassCard color={theme.palette.background.paper}>
-            <CardHeader
-              avatar={<AttachMoney sx={{ color: theme.palette.success.main }} />}
-              title="Commission & Invoices"
-              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
-            />
-            <CardContent>
-              <div className="row">
-                <div className="col-12 col-md-6 mb-2">
-                  <StatCard
+          {/* Revenue and invoice summary */}
+          <Grid item xs={12} md={5}>
+            <PanelCard title="Commission & Invoices" icon={<AttachMoney />}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <MetricCard
                     title="Total Commission"
-                    value={"USD " + (dashboard?.commission?.total ?? "-")}
-                    subtitle={`This Month: USD ${dashboard?.commission?.last_month ?? "-"}`}
+                    value={
+                      dashboard?.commission?.total !== undefined
+                        ? `USD ${dashboard?.commission?.total}`
+                        : '-'
+                    }
+                    subtitle={`This Month: USD ${dashboard?.commission?.last_month ?? '-'
+                      }`}
                     icon={<Insights />}
-                    avatarBgColor={theme.palette.success.light}
-                    iconColor={theme.palette.success.dark}
+                    color={customTheme.palette.success.main}
+                    progress={
+                      ((dashboard?.commission?.last_month || 0) /
+                        (dashboard?.commission?.total || 1)) *
+                      100
+                    }
+                    progressColor={customTheme.palette.success.dark}
                   />
-                </div>
-                <div className="col-12 col-md-6 mb-2">
-                  <StatCard
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <MetricCard
                     title="Subscription Invoice"
-                    value={"USD " + (dashboard?.subscription_invoice?.total ?? "-")}
-                    subtitle={`This Month: USD ${dashboard?.subscription_invoice?.last_month ?? "-"}`}
+                    value={
+                      dashboard?.subscription_invoice?.total !==
+                        undefined
+                        ? `USD ${dashboard?.subscription_invoice?.total}`
+                        : '-'
+                    }
+                    subtitle={`This Month: USD ${dashboard?.subscription_invoice?.last_month ?? '-'
+                      }`}
                     icon={<ReceiptLong />}
-                    avatarBgColor={theme.palette.primary.light}
-                    iconColor={theme.palette.primary.dark}
+                    color={customTheme.palette.primary.main}
+                    progress={
+                      ((dashboard?.subscription_invoice?.last_month || 0) /
+                        (dashboard?.subscription_invoice?.total || 1)) *
+                      100
+                    }
+                    progressColor={customTheme.palette.primary.dark}
                   />
-                </div>
-              </div>
-            </CardContent>
-          </GlassCard>
-        </div>
-        <div className="col-12 col-lg-6">
-          <GlassCard color={theme.palette.background.paper}>
-            <CardHeader
-              avatar={<Cancel sx={{ color: theme.palette.error.light }} />}
-              title="Cancellations"
-              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
-            />
-            <CardContent>
-              <div className="row">
-                <div className="col-12 col-md-6 mb-2">
-                  <StatCard
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <MetricCard
                     title="Cancelled Orders"
                     value={dashboard?.orders?.cancelled ?? 0}
                     icon={<Cancel />}
-                    badge={dashboard?.orders?.cancelled > 0 ? dashboard?.orders?.cancelled : null}
-                    avatarBgColor={theme.palette.error.light}
-                    iconColor={theme.palette.error.dark}
+                    color={customTheme.palette.error.main}
+                    progress={
+                      (dashboard?.orders?.cancelled || 0) /
+                      (dashboard?.orders?.total || 1) *
+                      100
+                    }
+                    progressColor={customTheme.palette.error.dark}
+                    subtitle={`Total Orders: ${dashboard?.orders?.total ?? 0}`}
                   />
-                </div>
-                <div className="col-12 col-md-6 mb-2">
-                  <StatCard
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <MetricCard
                     title="Cancelled Subs."
                     value={dashboard?.subscriptions?.cancelled ?? 0}
                     icon={<Cancel />}
-                    badge={dashboard?.subscriptions?.cancelled > 0 ? dashboard?.subscriptions?.cancelled : null}
-                    avatarBgColor={theme.palette.secondary.light}
-                    iconColor={theme.palette.secondary.dark}
+                    color={customTheme.palette.secondary.main}
+                    progress={
+                      (dashboard?.subscriptions?.cancelled || 0) /
+                      (dashboard?.subscriptions?.total || 1) *
+                      100
+                    }
+                    progressColor={customTheme.palette.secondary.dark}
+                    subtitle={`Total Subs.: ${dashboard?.subscriptions?.total ?? 0}`}
                   />
-                </div>
-              </div>
-            </CardContent>
-          </GlassCard>
-        </div>
-      </div>
+                </Grid>
+              </Grid>
+            </PanelCard>
+          </Grid>
+        </Grid>
 
-      {/* TOP CUSTOMERS & VENDORS */}
-      <div className="row gy-4 mb-4">
-        <div className="col-12 col-lg-6">
-          <GlassCard color={theme.palette.background.paper}>
-            <CardHeader
-              avatar={<EmojiEvents sx={{ color: theme.palette.warning.main }} />}
-              title="Top Customer"
-              subheader="By total value"
-              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
-            />
-            <CardContent>
+        {/* Row 4: Top customers and vendors */}
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          <Grid item xs={12} md={6}>
+            <PanelCard
+              title="Top Customers"
+              subtitle="By total value"
+              icon={<EmojiEvents />}
+            >
               {dashboard?.top?.customers?.length > 0 ? (
-                <List>
+                <Box>
                   {dashboard.top.customers.map((cust, idx) => (
-                    <ListItem key={cust.customer__id}>
-                      <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: theme.palette.info.light, color: theme.palette.info.dark }}>
+                    <Box
+                      key={cust.customer__id}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        p: 1.5,
+                        borderRadius: 2,
+                        mb: 1,
+                        backgroundColor:
+                          idx === 0
+                            ? lighten(
+                              customTheme.palette.warning.light,
+                              0.5
+                            )
+                            : lighten(
+                              customTheme.palette.background.paper,
+                              0.8
+                            ),
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Avatar
+                          sx={{
+                            bgcolor: customTheme.palette.info.main,
+                            color: '#fff',
+                            mr: 2,
+                          }}
+                        >
                           <Person />
                         </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={cust.customer__email}
-                        secondary={`Total: USD ${cust.total}`}
-                        sx={{ color: theme.palette.text.primary }}
-                      />
+                        <Box>
+                          <Typography
+                            variant="body1"
+                            sx={{ fontWeight: idx === 0 ? 600 : 500 }}
+                          >
+                            {cust.customer__email}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: 'text.secondary' }}
+                          >
+                            Total: USD {cust.total}
+                          </Typography>
+                        </Box>
+                      </Box>
                       {idx === 0 && (
                         <Tooltip title="Top Customer">
-                          <span><Star color="warning" sx={{ ml: 2 }} /></span>
+                          <span>
+                            <EmojiEvents
+                              sx={{
+                                color: customTheme.palette.warning.main,
+                              }}
+                            />
+                          </span>
                         </Tooltip>
                       )}
-                    </ListItem>
+                    </Box>
                   ))}
-                </List>
+                </Box>
               ) : (
-                <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                <Typography
+                  variant="body2"
+                  sx={{ color: 'text.secondary' }}
+                >
                   No customer data.
                 </Typography>
               )}
-            </CardContent>
-          </GlassCard>
-        </div>
-        <div className="col-12 col-lg-6">
-          <GlassCard color={theme.palette.background.paper}>
-            <CardHeader
-              avatar={<Leaderboard sx={{ color: theme.palette.success.main }} />}
-              title="Top Vendor"
-              subheader="By total value"
-              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
-            />
-            <CardContent>
+            </PanelCard>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <PanelCard
+              title="Top Vendors"
+              subtitle="By total value"
+              icon={<Leaderboard />}
+            >
               {dashboard?.top?.vendors?.length > 0 ? (
-                <List>
+                <Box>
                   {dashboard.top.vendors.map((ven, idx) => (
-                    <ListItem key={ven.vendor__id}>
-                      <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: theme.palette.success.light, color: theme.palette.success.dark }}>
+                    <Box
+                      key={ven.vendor__id}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        p: 1.5,
+                        borderRadius: 2,
+                        mb: 1,
+                        backgroundColor:
+                          idx === 0
+                            ? lighten(
+                              customTheme.palette.success.light,
+                              0.5
+                            )
+                            : lighten(
+                              customTheme.palette.background.paper,
+                              0.8
+                            ),
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Avatar
+                          sx={{
+                            bgcolor: customTheme.palette.success.main,
+                            color: '#fff',
+                            mr: 2,
+                          }}
+                        >
                           <Store />
                         </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={ven.vendor__email}
-                        secondary={`Total: USD ${ven.total}`}
-                        sx={{ color: theme.palette.text.primary }}
-                      />
+                        <Box>
+                          <Typography
+                            variant="body1"
+                            sx={{ fontWeight: idx === 0 ? 600 : 500 }}
+                          >
+                            {ven.vendor__email}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: 'text.secondary' }}
+                          >
+                            Total: USD {ven.total}
+                          </Typography>
+                        </Box>
+                      </Box>
                       {idx === 0 && (
                         <Tooltip title="Top Vendor">
-                          <span><Star color="warning" sx={{ ml: 2 }} /></span>
+                          <span>
+                            <EmojiEvents
+                              sx={{
+                                color: customTheme.palette.warning.main,
+                              }}
+                            />
+                          </span>
                         </Tooltip>
                       )}
-                    </ListItem>
+                    </Box>
                   ))}
-                </List>
+                </Box>
               ) : (
-                <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                <Typography
+                  variant="body2"
+                  sx={{ color: 'text.secondary' }}
+                >
                   No vendor data.
                 </Typography>
               )}
-            </CardContent>
-          </GlassCard>
-        </div>
-      </div>
+            </PanelCard>
+          </Grid>
+        </Grid>
 
-      {/* BOTTOM: ORDERS CHART & SUBSCRIPTION RADIAL */}
-      <div className="row gy-4 mb-4">
-        <div className="col-12 col-md-7">
-          <GlassCard color={theme.palette.background.paper}>
-            <CardHeader
-              avatar={<BarChartIcon sx={{ color: theme.palette.warning.main }} />}
+        {/* Row 5: Weekly orders and subscription status radial chart */}
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          <Grid item xs={12} md={7}>
+            <PanelCard
               title="Orders by Week"
-              subheader="Weekly order counts"
-              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
-            />
-            <CardContent sx={{ height: 280 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartByWeek}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
-                  <XAxis dataKey="name" stroke={theme.palette.text.secondary} />
-                  <YAxis stroke={theme.palette.text.secondary} />
-                  <RechartsTooltip />
-                  <Legend />
-                  <Bar dataKey="count" name="Orders" fill={theme.palette.warning.main} radius={[10, 10, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </GlassCard>
-        </div>
-        <div className="col-12 col-md-5">
-          <GlassCard color={theme.palette.background.paper}>
-            <CardHeader
-              avatar={<TrendingUp sx={{ color: theme.palette.info.main }} />}
-              title="Subscriptions Status"
-              subheader="Total vs Cancelled"
-              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
-            />
-            <CardContent sx={{ height: 280, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <ResponsiveContainer width="100%" height="90%">
-                <RadialBarChart
-                  innerRadius="80%"
-                  outerRadius="100%"
-                  data={[
-                    { name: "Active", value: dashboard?.subscriptions?.total - dashboard?.subscriptions?.cancelled, fill: theme.palette.info.main },
-                    { name: "Cancelled", value: dashboard?.subscriptions?.cancelled, fill: theme.palette.error.main },
-                  ]}
-                  startAngle={90}
-                  endAngle={-270}
-                >
-                  <RadialBar
-                    minAngle={15}
-                    background
-                    clockWise
-                    dataKey="value"
-                  />
-                  <Legend
-                    iconSize={12}
-                    width={100}
-                    height={50}
-                    layout="vertical"
-                    verticalAlign="middle"
-                    align="right"
-                  />
-                  <RechartsTooltip />
-                </RadialBarChart>
-              </ResponsiveContainer>
-              <Box sx={{ textAlign: "center", position: "absolute", left: "62%", top: "45%" }}>
-                <Typography variant="h4" sx={{ color: theme.palette.info.main }}>
-                  {dashboard?.subscriptions?.total ?? "-"}
-                </Typography>
-                <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                  Subscriptions
-                </Typography>
+              subtitle="Weekly order counts"
+              icon={<BarChartIcon />}
+            >
+              <Box sx={{ height: 260 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartByWeek}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke={customTheme.palette.divider}
+                    />
+                    <XAxis
+                      dataKey="name"
+                      stroke={customTheme.palette.text.secondary}
+                    />
+                    <YAxis
+                      stroke={customTheme.palette.text.secondary}
+                    />
+                    <RechartsTooltip />
+                    <Legend />
+                    <Bar
+                      dataKey="count"
+                      name="Orders"
+                      fill={customTheme.palette.warning.main}
+                      radius={[6, 6, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
               </Box>
-            </CardContent>
-          </GlassCard>
-        </div>
-      </div>
+            </PanelCard>
+          </Grid>
+          <Grid item xs={12} md={5}>
+            <PanelCard
+              title="Subscriptions Status"
+              subtitle="Active vs Cancelled"
+              icon={<TrendingUp />}
+            >
+              <Box
+                sx={{
+                  height: 260,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative',
+                }}
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadialBarChart
+                    innerRadius="70%"
+                    outerRadius="100%"
+                    data={[
+                      {
+                        name: 'Active',
+                        value:
+                          (dashboard?.subscriptions?.total || 0) -
+                          (dashboard?.subscriptions?.cancelled || 0),
+                        fill: customTheme.palette.info.main,
+                      },
+                      {
+                        name: 'Cancelled',
+                        value:
+                          dashboard?.subscriptions?.cancelled || 0,
+                        fill: customTheme.palette.error.main,
+                      },
+                    ]}
+                    startAngle={90}
+                    endAngle={-270}
+                  >
+                    <RadialBar
+                      dataKey="value"
+                      minAngle={15}
+                      background
+                      clockWise
+                    />
+                    <Legend
+                      iconSize={12}
+                      width={100}
+                      height={50}
+                      layout="vertical"
+                      verticalAlign="middle"
+                      align="right"
+                    />
+                    <RechartsTooltip />
+                  </RadialBarChart>
+                </ResponsiveContainer>
+                <Box
+                  sx={{
+                    textAlign: 'center',
+                    position: 'absolute',
+                    left: '50%',
+                    top: '50%',
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                >
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      color: customTheme.palette.info.main,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {dashboard?.subscriptions?.total ?? '-'}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: 'text.secondary' }}
+                  >
+                    Subscriptions
+                  </Typography>
+                </Box>
+              </Box>
+            </PanelCard>
+          </Grid>
+        </Grid>
 
-      {/* TOP COMPLETED CATEGORIES */}
-      <div className="row mb-4">
-        <div className="col-12">
-          <GlassCard color={theme.palette.background.paper}>
-            <CardHeader
-              avatar={<AccountTree sx={{ color: theme.palette.warning.main }} />}
+        {/* Row 6: Completed categories & financial breakdown */}
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={4}>
+            <PanelCard
               title="Top Completed Category"
-              subheader="By time period"
-              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
-            />
-            <CardContent>
-              <div className="row">
-                <div className="col-12 col-md-4 mb-2">
-                  <Chip
-                    label={`Last Week: ${dashboard?.top_completed_categories?.last_week ?? "-"}`}
-                    color="success"
-                    variant="filled"
-                    icon={<Insights />}
-                  />
-                </div>
-                <div className="col-12 col-md-4 mb-2">
-                  <Chip
-                    label={`Last Month: ${dashboard?.top_completed_categories?.last_month ?? "-"}`}
-                    color="info"
-                    variant="filled"
-                    icon={<Insights />}
-                  />
-                </div>
-                <div className="col-12 col-md-4 mb-2">
-                  <Chip
-                    label={`Last Year: ${dashboard?.top_completed_categories?.last_year ?? "-"}`}
-                    color="warning"
-                    variant="filled"
-                    icon={<Insights />}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </GlassCard>
-        </div>
-      </div>
-
-      {/* NEW COMPARATIVE CHARTS */}
-      <div className="row gy-4 mb-4">
-        {/* Financial Breakdown Bar Chart */}
-        <div className="col-12 col-md-6">
-          <GlassCard color={theme.palette.background.paper}>
-            <CardHeader
-              avatar={<BarChartIcon sx={{ color: theme.palette.primary.main }} />}
+              subtitle="By time period"
+              icon={<AccountTree />}
+            >
+              <Grid container spacing={1}>
+                <Grid item xs={12}>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 500 }}
+                  >
+                    Last Week:
+                    <strong>
+                      {' '}
+                      {dashboard?.top_completed_categories?.last_week ??
+                        '-'}
+                    </strong>
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 500 }}
+                  >
+                    Last Month:
+                    <strong>
+                      {' '}
+                      {dashboard?.top_completed_categories?.last_month ??
+                        '-'}
+                    </strong>
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 500 }}
+                  >
+                    Last Year:
+                    <strong>
+                      {' '}
+                      {dashboard?.top_completed_categories?.last_year ??
+                        '-'}
+                    </strong>
+                  </Typography>
+                </Grid>
+              </Grid>
+            </PanelCard>
+          </Grid>
+          <Grid item xs={12} md={8}>
+            <PanelCard
               title="Financial Breakdown"
-              subheader="Total vs Last Month vs Last Year"
-              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
-            />
-            <CardContent sx={{ height: 300 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={revenueChart} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
-                  <XAxis dataKey="name" stroke={theme.palette.text.secondary} />
-                  <YAxis stroke={theme.palette.text.secondary} />
-                  <RechartsTooltip />
-                  <Legend />
-                  <Bar dataKey="Revenue" fill={theme.palette.success.main} name="Revenue" />
-                  <Bar dataKey="Commission" fill={theme.palette.info.main} name="Commission" />
-                  <Bar dataKey="Subscriptions" fill={theme.palette.warning.main} name="Subscriptions" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </GlassCard>
-        </div>
-        {/* Orders & Subscriptions Status Bar Chart */}
-        <div className="col-12 col-md-6">
-          <GlassCard color={theme.palette.background.paper}>
-            <CardHeader
-              avatar={<InsertChart sx={{ color: theme.palette.secondary.main }} />}
-              title="Orders & Subs Status"
-              subheader="Active vs Cancelled"
-              sx={{ borderBottom: `1.5px solid ${theme.palette.divider}` }}
-            />
-            <CardContent sx={{ height: 300 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={statusChart} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
-                  <XAxis dataKey="name" stroke={theme.palette.text.secondary} />
-                  <YAxis stroke={theme.palette.text.secondary} />
-                  <RechartsTooltip />
-                  <Legend />
-                  <Bar dataKey="Active" stackId="a" fill={theme.palette.success.main} name="Active" />
-                  <Bar dataKey="Cancelled" stackId="a" fill={theme.palette.error.main} name="Cancelled" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </GlassCard>
-        </div>
-      </div>
+              subtitle="Total vs Last Month vs Last Year"
+              icon={<BarChartIcon />}
+            >
+              <Box sx={{ height: 260 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={revenueChart}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke={customTheme.palette.divider}
+                    />
+                    <XAxis
+                      dataKey="name"
+                      stroke={customTheme.palette.text.secondary}
+                    />
+                    <YAxis
+                      stroke={customTheme.palette.text.secondary}
+                    />
+                    <RechartsTooltip />
+                    <Legend />
+                    <Bar
+                      dataKey="Revenue"
+                      fill={customTheme.palette.success.main}
+                      name="Revenue"
+                    />
+                    <Bar
+                      dataKey="Commission"
+                      fill={customTheme.palette.info.main}
+                      name="Commission"
+                    />
+                    <Bar
+                      dataKey="Subscriptions"
+                      fill={customTheme.palette.warning.main}
+                      name="Subscriptions"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Box>
+            </PanelCard>
+          </Grid>
+        </Grid>
 
-    </Box>
+        {/* Row 7: Combined order & subscription status bar */}
+        <Grid container spacing={2} sx={{ mt: 3 }}>
+          <Grid item xs={12}>
+            <PanelCard
+              title="Orders & Subscriptions Status"
+              subtitle="Active vs Cancelled"
+              icon={<InsertChart />}
+            >
+              <Box sx={{ height: 260 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={statusChart}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke={customTheme.palette.divider}
+                    />
+                    <XAxis
+                      dataKey="name"
+                      stroke={customTheme.palette.text.secondary}
+                    />
+                    <YAxis
+                      stroke={customTheme.palette.text.secondary}
+                    />
+                    <RechartsTooltip />
+                    <Legend />
+                    <Bar
+                      dataKey="Active"
+                      stackId="a"
+                      fill={customTheme.palette.success.main}
+                      name="Active"
+                    />
+                    <Bar
+                      dataKey="Cancelled"
+                      stackId="a"
+                      fill={customTheme.palette.error.main}
+                      name="Cancelled"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Box>
+            </PanelCard>
+          </Grid>
+        </Grid>
+      </Box>
+    </ThemeProvider>
   );
 }
