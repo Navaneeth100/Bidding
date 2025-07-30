@@ -17,6 +17,9 @@ import {
   useTheme,
   ThemeProvider,
   createTheme,
+  Paper,
+  Stack,
+  Chip 
 } from '@mui/material';
 import {
   LocalAtm,
@@ -37,6 +40,7 @@ import {
   MoreVert,
   Refresh,
   AttachMoney,
+  
 } from '@mui/icons-material';
 import {
   AreaChart,
@@ -56,6 +60,7 @@ import {
   Cell,
 } from 'recharts';
 import { lighten, darken } from '@mui/material/styles';
+// import AccountTreeIcon from '@mui/icons-material/AccountTree';
 
 /* A card for high‑level metrics, with a gradient background, icon and optional progress bar */
 const MetricCard = ({
@@ -69,6 +74,7 @@ const MetricCard = ({
 }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  console.log("isDark", isDark);
 
   // Default color (from prop) or fallback to primary.main
   const baseColor = color || theme.palette.primary.main;
@@ -214,7 +220,7 @@ const PanelCard = ({ title, icon, subtitle, children }) => {
 export default function DashboardNew() {
   const parentTheme = useTheme();
   const currentMode = parentTheme.palette.mode;
-
+  const isDark = parentTheme.palette.mode === 'dark';
   /* Extend the parent theme with softer backgrounds */
   const customTheme = React.useMemo(
     () =>
@@ -421,7 +427,8 @@ export default function DashboardNew() {
       Cancelled: dashboard?.subscriptions?.cancelled || 0,
     },
   ];
-
+  const activeValue = (dashboard?.subscriptions?.total || 0) - (dashboard?.subscriptions?.cancelled || 0);
+  const cancelledValue = dashboard?.subscriptions?.cancelled || 0;
   /* Loading and error handling */
   if (loading) {
     return (
@@ -496,10 +503,10 @@ export default function DashboardNew() {
             mb: 4,
             p: 3,
             borderRadius: 3,
-           background:
-  theme.palette.mode === 'dark'
-    ? 'linear-gradient(90deg, #002251ff, #9fc9f3ff)' // dark blue gradient for dark mode
-    : 'linear-gradient(90deg, #cfeedfff, #198754)', // same static gradient for light mode
+            background:
+              theme.palette.mode === 'dark'
+                ? 'linear-gradient(90deg, #002251ff, #9fc9f3ff)' // dark blue gradient for dark mode
+                : 'linear-gradient(90deg, #cfeedfff, #198754)', // same static gradient for light mode
 
             boxShadow: '0 8px 16px rgba(0,0,0,0.05)',
           })}
@@ -532,7 +539,7 @@ export default function DashboardNew() {
                   : ''
               }
               icon={<LocalAtm />}
-              color={customTheme.palette.info.main}
+              color={isDark ? '#023862ff' : '#90caf9'}
               progress={
                 (dashboard?.revenue?.last_month || 0) /
                 (dashboard?.revenue?.total || 1) *
@@ -551,7 +558,8 @@ export default function DashboardNew() {
                   : ''
               }
               icon={<Store />}
-              color={customTheme.palette.warning.main}
+
+              color={isDark ? '#67300cff' : customTheme.palette.warning.main}
               progress={vendorProgress}
               progressColor={customTheme.palette.warning.dark}
             />
@@ -566,9 +574,10 @@ export default function DashboardNew() {
                   : ''
               }
               icon={<InsertChart />}
-              color={customTheme.palette.success.main}
+
+              color={isDark ? '#033e22ff' : customTheme.palette.success.main}
               progress={orderProgress}
-              progressColor={customTheme.palette.success.dark}
+              progressColor={isDark ? '#55d78bff' : customTheme.palette.success.dark}
             />
           </Grid>
           <Grid item xs={12} sm={6} lg={3}>
@@ -579,9 +588,9 @@ export default function DashboardNew() {
                 (dashboard?.subscriptions?.cancelled ?? 0)
                 }`}
               icon={<ReceiptLong />}
-              color={customTheme.palette.error.main}
+              color={isDark ? '#b81004c3' : customTheme.palette.error.main}
               progress={subscriptionUsed}
-              progressColor={customTheme.palette.error.dark}
+              progressColor={isDark ? '#fd1202ff' : customTheme.palette.error.dark}
             />
           </Grid>
         </Grid>
@@ -601,7 +610,7 @@ export default function DashboardNew() {
                     value={totalUsers}
                     subtitle={`Last Month: ${lastMonthUsers}`}
                     icon={<SupervisorAccount />}
-                    color={customTheme.palette.primary.main}
+                    color={isDark ? '#023862ff' : customTheme.palette.primary.main}
                     progress={usersProgress}
                     progressColor={customTheme.palette.primary.dark}
                   />
@@ -612,7 +621,7 @@ export default function DashboardNew() {
                     value={activeLastWeekUsers}
                     subtitle={`${activeUsersProgress}% of all users`}
                     icon={<ShowChart />}
-                    color={customTheme.palette.info.main}
+                    color={isDark ? '#b81004c3' : customTheme.palette.error.main}
                     progress={activeUsersProgress}
                     progressColor={customTheme.palette.info.dark}
                   />
@@ -623,7 +632,7 @@ export default function DashboardNew() {
                     value={newVendors}
                     subtitle={`${newVendorsProgress}% of vendors`}
                     icon={<PersonAdd />}
-                    color={customTheme.palette.warning.main}
+                    color={isDark ? '#67300cff' : customTheme.palette.warning.main}
                     progress={newVendorsProgress}
                     progressColor={customTheme.palette.warning.dark}
                   />
@@ -634,7 +643,7 @@ export default function DashboardNew() {
                     value={totalCustomers}
                     subtitle={`${customersProgress}% of users`}
                     icon={<Person />}
-                    color={customTheme.palette.success.main}
+                    color={isDark ? '#033e22ff' : customTheme.palette.success.main}
                     progress={customersProgress}
                     progressColor={customTheme.palette.success.dark}
                   />
@@ -829,7 +838,7 @@ export default function DashboardNew() {
                     subtitle={`This Month: USD ${dashboard?.commission?.last_month ?? '-'
                       }`}
                     icon={<Insights />}
-                    color={customTheme.palette.success.main}
+                    color={isDark ? '#033e22ff' : customTheme.palette.success.main}
                     progress={
                       ((dashboard?.commission?.last_month || 0) /
                         (dashboard?.commission?.total || 1)) *
@@ -850,7 +859,7 @@ export default function DashboardNew() {
                     subtitle={`This Month: USD ${dashboard?.subscription_invoice?.last_month ?? '-'
                       }`}
                     icon={<ReceiptLong />}
-                    color={customTheme.palette.primary.main}
+                    color={isDark ? '#023862ff' : customTheme.palette.grey.main}
                     progress={
                       ((dashboard?.subscription_invoice?.last_month || 0) /
                         (dashboard?.subscription_invoice?.total || 1)) *
@@ -864,7 +873,7 @@ export default function DashboardNew() {
                     title="Cancelled Orders"
                     value={dashboard?.orders?.cancelled ?? 0}
                     icon={<Cancel />}
-                    color={customTheme.palette.error.main}
+                    color={isDark ? '#b81004c3' : customTheme.palette.error.main}
                     progress={
                       (dashboard?.orders?.cancelled || 0) /
                       (dashboard?.orders?.total || 1) *
@@ -879,7 +888,7 @@ export default function DashboardNew() {
                     title="Cancelled Subs."
                     value={dashboard?.subscriptions?.cancelled ?? 0}
                     icon={<Cancel />}
-                    color={customTheme.palette.secondary.main}
+                    color={isDark ? '#350058ff' : customTheme.palette.secondary.main}
                     progress={
                       (dashboard?.subscriptions?.cancelled || 0) /
                       (dashboard?.subscriptions?.total || 1) *
@@ -914,22 +923,15 @@ export default function DashboardNew() {
                         p: 1.5,
                         borderRadius: 2,
                         mb: 1,
-                        backgroundColor:
-                          idx === 0
-                            ? lighten(
-                              customTheme.palette.warning.light,
-                              0.5
-                            )
-                            : lighten(
-                              customTheme.palette.background.paper,
-                              0.8
-                            ),
+                        backgroundColor: idx === 0
+                          ? 'rgba(255, 193, 7, 0.15)' // Soft amber highlight for top customer
+                          : 'rgba(0, 0, 0, 0.04)',    // Very light grey for others (works in both modes)
                       }}
                     >
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Avatar
                           sx={{
-                            bgcolor: customTheme.palette.info.main,
+                            bgcolor: idx === 0 ? '#ffc107' : '#1976d2', // Amber for top, blue for others
                             color: '#fff',
                             mr: 2,
                           }}
@@ -937,16 +939,10 @@ export default function DashboardNew() {
                           <Person />
                         </Avatar>
                         <Box>
-                          <Typography
-                            variant="body1"
-                            sx={{ fontWeight: idx === 0 ? 600 : 500 }}
-                          >
+                          <Typography variant="body1" sx={{ fontWeight: idx === 0 ? 700 : 500 }}>
                             {cust.customer__email}
                           </Typography>
-                          <Typography
-                            variant="caption"
-                            sx={{ color: 'text.secondary' }}
-                          >
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                             Total: USD {cust.total}
                           </Typography>
                         </Box>
@@ -954,17 +950,14 @@ export default function DashboardNew() {
                       {idx === 0 && (
                         <Tooltip title="Top Customer">
                           <span>
-                            <EmojiEvents
-                              sx={{
-                                color: customTheme.palette.warning.main,
-                              }}
-                            />
+                            <EmojiEvents sx={{ color: '#ffc107' /* amber gold trophy */ }} />
                           </span>
                         </Tooltip>
                       )}
                     </Box>
                   ))}
                 </Box>
+
               ) : (
                 <Typography
                   variant="body2"
@@ -1067,24 +1060,100 @@ export default function DashboardNew() {
               <Box sx={{ height: 260 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartByWeek}>
+
+                    {/* Gradient fill for bars */}
+                    <defs>
+                      <linearGradient id="orderGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop
+                          offset="5%"
+                          stopColor={isDark ? '#7e57c2' : '#80cbc4'}  // purple vs teal
+                          stopOpacity={0.9}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor={isDark ? '#512da8' : '#004d40'}  // dark purple vs dark teal
+                          stopOpacity={0.7}
+                        />
+                      </linearGradient>
+                    </defs>
+
                     <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke={customTheme.palette.divider}
+                      strokeDasharray="4 4"
+                      stroke={isDark ? 'rgba(255,255,255,0.1)' : '#e0e0e0'}
+                      vertical={false}
                     />
+
                     <XAxis
                       dataKey="name"
-                      stroke={customTheme.palette.text.secondary}
+                      stroke={isDark ? '#bbb' : '#555'}
+                      tick={{ fontSize: 14, fontWeight: '600' }}
+                      axisLine={{ stroke: isDark ? '#555' : '#ccc' }}
+                      tickLine={false}
+                      padding={{ left: 10, right: 10 }}
                     />
+
                     <YAxis
-                      stroke={customTheme.palette.text.secondary}
+                      stroke={isDark ? '#bbb' : '#555'}
+                      tick={{ fontSize: 14, fontWeight: '600' }}
+                      axisLine={{ stroke: isDark ? '#555' : '#ccc' }}
+                      tickLine={false}
                     />
-                    <RechartsTooltip />
-                    <Legend />
+
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: isDark ? '#311b92' : '#fff',  // deep purple bg in dark mode
+                        borderColor: isDark ? '#512da8' : '#ccc',
+                        boxShadow: isDark
+                          ? '0 0 10px rgba(103, 58, 183, 0.6)'
+                          : '0 0 10px rgba(0, 105, 92, 0.3)',
+                        borderRadius: 8,
+                        color: isDark ? '#d1c4e9' : '#004d40',
+                        fontWeight: 600,
+                      }}
+                      itemStyle={{ color: isDark ? '#b39ddb' : '#00796b' }}
+                      cursor={{
+                        fill: isDark
+                          ? 'rgba(103, 58, 183, 0.15)'
+                          : 'rgba(0, 137, 123, 0.1)',
+                      }}
+                    />
+
+                    <Legend
+                      wrapperStyle={{
+                        color: isDark ? '#b39ddb' : '#004d40',
+                        fontWeight: '700',
+                        fontSize: 16,
+                        paddingTop: 8,
+                        userSelect: 'none',
+                      }}
+                      iconType="circle"
+                      iconSize={14}
+                    />
+
                     <Bar
                       dataKey="count"
                       name="Orders"
-                      fill={customTheme.palette.warning.main}
+                      fill="url(#orderGradient)"
                       radius={[6, 6, 0, 0]}
+                      style={{
+                        filter: isDark
+                          ? 'drop-shadow(0 1px 3px rgba(91, 0, 247, 0.5))'
+                          : 'drop-shadow(0 1px 3px rgba(0, 77, 64, 0.4))',
+                        transition: 'transform 0.3s ease',
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                        e.currentTarget.style.filter = isDark
+                          ? 'drop-shadow(0 0 8px rgba(52, 16, 112, 0.9))'
+                          : 'drop-shadow(0 0 8px rgba(0, 105, 92, 0.9))';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.filter = isDark
+                          ? 'drop-shadow(0 1px 3px rgba(103, 58, 183, 0.5))'
+                          : 'drop-shadow(0 1px 3px rgba(0, 77, 64, 0.4))';
+                      }}
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -1092,139 +1161,223 @@ export default function DashboardNew() {
             </PanelCard>
           </Grid>
           <Grid item xs={12} md={5}>
-            <PanelCard
-              title="Subscriptions Status"
-              subtitle="Active vs Cancelled"
-              icon={<TrendingUp />}
-            >
-              <Box
-                sx={{
-                  height: 260,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                }}
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadialBarChart
-                    innerRadius="70%"
-                    outerRadius="100%"
-                    data={[
-                      {
-                        name: 'Active',
-                        value:
-                          (dashboard?.subscriptions?.total || 0) -
-                          (dashboard?.subscriptions?.cancelled || 0),
-                        fill: customTheme.palette.info.main,
-                      },
-                      {
-                        name: 'Cancelled',
-                        value:
-                          dashboard?.subscriptions?.cancelled || 0,
-                        fill: customTheme.palette.error.main,
-                      },
-                    ]}
-                    startAngle={90}
-                    endAngle={-270}
-                  >
-                    <RadialBar
-                      dataKey="value"
-                      minAngle={15}
-                      background
-                      clockWise
-                    />
-                    <Legend
-                      iconSize={12}
-                      width={100}
-                      height={50}
-                      layout="vertical"
-                      verticalAlign="middle"
-                      align="right"
-                    />
-                    <RechartsTooltip />
-                  </RadialBarChart>
-                </ResponsiveContainer>
-                <Box
-                  sx={{
-                    textAlign: 'center',
-                    position: 'absolute',
-                    left: '50%',
-                    top: '50%',
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                >
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      color: customTheme.palette.info.main,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {dashboard?.subscriptions?.total ?? '-'}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: 'text.secondary' }}
-                  >
-                    Subscriptions
-                  </Typography>
-                </Box>
-              </Box>
-            </PanelCard>
+    <PanelCard
+      title="Subscriptions Status"
+      subtitle="Active vs Cancelled"
+      icon={<TrendingUp />}
+    >
+      <Box
+        sx={{
+          height: 260,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+        }}
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <RadialBarChart
+            innerRadius="70%"
+            outerRadius="100%"
+            data={[
+              {
+                name: 'Active',
+                value: activeValue,
+                fill: isDark ? 'url(#activeGradientDark)' : customTheme.palette.info.main,
+              },
+              {
+                name: 'Cancelled',
+                value: cancelledValue,
+                fill: isDark ? 'url(#cancelledGradientDark)' : customTheme.palette.error.main,
+              },
+            ]}
+            startAngle={90}
+            endAngle={-270}
+          >
+            <defs>
+              {/* Active Gradient for Dark Mode - radial gradient with smooth light-blue to deep-blue */}
+              <radialGradient id="activeGradientDark" cx="50%" cy="50%" r="75%" fx="50%" fy="50%">
+                <stop offset="10%" stopColor="#90caf9" />
+                <stop offset="50%" stopColor="#42a5f5" />
+                <stop offset="90%" stopColor="#1e88e5" />
+              </radialGradient>
+
+              {/* Cancelled Gradient for Dark Mode - radial gradient with soft red to deep crimson */}
+              <radialGradient id="cancelledGradientDark" cx="50%" cy="50%" r="75%" fx="50%" fy="50%">
+                <stop offset="10%" stopColor="#ef9a9a" />
+                <stop offset="50%" stopColor="#e53935" />
+                <stop offset="90%" stopColor="#b71c1c" />
+              </radialGradient>
+            </defs>
+
+            <RadialBar
+              dataKey="value"
+              minAngle={15}
+              background={{ fill: isDark ? '#121212' : '#eee' }}
+              clockWise
+              cornerRadius={10}
+            />
+
+            <Legend
+              iconSize={12}
+              width={120}
+              height={60}
+              layout="vertical"
+              verticalAlign="middle"
+              align="right"
+              wrapperStyle={{
+                color: isDark ? '#ccc' : '#555',
+                fontWeight: '600',
+                fontSize: 14,
+                userSelect: 'none',
+              }}
+            />
+
+            <RechartsTooltip
+              contentStyle={{
+                backgroundColor: isDark ? '#263238' : '#fff',
+                borderColor: isDark ? '#455a64' : '#ccc',
+                boxShadow: isDark ? '0 0 10px rgba(30, 136, 229, 0.6)' : '0 0 10px rgba(4, 115, 188, 0.3)',
+                borderRadius: 8,
+                color: isDark ? '#bbdefb' : '#0d47a1',
+                fontWeight: 600,
+              }}
+              itemStyle={{ color: isDark ? '#90caf9' : '#1565c0' }}
+              cursor={{ fill: isDark ? 'rgba(30, 136, 229, 0.15)' : 'rgba(4, 115, 188, 0.1)' }}
+            />
+          </RadialBarChart>
+        </ResponsiveContainer>
+
+        <Box
+          sx={{
+            textAlign: 'center',
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            textShadow: isDark ? '0 0 6px rgba(30, 136, 229, 0.7)' : 'none',
+          }}
+        >
+          <Typography
+            variant="h5"
+            sx={{
+              color: isDark ? customTheme.palette.info.light : customTheme.palette.info.dark,
+              fontWeight: 700,
+            }}
+          >
+            {dashboard?.subscriptions?.total ?? '-'}
+          </Typography>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            Subscriptions
+          </Typography>
+        </Box>
+      </Box>
+    </PanelCard>
           </Grid>
         </Grid>
 
         {/* Row 6: Completed categories & financial breakdown */}
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
-            <PanelCard
-              title="Top Completed Category"
-              subtitle="By time period"
-              icon={<AccountTree />}
-            >
-              <Grid container spacing={1}>
-                <Grid item xs={12}>
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 500 }}
-                  >
-                    Last Week:
-                    <strong>
-                      {' '}
-                      {dashboard?.top_completed_categories?.last_week ??
-                        '-'}
-                    </strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 500 }}
-                  >
-                    Last Month:
-                    <strong>
-                      {' '}
-                      {dashboard?.top_completed_categories?.last_month ??
-                        '-'}
-                    </strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 500 }}
-                  >
-                    Last Year:
-                    <strong>
-                      {' '}
-                      {dashboard?.top_completed_categories?.last_year ??
-                        '-'}
-                    </strong>
-                  </Typography>
-                </Grid>
-              </Grid>
-            </PanelCard>
+<Paper
+      elevation={4}
+      sx={{
+        maxWidth: 420,
+        p: 3,
+        borderRadius: 3,
+        bgcolor: 'background.paper',
+        boxShadow: 4,
+      }}
+    >
+      <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+        <Avatar sx={{ bgcolor: '#d32f2f', width: 48, height: 48 }}>
+          <AttachMoney fontSize="large" />
+        </Avatar>
+        <Box>
+          <Typography variant="h6" fontWeight={700}>
+            Top Completed Category
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            By time period
+          </Typography>
+        </Box>
+      </Stack>
+
+      <Stack spacing={2}>
+        {[
+          {
+            label: 'Last Week',
+            value: dashboard?.top_completed_categories?.last_week ?? '-',
+            chartData: [
+              { value: 4 }, { value: 7 }, { value: 3 }, { value: 6 }, { value: 5 }
+            ],
+          },
+          {
+            label: 'Last Month',
+            value: dashboard?.top_completed_categories?.last_month ?? '-',
+            chartData: [
+              { value: 3 }, { value: 6 }, { value: 4 }, { value: 5 }, { value: 7 }
+            ],
+          },
+          {
+            label: 'Last Year',
+            value: dashboard?.top_completed_categories?.last_year ?? '-',
+            chartData: [
+              { value: 7 }, { value: 5 }, { value: 6 }, { value: 3 }, { value: 4 }
+            ],
+          },
+        ].map(({ label, value, chartData }) => (
+          <Stack
+            key={label}
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            spacing={2}
+            sx={{
+              borderRadius: 2,
+              p: 1.5,
+              bgcolor: 'action.hover',
+              cursor: 'default',
+              transition: 'background-color 0.3s ease',
+              '&:hover': { bgcolor: 'action.selected' },
+            }}
+          >
+            <Box sx={{ minWidth: 90 }}>
+              <Typography variant="subtitle1" fontWeight={600}>
+                {label}
+              </Typography>
+              {value === '-' ? (
+                <Typography
+                  color="text.secondary"
+                  fontStyle="italic"
+                  fontWeight={500}
+                >
+                  -
+                </Typography>
+              ) : (
+                <Chip
+                  label={value}
+                  size="small"
+                  color="primary"
+                  sx={{ fontWeight: 700 }}
+                />
+              )}
+            </Box>
+
+            <Box sx={{ flexGrow: 1, height: 40, maxWidth: 160 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={chartData}
+                  margin={{ top: 8, right: 0, left: 0, bottom: 8 }}
+                >
+                  <Bar dataKey="value" fill="#1976d2" radius={[3, 3, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </Box>
+          </Stack>
+        ))}
+      </Stack>
+    </Paper>
           </Grid>
           <Grid item xs={12} md={8}>
             <PanelCard
@@ -1235,38 +1388,106 @@ export default function DashboardNew() {
               <Box sx={{ height: 260 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={revenueChart}>
+
+                    {/* Gradients */}
+                    <defs>
+                      {/* Revenue gradient */}
+                      <linearGradient
+                        id="gradientRevenue"
+                        x1="0" y1="0" x2="0" y2="1"
+                        // Light mode: light to dark, Dark mode: dark to light
+                        {...(isDark
+                          ? { stopColorTop: '#1b3a1a', stopOpacityTop: 0.8, stopColorBottom: '#66bb6a', stopOpacityBottom: 0.9 }
+                          : { stopColorTop: '#a5d6a7', stopOpacityTop: 0.9, stopColorBottom: '#388e3c', stopOpacityBottom: 0.7 })}
+                      >
+                        <stop offset="5%" stopColor={isDark ? '#1b3a1a' : '#a5d6a7'} stopOpacity={isDark ? 0.8 : 0.9} />
+                        <stop offset="95%" stopColor={isDark ? '#66bb6a' : '#388e3c'} stopOpacity={isDark ? 0.9 : 0.7} />
+                      </linearGradient>
+
+                      {/* Commission gradient */}
+                      <linearGradient id="gradientCommission" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={isDark ? '#0d3c61' : '#90caf9'} stopOpacity={isDark ? 0.85 : 0.9} />
+                        <stop offset="95%" stopColor={isDark ? '#42a5f5' : '#1976d2'} stopOpacity={isDark ? 0.95 : 0.7} />
+                      </linearGradient>
+
+                      {/* Subscriptions gradient */}
+                      <linearGradient id="gradientSubscriptions" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={isDark ? '#7a4b00' : '#ffcc80'} stopOpacity={isDark ? 0.8 : 0.9} />
+                        <stop offset="95%" stopColor={isDark ? '#ffb300' : '#ef6c00'} stopOpacity={isDark ? 0.95 : 0.75} />
+                      </linearGradient>
+                    </defs>
+
                     <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke={customTheme.palette.divider}
+                      strokeDasharray="4 4"
+                      stroke={isDark ? 'rgba(255, 255, 255, 0.1)' : '#e0e0e0'}
+                      vertical={false}
                     />
+
                     <XAxis
                       dataKey="name"
-                      stroke={customTheme.palette.text.secondary}
+                      stroke={isDark ? '#ccc' : '#333'}
+                      tick={{ fontSize: 14, fontWeight: 600 }}
+                      axisLine={{ stroke: isDark ? '#555' : '#ccc' }}
+                      tickLine={false}
                     />
                     <YAxis
-                      stroke={customTheme.palette.text.secondary}
+                      stroke={isDark ? '#ccc' : '#333'}
+                      tick={{ fontSize: 14, fontWeight: 600 }}
+                      axisLine={{ stroke: isDark ? '#555' : '#ccc' }}
+                      tickLine={false}
                     />
-                    <RechartsTooltip />
-                    <Legend />
+
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: isDark ? '#222' : '#fff',
+                        borderColor: isDark ? '#555' : '#ccc',
+                        boxShadow: isDark
+                          ? '0 0 10px rgba(102, 187, 106, 0.6)'
+                          : '0 0 10px rgba(56, 142, 60, 0.3)',
+                        borderRadius: 8,
+                        color: isDark ? '#ddd' : '#222',
+                        fontWeight: '600',
+                      }}
+                      itemStyle={{ color: isDark ? '#a5d6a7' : '#2e7d32' }}
+                      cursor={{ fill: isDark ? 'rgba(102, 187, 106, 0.15)' : 'rgba(56, 142, 60, 0.1)' }}
+                    />
+
+                    <Legend
+                      wrapperStyle={{
+                        color: isDark ? '#aaa' : '#444',
+                        fontWeight: '700',
+                        fontSize: 15,
+                        paddingTop: 10,
+                        paddingBottom: 5,
+                        userSelect: 'none',
+                      }}
+                      iconType="circle"
+                      iconSize={14}
+                    />
+
                     <Bar
                       dataKey="Revenue"
-                      fill={customTheme.palette.success.main}
+                      fill="url(#gradientRevenue)"
                       name="Revenue"
+                      radius={[6, 6, 0, 0]}
                     />
                     <Bar
                       dataKey="Commission"
-                      fill={customTheme.palette.info.main}
+                      fill="url(#gradientCommission)"
                       name="Commission"
+                      radius={[6, 6, 0, 0]}
                     />
                     <Bar
                       dataKey="Subscriptions"
-                      fill={customTheme.palette.warning.main}
+                      fill="url(#gradientSubscriptions)"
                       name="Subscriptions"
+                      radius={[6, 6, 0, 0]}
                     />
                   </BarChart>
                 </ResponsiveContainer>
               </Box>
             </PanelCard>
+
           </Grid>
         </Grid>
 

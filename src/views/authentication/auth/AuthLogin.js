@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -6,35 +6,121 @@ import {
   FormControlLabel,
   Checkbox,
   Button,
-  Card,
+  Link,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  keyframes,
+  Divider,
 } from '@mui/material';
-import { LoginOutlined, HelpOutline, Close } from '@mui/icons-material';
+import { Facebook, Twitter, Instagram } from '@mui/icons-material';
 import Lottie from 'lottie-react';
-import lottieAnimation from '../../../assets/images/animations/Login.json';
-import stayImg from './stay.png';
-import { url } from '../../../../mainurl';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { registerDevice } from '../../../utils/registerDevice';
 import { auth } from '../../../firebase';
-import { signInWithCustomToken } from "firebase/auth";
+import { signInWithCustomToken } from 'firebase/auth';
 
-const backgroundMotion = keyframes`
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-`;
+import lottieAnimation from '../../../assets/images/animations/Login.json';
+import stayImg from './stay.png';
+import { url } from '../../../../mainurl';
 
-const AuthLogin = ({ title, subtitle, subtext }) => {
+// AnimatedLinesBackground component remains unchanged, same as your original code
+function AnimatedLinesBackground() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let animationFrameId;
+    const lines = [];
+    const maxLines = 20;
+
+    function resize() {
+      width = canvas.width = canvas.clientWidth;
+      height = canvas.height = canvas.clientHeight;
+    }
+    resize();
+
+    class Line {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.length = 50 + Math.random() * 100;
+        this.speed = 0.5 + Math.random();
+        this.width = 2 + Math.random() * 3;
+        this.color = `rgba(64, 156, 255, ${0.2 + Math.random() * 0.6})`;
+      }
+      update() {
+        this.x += this.speed;
+        if (this.x - this.length > width) {
+          this.x = -this.length;
+          this.y = Math.random() * height;
+        }
+      }
+      draw(ctx) {
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.width;
+        ctx.shadowColor = '#40a5ff';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x - this.length, this.y);
+        ctx.stroke();
+      }
+    }
+
+    for (let i = 0; i < maxLines; i++) {
+      lines.push(new Line());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      lines.forEach((line) => {
+        line.update();
+        line.draw(ctx);
+      });
+      animationFrameId = requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize', resize);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 0,
+        pointerEvents: 'none',
+        borderRadius: '0 10px 10px 0',
+        backgroundColor: '#0d1b2a',
+      }}
+    />
+  );
+}
+
+export default function AuthLogin() {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleForgotPassword = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -51,23 +137,17 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
     }
   };
 
-  const navigate = useNavigate();
-
   const handleSubmit = async () => {
     try {
-      const response = await axios.post(`${url}/auth/admin/login/`, {
-        email: formData.email,
-        password: formData.password,
-      }, {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await axios.post(
+        `${url}/auth/admin/login/`,
+        { email: formData.email, password: formData.password },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
 
       if (response.status === 200) {
         const data = response.data;
-        toast.success('Login successful!', {
-          position: 'top-right',
-          autoClose: 1500,
-        });
+        toast.success('Login successful!', { position: 'top-right', autoClose: 1500 });
 
         localStorage.setItem('authTokens', JSON.stringify(data));
         const firebaseCustomToken = data.firebaseCustomToken;
@@ -81,7 +161,8 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
         }
 
         const previousMode = localStorage.getItem('mode');
-        const loginMode = data.mode !== undefined ? data.mode.toString() : previousMode || '0';
+        const loginMode =
+          data.mode !== undefined ? data.mode.toString() : previousMode || '0';
         localStorage.setItem('mode', loginMode);
 
         const currentTheme = window.__themeMode;
@@ -91,7 +172,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
         }
 
         setTimeout(() => {
-          navigate("/dashboard");
+          navigate('/dashboard');
         }, 1500);
       }
     } catch (err) {
@@ -102,192 +183,228 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
     }
   };
 
+  const handleSignUpClick = () => {
+    toast.info('This feature is not available', {
+      position: 'top-right',
+      autoClose: 2000,
+    });
+  };
+
   return (
     <Box
       sx={{
-        height: '100vh',
-        width: '100%',
-        background: 'linear-gradient(120deg, #f3c98b, #cda48f, #9baec8)',
-        backgroundSize: '200% 200%',
-        animation: `${backgroundMotion} 20s ease infinite`,
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        px: 2,
+        minHeight: '100vh',
+        fontFamily: 'Inter, Roboto, Arial, sans-serif',
+        color: '#333',
       }}
     >
-      <Card
-        elevation={12}
+      {/* Left Panel */}
+      <Box
         sx={{
-          borderRadius: 4,
-          maxWidth: 900,
-          width: '100%',
+          flex: 1,
+          position: 'relative',
           overflow: 'hidden',
+          px: { xs: 4, md: 8 },
+          py: { xs: 6, md: 10 },
           display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          backgroundColor: '#fff',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          color: 'white',
+          background: `linear-gradient(135deg, #22347dff, #203b9cff, #0d1b2a)`,
+          backgroundSize: '400% 400%',
+          animation: 'gradientShift 20s ease infinite',
+          textAlign: 'center',
+          userSelect: 'none',
+          position: 'relative',
         }}
       >
-        {/* Left Panel with Logo + Name + Lottie */}
+        {/* Gradient animation keyframes */}
+        <style>
+          {`
+            @keyframes gradientShift {
+              0% { background-position: 0% 50%; }
+              50% { background-position: 100% 50%; }
+              100% { background-position: 0% 50%; }
+            }
+          `}
+        </style>
+
+        {/* Logo top-left */}
+        <Box
+          component="img"
+          src={stayImg}
+          alt="Logo"
+          sx={{
+            width: 80,
+            height: 80,
+            objectFit: 'contain',
+            position: 'absolute',
+            top: 32,
+            left: 32,
+            filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.4))',
+            borderRadius: 2,
+            backgroundColor: 'rgba(255 255 255 / 0.15)',
+            p: 1,
+          }}
+        />
+
+        {/* Decorative Circles */}
         <Box
           sx={{
-            width: { xs: '100%', md: '50%' },
-            p: 4,
-            // background: 'linear-gradient(135deg, #fbe9d7, #f5f0e3)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center',
-            position: 'relative', // Make positioning relative for children
-            minHeight: 300, // Set a height if needed for demo purposes
+            position: 'absolute',
+            top: -80,
+            left: -80,
+            width: 160,
+            height: 160,
+            borderRadius: '50%',
+            background: 'rgba(255, 255, 255, 0.1)',
+            filter: 'blur(40px)',
           }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: -100,
+            right: -100,
+            width: 240,
+            height: 240,
+            borderRadius: '50%',
+            background: 'rgba(255, 255, 255, 0.12)',
+            filter: 'blur(80px)',
+          }}
+        />
+
+        {/* Lottie Animation Container */}
+        <Box
+          sx={{ maxWidth: 320, width: '100%', mb: 5, position: 'relative', zIndex: 10 }}
         >
-          {/* Main Content (centered animation, etc.) */}
-          <Lottie
-            animationData={lottieAnimation}
-            loop
-            autoplay
-            style={{ width: 400, height: 400 }}
-          />
-
-          {/* Logo Card (Bottom Left) */}
-          <Box
-            sx={{
-              position: 'absolute',
-              left: 24,
-              bottom: 24,
-              background: '#f6f8fa', // Soft surface color
-              borderRadius: 3.5,
-              p: 0,
-              boxShadow:
-                '0 2px 16px 0 rgba(36, 71, 92, 0.10), 0 1.5px 8px 0 rgba(72, 135, 116, 0.06)',
-              minWidth: 160,
-              maxWidth: 260,
-              zIndex: 2,
-              border: '1.5px solid #e0ece6', // Gentle border for surface contrast
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-                px: 2.5,
-                py: 1.5,
-                width: '100%',
-              }}
-            >
-              <Box
-                component="img"
-                src={stayImg}
-                alt="TahadiOne"
-                sx={{
-                  width: 40,
-                  height: 36,
-                  borderRadius: 2.5,
-                  boxShadow:
-                    '0 2px 12px 0 rgba(71, 135, 116, 0.10), 0 1.5px 4px 0 rgba(72, 135, 116, 0.05)',
-                  // background: '#e7f8ef',
-                  p: 0.8,
-                  // objectFit: 'contain',
-                  border: '1px solid #e0ece6',
-                }}
-              />
-              <Typography
-                variant="subtitle2"
-                fontWeight={600}
-                letterSpacing={0.1}
-                sx={{
-                  color: '#42786d',
-                  fontSize: '0.98rem',
-                  fontFamily:
-                    '"Inter", "Roboto", "Arial Rounded MT Bold", "Arial", sans-serif',
-                  textWrap: 'nowrap',
-                  ml: 0.5,
-                }}
-              >
-                TahadiOne
-              </Typography>
-            </Box>
-          </Box>
-
+          <Lottie animationData={lottieAnimation} loop autoplay />
         </Box>
 
-
-        {/* Right Panel with Login Form */}
-        <Box
+        {/* Welcome Text */}
+        <Typography
+          variant="h3"
+          fontWeight="bold"
+          mb={1}
+          sx={{ letterSpacing: 1.5, textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}
+        >
+          Hello, <br />
+          <Box component="span" sx={{ fontWeight: 900 }}>
+            welcome!
+          </Box>
+        </Typography>
+        <Typography
+          variant="body1"
           sx={{
-            width: { xs: '100%', md: '50%' },
-            p: { xs: 4, md: 6 },
+            maxWidth: 320,
+            mt: 1,
+            color: 'rgba(255,255,255,0.85)',
+            fontWeight: 500,
+            textShadow: '0 1px 4px rgba(0,0,0,0.2)',
           }}
         >
-          <Typography
-            variant="h4"
-            fontWeight={600}
-            mb={1}
-            sx={{ color: '#3b4d61' }}
-          >
-            {/* Pin */}
-          </Typography>
-          <Typography variant="body1" color="text.secondary" mb={4}>
-            {/* Get access to the recipes now, become a member today */}
-          </Typography>
+          Access your dashboard and stay connected with ease.
+        </Typography>
+      </Box>
 
-          <form>
+      {/* Right Panel - Login Form with animated background */}
+      <Box
+        sx={{
+          flex: 1,
+          position: 'relative',
+          px: { xs: 6, md: 10 },
+          py: { xs: 8, md: 10 },
+          backgroundColor: 'transparent',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          borderRadius: '0 10px 10px 0',
+          boxShadow: '-5px 0 15px rgba(0,0,0,0.05)',
+        }}
+      >
+        {/* Animated background */}
+        <AnimatedLinesBackground />
+
+        {/* Form container above animation */}
+        <Box
+          sx={{
+            position: 'relative',
+            zIndex: 1,
+            backgroundColor: 'rgba(255,255,255,0.95)',
+            borderRadius: 3,
+            boxShadow: '0 8px 30px rgba(0,0,0,0.1)',
+            px: 4,
+            py: 5,
+            maxWidth: 420,
+            margin: '0 auto',
+            width: '100%',
+          }}
+        >
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
+          >
+            <Typography
+              variant="h4"
+              fontWeight={700}
+              mb={4}
+              sx={{ color: '#3b4d61', letterSpacing: 1.2, textAlign: 'center' }}
+            >
+              Sign In
+            </Typography>
+
             <TextField
-              fullWidth
-              label="E-mail"
-              margin="normal"
+              label="Email address"
               variant="outlined"
+              fullWidth
+              margin="normal"
               name="email"
               value={formData.email}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               sx={{
-                mb: 2,
-                "& .MuiInputBase-root": {
-                  borderRadius: 2,
-                  background: "#f8fafb",
+                mb: 3,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 3,
+                  backgroundColor: '#f5f7fb',
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#4c6ef5',
+                    boxShadow: '0 0 8px #4c6ef5aa',
+                  },
                 },
-                "& .MuiInputLabel-root": {
-                  color: "#4b7c73",
-                },
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#4b7c7322",
-                },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#4b7c73",
+                '& label.Mui-focused': {
+                  color: '#4c6ef5',
                 },
               }}
             />
+
             <TextField
-              fullWidth
-              type={showPassword ? "text" : "password"}
               label="Password"
-              margin="normal"
               variant="outlined"
+              fullWidth
+              margin="normal"
+              type={showPassword ? 'text' : 'password'}
               name="password"
               value={formData.password}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               sx={{
                 mb: 2,
-                "& .MuiInputBase-root": {
-                  borderRadius: 2,
-                  background: "#f8fafb",
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 3,
+                  backgroundColor: '#f5f7fb',
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#4c6ef5',
+                    boxShadow: '0 0 8px #4c6ef5aa',
+                  },
                 },
-                "& .MuiInputLabel-root": {
-                  color: "#4b7c73",
-                },
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#4b7c7322",
-                },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#4b7c73",
+                '& label.Mui-focused': {
+                  color: '#4c6ef5',
                 },
               }}
               InputProps={{
@@ -296,97 +413,176 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
                     onClick={() => setShowPassword((v) => !v)}
                     sx={{
                       minWidth: 0,
-                      color: "#4b7c73",
-                      fontSize: "1.2rem",
+                      color: '#4c6ef5',
+                      fontSize: '1.3rem',
                       px: 1,
-                      "&:hover": { color: "#3f6a62", background: "none" },
+                      '&:hover': { color: '#3b57c1', background: 'none' },
                     }}
                     tabIndex={-1}
+                    type="button"
                   >
-                    {showPassword ? "🙈" : "👁️"}
+                    {showPassword ? '🙈' : '👁️'}
                   </Button>
                 ),
               }}
             />
-            <FormControlLabel
-              control={<Checkbox />}
-              label="Remember Me"
-              sx={{ mt: 1 }}
-            />
+
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 4,
+              }}
+            >
+              <FormControlLabel
+                control={<Checkbox />}
+                label="Remember me"
+                sx={{
+                  userSelect: 'none',
+                  '& .MuiTypography-root': {
+                    fontWeight: 600,
+                    color: '#4c6ef5',
+                  },
+                }}
+              />
+              <Link
+                component="button"
+                variant="body2"
+                onClick={handleForgotPassword}
+                sx={{
+                  textDecoration: 'none',
+                  color: '#4c6ef5',
+                  fontWeight: 600,
+                  '&:hover': { textDecoration: 'underline' },
+                }}
+              >
+                Forgot password?
+              </Link>
+            </Box>
 
             <Button
               fullWidth
               variant="contained"
               color="primary"
-              startIcon={<LoginOutlined />}
+              type="submit"
               sx={{
-                mt: 3,
-                backgroundColor: '#4b7c73',
-                '&:hover': {
-                  backgroundColor: '#3f6a62',
-                },
+                backgroundColor: '#4c6ef5',
+                py: 1.8,
+                borderRadius: 3,
+                fontWeight: 700,
+                letterSpacing: 1.1,
+                transition: 'background-color 0.3s ease',
+                '&:hover': { backgroundColor: '#3b57c1' },
+                userSelect: 'none',
               }}
-              onClick={handleSubmit}
-              type="button"
             >
-              Sign In
+              Login
             </Button>
 
             <Button
-              startIcon={<HelpOutline />}
+              fullWidth
+              variant="outlined"
+              color="primary"
               sx={{
-                mt: 2,
-                color: '#4b7c73',
+                mt: 3,
+                py: 1.8,
+                borderRadius: 3,
+                fontWeight: 700,
+                letterSpacing: 1.1,
                 textTransform: 'none',
+                userSelect: 'none',
+                borderColor: '#4c6ef5',
+                color: '#4c6ef5',
+                '&:hover': {
+                  backgroundColor: '#e7f0ff',
+                  borderColor: '#3b57c1',
+                  color: '#3b57c1',
+                },
               }}
-              onClick={handleForgotPassword}
+              onClick={() =>
+                toast.info('This feature is not available', {
+                  position: 'top-right',
+                  autoClose: 2000,
+                })
+              }
+              type="button"
             >
-              Forgot Password
+              Sign up
             </Button>
+
+            {/* Social Icons */}
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 4,
+                mt: 5,
+                color: '#4c6ef5',
+              }}
+            >
+              <Facebook sx={{ cursor: 'pointer', fontSize: 30 }} />
+              <Twitter sx={{ cursor: 'pointer', fontSize: 30 }} />
+              <Instagram sx={{ cursor: 'pointer', fontSize: 30 }} />
+            </Box>
           </form>
         </Box>
-      </Card>
+      </Box>
 
-      {/* Forgot Password Modal */}
+      {/* Forgot Password Dialog */}
       <Dialog
         open={open}
         onClose={handleClose}
         PaperProps={{
           sx: {
             borderRadius: 4,
-            background: 'linear-gradient(135deg, #fffbe6, #f3f3f3)',
-            boxShadow: '0px 10px 30px rgba(0,0,0,0.2)',
-            px: 3,
-            py: 2,
-            minWidth: 360,
+            background: 'linear-gradient(135deg, #e3f2fd, #bbdefb)',
+            boxShadow: '0px 10px 30px rgba(0,0,0,0.25)',
+            px: 5,
+            py: 4,
+            minWidth: 380,
+            maxWidth: 420,
           },
         }}
       >
         <DialogTitle
           sx={{
-            fontWeight: 'bold',
-            fontSize: '1.4rem',
-            color: '#333',
-            mb: 1,
+            fontWeight: '700',
+            fontSize: '1.8rem',
+            color: '#1a237e',
+            mb: 2,
+            letterSpacing: 0.5,
+            fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
           }}
         >
           Contact Admin
         </DialogTitle>
-
-        <DialogContent>
-          <Typography variant="body1" sx={{ mb: 2, color: '#555' }}>
+        <DialogContent sx={{ px: 0 }}>
+          <Typography
+            variant="body1"
+            sx={{
+              mb: 3,
+              color: '#3949ab',
+              fontWeight: 700,
+              fontSize: '1.15rem',
+              lineHeight: 1.5,
+              fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+            }}
+          >
             Please contact the administrator to reset your password:
           </Typography>
 
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              mb: 1,
-            }}
-          >
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: 700,
+                fontSize: '1.1rem',
+                color: '#1a237e',
+                minWidth: 70,
+                fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+              }}
+            >
               📧 Email:
             </Typography>
             <a
@@ -394,22 +590,26 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
               style={{
                 color: '#3b4d61',
                 textDecoration: 'none',
-                fontWeight: 500,
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
               }}
             >
               admin@yourdomain.com
             </a>
           </Box>
 
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              mb: 2,
-            }}
-          >
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: 700,
+                fontSize: '1.1rem',
+                color: '#1a237e',
+                minWidth: 70,
+                fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+              }}
+            >
               📞 Phone:
             </Typography>
             <a
@@ -417,36 +617,38 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
               style={{
                 color: '#3b4d61',
                 textDecoration: 'none',
-                fontWeight: 500,
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
               }}
             >
               +966 123 456 789
             </a>
           </Box>
         </DialogContent>
-
-        <DialogActions sx={{ justifyContent: 'flex-end', pr: 2 }}>
+        <Divider sx={{ my: 3 }} />
+        <DialogActions sx={{ justifyContent: 'flex-end' }}>
           <Button
             onClick={handleClose}
-            startIcon={<Close />}
             sx={{
-              backgroundColor: '#4b7c73',
-              color: 'white',
-              borderRadius: 2,
-              px: 2,
-              py: 1,
+              color: '#1a237e',
+              fontWeight: '700',
+              px: 4,
+              py: 1.25,
+              borderRadius: 3,
               textTransform: 'none',
-              '&:hover': {
-                backgroundColor: '#3f6a62',
-              },
+              fontSize: '1rem',
+              letterSpacing: 0.5,
+              '&:hover': { backgroundColor: '#c5cae9' },
             }}
+            autoFocus
           >
             Close
           </Button>
         </DialogActions>
       </Dialog>
+
+
     </Box>
   );
-};
-
-export default AuthLogin;
+}
