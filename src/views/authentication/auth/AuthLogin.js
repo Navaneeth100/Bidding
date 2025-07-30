@@ -26,7 +26,7 @@ import lottieAnimation from '../../../assets/images/animations/Login.json';
 import stayImg from './stay.png';
 import { url } from '../../../../mainurl';
 
-// AnimatedLinesBackground component remains unchanged, same as your original code
+// AnimatedLinesBackground component remains unchanged, with minor glow on circles
 function AnimatedLinesBackground() {
   const canvasRef = useRef(null);
 
@@ -218,6 +218,12 @@ export default function AuthLogin() {
           textAlign: 'center',
           userSelect: 'none',
           position: 'relative',
+          // Gradient text for headings
+          '& h3': {
+            background: 'linear-gradient(45deg, #7b9aff, #b4a1ff)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          },
         }}
       >
         {/* Gradient animation keyframes */}
@@ -250,7 +256,7 @@ export default function AuthLogin() {
           }}
         />
 
-        {/* Decorative Circles */}
+        {/* Decorative Circles with glow */}
         <Box
           sx={{
             position: 'absolute',
@@ -259,8 +265,9 @@ export default function AuthLogin() {
             width: 160,
             height: 160,
             borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.1)',
-            filter: 'blur(40px)',
+            background: 'rgba(123, 154, 255, 0.15)',
+            filter: 'blur(60px)',
+            boxShadow: '0 0 30px 10px rgba(123, 154, 255, 0.3)',
           }}
         />
         <Box
@@ -271,14 +278,23 @@ export default function AuthLogin() {
             width: 240,
             height: 240,
             borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.12)',
-            filter: 'blur(80px)',
+            background: 'rgba(180, 161, 255, 0.15)',
+            filter: 'blur(90px)',
+            boxShadow: '0 0 60px 15px rgba(180, 161, 255, 0.4)',
           }}
         />
 
-        {/* Lottie Animation Container */}
+        {/* Lottie Animation Container with subtle shadow */}
         <Box
-          sx={{ maxWidth: 320, width: '100%', mb: 5, position: 'relative', zIndex: 10 }}
+          sx={{
+            maxWidth: 320,
+            width: '100%',
+            mb: 5,
+            position: 'relative',
+            zIndex: 10,
+            filter: 'drop-shadow(0 5px 15px rgba(123, 154, 255, 0.3))',
+            borderRadius: 3,
+          }}
         >
           <Lottie animationData={lottieAnimation} loop autoplay />
         </Box>
@@ -335,12 +351,17 @@ export default function AuthLogin() {
             zIndex: 1,
             backgroundColor: 'rgba(255,255,255,0.95)',
             borderRadius: 3,
-            boxShadow: '0 8px 30px rgba(0,0,0,0.1)',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
             px: 4,
             py: 5,
             maxWidth: 420,
             margin: '0 auto',
             width: '100%',
+            border: '1px solid #e0e0e0',
+            transition: 'box-shadow 0.3s ease',
+            '&:hover': {
+              boxShadow: '0 12px 40px rgba(76, 110, 245, 0.35)',
+            },
           }}
         >
           <form
@@ -353,7 +374,15 @@ export default function AuthLogin() {
               variant="h4"
               fontWeight={700}
               mb={4}
-              sx={{ color: '#3b4d61', letterSpacing: 1.2, textAlign: 'center' }}
+              sx={{
+                color: '#3b4d61',
+                letterSpacing: 1.2,
+                textAlign: 'center',
+                textTransform: 'uppercase',
+                letterSpacing: '2px',
+                userSelect: 'none',
+                textShadow: '0 1px 4px rgba(76, 110, 245, 0.5)',
+              }}
             >
               Sign In
             </Typography>
@@ -370,11 +399,17 @@ export default function AuthLogin() {
               sx={{
                 mb: 3,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
-                  backgroundColor: '#f5f7fb',
+                  borderRadius: 6,
+                  backgroundColor: '#f9fbff',
+                  boxShadow: 'inset 4px 4px 8px #d6e1ff, inset -4px -4px 8px #ffffff',
+                  transition: 'all 0.3s ease',
                   '&.Mui-focused fieldset': {
                     borderColor: '#4c6ef5',
-                    boxShadow: '0 0 8px #4c6ef5aa',
+                    boxShadow:
+                      '0 0 8px 3px rgba(76, 110, 245, 0.35), inset 4px 4px 8px #c0d1ff',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#7a92ff',
                   },
                 },
                 '& label.Mui-focused': {
@@ -396,11 +431,17 @@ export default function AuthLogin() {
               sx={{
                 mb: 2,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
-                  backgroundColor: '#f5f7fb',
+                  borderRadius: 6,
+                  backgroundColor: '#f9fbff',
+                  boxShadow: 'inset 4px 4px 8px #d6e1ff, inset -4px -4px 8px #ffffff',
+                  transition: 'all 0.3s ease',
                   '&.Mui-focused fieldset': {
                     borderColor: '#4c6ef5',
-                    boxShadow: '0 0 8px #4c6ef5aa',
+                    boxShadow:
+                      '0 0 8px 3px rgba(76, 110, 245, 0.35), inset 4px 4px 8px #c0d1ff',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#7a92ff',
                   },
                 },
                 '& label.Mui-focused': {
@@ -416,6 +457,7 @@ export default function AuthLogin() {
                       color: '#4c6ef5',
                       fontSize: '1.3rem',
                       px: 1,
+                      transition: 'color 0.3s ease',
                       '&:hover': { color: '#3b57c1', background: 'none' },
                     }}
                     tabIndex={-1}
@@ -433,16 +475,26 @@ export default function AuthLogin() {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 mb: 4,
+                userSelect: 'none',
               }}
             >
               <FormControlLabel
-                control={<Checkbox />}
+                control={
+                  <Checkbox
+                    sx={{
+                      color: '#4c6ef5',
+                      '&.Mui-checked': {
+                        color: '#4c6ef5',
+                      },
+                    }}
+                  />
+                }
                 label="Remember me"
                 sx={{
-                  userSelect: 'none',
                   '& .MuiTypography-root': {
                     fontWeight: 600,
                     color: '#4c6ef5',
+                    userSelect: 'none',
                   },
                 }}
               />
@@ -454,7 +506,9 @@ export default function AuthLogin() {
                   textDecoration: 'none',
                   color: '#4c6ef5',
                   fontWeight: 600,
-                  '&:hover': { textDecoration: 'underline' },
+                  cursor: 'pointer',
+                  transition: 'color 0.3s ease',
+                  '&:hover': { textDecoration: 'underline', color: '#3b57c1' },
                 }}
               >
                 Forgot password?
@@ -469,12 +523,13 @@ export default function AuthLogin() {
               sx={{
                 backgroundColor: '#4c6ef5',
                 py: 1.8,
-                borderRadius: 3,
+                borderRadius: 6,
                 fontWeight: 700,
                 letterSpacing: 1.1,
-                transition: 'background-color 0.3s ease',
-                '&:hover': { backgroundColor: '#3b57c1' },
+                transition: 'background-color 0.3s ease, transform 0.15s ease',
+                '&:hover': { backgroundColor: '#3b57c1', transform: 'scale(1.05)' },
                 userSelect: 'none',
+                boxShadow: '0 6px 15px rgba(76,110,245,0.4)',
               }}
             >
               Login
@@ -487,17 +542,20 @@ export default function AuthLogin() {
               sx={{
                 mt: 3,
                 py: 1.8,
-                borderRadius: 3,
+                borderRadius: 6,
                 fontWeight: 700,
                 letterSpacing: 1.1,
                 textTransform: 'none',
                 userSelect: 'none',
                 borderColor: '#4c6ef5',
                 color: '#4c6ef5',
+                transition: 'all 0.3s ease',
                 '&:hover': {
                   backgroundColor: '#e7f0ff',
                   borderColor: '#3b57c1',
                   color: '#3b57c1',
+                  transform: 'scale(1.05)',
+                  boxShadow: '0 6px 15px rgba(59,87,193,0.3)',
                 },
               }}
               onClick={() =>
@@ -512,19 +570,28 @@ export default function AuthLogin() {
             </Button>
 
             {/* Social Icons */}
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: 4,
-                mt: 5,
-                color: '#4c6ef5',
-              }}
-            >
-              <Facebook sx={{ cursor: 'pointer', fontSize: 30 }} />
-              <Twitter sx={{ cursor: 'pointer', fontSize: 30 }} />
-              <Instagram sx={{ cursor: 'pointer', fontSize: 30 }} />
-            </Box>
+           <Box
+  sx={{
+    display: 'flex',
+    justifyContent: 'center',
+    gap: 5,
+    mt: 5,
+  }}
+>
+  <Facebook
+    sx={{ cursor: 'pointer', fontSize: 34, color: '#1877F2', transition: 'transform 0.3s ease',
+      '&:hover': { transform: 'scale(1.2) rotate(10deg)', filter: 'brightness(1.2)' } }}
+  />
+  <Twitter
+    sx={{ cursor: 'pointer', fontSize: 34, color: '#1DA1F2', transition: 'transform 0.3s ease',
+      '&:hover': { transform: 'scale(1.2) rotate(10deg)', filter: 'brightness(1.2)' } }}
+  />
+  <Instagram
+    sx={{ cursor: 'pointer', fontSize: 34, color: '#E4405F', transition: 'transform 0.3s ease',
+      '&:hover': { transform: 'scale(1.2) rotate(10deg)', filter: 'brightness(1.2)' } }}
+  />
+</Box>
+
           </form>
         </Box>
       </Box>
@@ -535,24 +602,28 @@ export default function AuthLogin() {
         onClose={handleClose}
         PaperProps={{
           sx: {
-            borderRadius: 4,
-            background: 'linear-gradient(135deg, #e3f2fd, #bbdefb)',
-            boxShadow: '0px 10px 30px rgba(0,0,0,0.25)',
+            borderRadius: 5,
+            background:
+              'linear-gradient(135deg, rgba(227,242,253,0.9), rgba(187,222,251,0.9))',
+            boxShadow: '0px 15px 40px rgba(0,0,0,0.3)',
             px: 5,
-            py: 4,
+            py: 5,
             minWidth: 380,
-            maxWidth: 420,
+            maxWidth: 460,
+            userSelect: 'none',
+            backdropFilter: 'blur(8px)',
           },
         }}
       >
         <DialogTitle
           sx={{
             fontWeight: '700',
-            fontSize: '1.8rem',
+            fontSize: '1.9rem',
             color: '#1a237e',
-            mb: 2,
-            letterSpacing: 0.5,
+            mb: 3,
+            letterSpacing: 0.6,
             fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+            textShadow: '0 1px 3px rgba(26, 35, 126, 0.3)',
           }}
         >
           Contact Admin
@@ -626,20 +697,21 @@ export default function AuthLogin() {
             </a>
           </Box>
         </DialogContent>
-        <Divider sx={{ my: 3 }} />
+        <Divider sx={{ my: 3, borderColor: '#9fa8da' }} />
         <DialogActions sx={{ justifyContent: 'flex-end' }}>
           <Button
             onClick={handleClose}
             sx={{
               color: '#1a237e',
               fontWeight: '700',
-              px: 4,
-              py: 1.25,
-              borderRadius: 3,
+              px: 5,
+              py: 1.5,
+              borderRadius: 4,
               textTransform: 'none',
-              fontSize: '1rem',
+              fontSize: '1.1rem',
               letterSpacing: 0.5,
-              '&:hover': { backgroundColor: '#c5cae9' },
+              transition: 'background-color 0.3s ease',
+              '&:hover': { backgroundColor: '#c5cae9', color: '#0d1b2a' },
             }}
             autoFocus
           >
@@ -647,8 +719,6 @@ export default function AuthLogin() {
           </Button>
         </DialogActions>
       </Dialog>
-
-
     </Box>
   );
 }
