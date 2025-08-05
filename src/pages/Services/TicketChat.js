@@ -10,6 +10,7 @@ import {
     Avatar,
     Chip,
     ButtonGroup,
+    alpha
 } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
@@ -123,28 +124,29 @@ const TicketChat = () => {
                 height: '80vh',
                 display: 'flex',
                 flexDirection: 'column',
-                bgcolor: 'white',
-                border: '1px solid #e2e8f0'
+                bgcolor: theme.palette.background.paper,
+                border: `1px solid ${theme.palette.divider}`,
             }}>
-                <Grid container sx={{ height: '80vh', border: '1px solid #e2e8f0', borderRadius: 1, overflow: 'hidden' }}>
+                <Grid container sx={{ height: '80vh', border: `1px solid ${theme.palette.divider}`, borderRadius: 1, overflow: 'hidden' }}>
 
                     {/* Left Sidebar - ticket List */}
 
-                    <Grid item xs={3} sx={{ borderRight: '1px solid #e2e8f0', overflowY: 'auto', p: 2 }}>
+                    <Grid item xs={3} sx={{ borderRight: `1px solid ${theme.palette.divider}`, overflowY: 'auto', p: 2 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                            <Typography variant="h6">Tickets</Typography>
+                            <Typography variant="h6" color={theme.palette.text.primary}>Tickets</Typography>
 
                             <ButtonGroup size="small" variant="outlined">
                                 <Button
                                     onClick={() => setPriorityFilter('')}
                                     sx={{
                                         minWidth: 32,
-                                        bgcolor: priorityFilter === '' ? 'black' : 'white',
-                                        color: priorityFilter === '' ? 'white' : '#64748b',
-                                        '&:hover': { bgcolor: '#64748b', color: 'white' },
+                                        bgcolor: priorityFilter === '' ? theme.palette.text.primary : theme.palette.background.paper,
+                                        color: priorityFilter === '' ? theme.palette.background.paper : theme.palette.text.secondary,
+                                        '&:hover': { bgcolor: theme.palette.action.hover, color: theme.palette.text.primary },
                                         fontSize: '10px',
                                         fontWeight: 'bold',
-                                        p: 0.5
+                                        p: 0.5,
+                                        borderColor: 'divider',
                                     }}
                                 >
                                     All
@@ -153,12 +155,13 @@ const TicketChat = () => {
                                     onClick={() => setPriorityFilter('urgent')}
                                     sx={{
                                         minWidth: 32,
-                                        bgcolor: priorityFilter === 'urgent' ? '#dc2626' : 'white',
-                                        color: priorityFilter === 'urgent' ? 'white' : '#dc2626',
-                                        '&:hover': { bgcolor: '#dc2626', color: 'white' },
+                                        bgcolor: priorityFilter === 'urgent' ? theme.palette.error.main : theme.palette.background.paper,
+                                        color: priorityFilter === 'urgent' ? theme.palette.error.contrastText : theme.palette.error.main,
+                                        '&:hover': { bgcolor: theme.palette.error.dark, color: theme.palette.error.contrastText },
                                         fontSize: '10px',
                                         fontWeight: 'bold',
-                                        p: 0.5
+                                        p: 0.5,
+                                        borderColor: 'divider',
                                     }}
                                 >
                                     U
@@ -167,12 +170,13 @@ const TicketChat = () => {
                                     onClick={() => setPriorityFilter('high')}
                                     sx={{
                                         minWidth: 32,
-                                        bgcolor: priorityFilter === 'high' ? '#f97316' : 'white',
-                                        color: priorityFilter === 'high' ? 'white' : '#f97316',
-                                        '&:hover': { bgcolor: '#f97316', color: 'white' },
+                                        bgcolor: priorityFilter === 'high' ? theme.palette.warning.main : theme.palette.background.paper,
+                                        color: priorityFilter === 'high' ? theme.palette.warning.contrastText : theme.palette.warning.main,
+                                        '&:hover': { bgcolor: theme.palette.warning.dark, color: theme.palette.warning.contrastText },
                                         fontSize: '10px',
                                         fontWeight: 'bold',
-                                        p: 0.5
+                                        p: 0.5,
+                                        borderColor: 'divider',
                                     }}
                                 >
                                     H
@@ -181,12 +185,13 @@ const TicketChat = () => {
                                     onClick={() => setPriorityFilter('medium')}
                                     sx={{
                                         minWidth: 32,
-                                        bgcolor: priorityFilter === 'medium' ? '#eab308' : 'white',
-                                        color: priorityFilter === 'medium' ? 'black' : '#eab308',
-                                        '&:hover': { bgcolor: '#eab308', color: 'black' },
+                                        bgcolor: priorityFilter === 'medium' ? theme.palette.info.main : theme.palette.background.paper,
+                                        color: priorityFilter === 'medium' ? theme.palette.info.contrastText : theme.palette.info.main,
+                                        '&:hover': { bgcolor: theme.palette.info.dark, color: theme.palette.info.contrastText },
                                         fontSize: '10px',
                                         fontWeight: 'bold',
-                                        p: 0.5
+                                        p: 0.5,
+                                        borderColor: 'divider',
                                     }}
                                 >
                                     M
@@ -195,9 +200,9 @@ const TicketChat = () => {
                                     onClick={() => setPriorityFilter('low')}
                                     sx={{
                                         minWidth: 32,
-                                        bgcolor: priorityFilter === 'low' ? '#22c55e' : 'white',
-                                        color: priorityFilter === 'low' ? 'white' : '#22c55e',
-                                        '&:hover': { bgcolor: '#22c55e', color: 'white' },
+                                        bgcolor: priorityFilter === 'low' ? theme.palette.success.main : theme.palette.background.paper,
+                                        color: priorityFilter === 'low' ? theme.palette.success.contrastText : theme.palette.success.main,
+                                        '&:hover': { bgcolor: theme.palette.success.dark, color: theme.palette.success.contrastText },
                                         fontSize: '10px',
                                         fontWeight: 'bold',
                                         p: 0.5
@@ -215,22 +220,22 @@ const TicketChat = () => {
                                     sx={{
                                         p: 1,
                                         borderRadius: 1,
-                                        bgcolor: selectedticket?.id === item.id ? '#e0f2fe' : 'transparent',
+                                        bgcolor: selectedticket?.id === item.id ? alpha(theme.palette.primary.light, 0.1) : 'transparent',
                                         cursor: 'pointer',
                                         mb: 1,
                                         display: 'flex',
                                         justifyContent: 'space-between',
-                                        '&:hover': { bgcolor: '#f1f5f9' },
+                                        '&:hover': { bgcolor: theme.palette.action.hover },
                                     }}
                                 >
                                     {/* Left Side: Avatar + Text */}
 
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Avatar sx={{ bgcolor: '#3B82F6', width: 30, height: 30, fontSize: 14 }}>
+                                        <Avatar sx={{ bgcolor: theme.palette.primary.main, width: 30, height: 30, fontSize: 14 }}>
                                             {item.subject?.charAt(0).toUpperCase() || 'U'}
                                         </Avatar>
                                         <Box>
-                                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                            <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
                                                 {item.subject}
                                             </Typography>
                                             <Typography variant="caption" color="text.secondary">
@@ -295,7 +300,7 @@ const TicketChat = () => {
                                         flex: 1,
                                         overflowY: 'auto',
                                         p: 2,
-                                        bgcolor: '#f9fafb',
+                                        bgcolor: theme.palette.background.default,
                                         display: 'flex',
                                         flexDirection: 'column',
                                         minHeight: '450px',
@@ -335,7 +340,8 @@ const TicketChat = () => {
                                                     maxWidth: '50%',
                                                     px: 2,
                                                     py: 1,
-                                                    bgcolor: msg.is_staff_reply ? '#d1fae5' : '#e0f2fe',
+                                                    bgcolor: msg.is_staff_reply ? alpha(theme.palette.success.light, 0.2) : alpha(theme.palette.info.light, 0.2),
+                                                    color: theme.palette.text.primary,
                                                 }}
                                             >
                                                 {msg.attachment && (
@@ -368,7 +374,7 @@ const TicketChat = () => {
                                 {/* File Preview */}
 
                                 {selectedFile && (
-                                    <Box sx={{ p: 1, pl: 2 }}>
+                                    <Box sx={{ p: 1, pl: 2, bgcolor: theme.palette.background.paper }}>
                                         <Box sx={{ position: 'relative', width: 60, height: 60 }}>
                                             <img
                                                 src={URL.createObjectURL(selectedFile)}
@@ -380,7 +386,7 @@ const TicketChat = () => {
                                                     position: 'absolute',
                                                     top: -6,
                                                     right: -6,
-                                                    bgcolor: 'white',
+                                                    bgcolor: theme.palette.background.paper,
                                                     borderRadius: '50%',
                                                     boxShadow: 1,
                                                     cursor: 'pointer',
@@ -390,6 +396,7 @@ const TicketChat = () => {
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
                                                     fontSize: 12,
+                                                    color: theme.palette.text.primary,
                                                 }}
                                                 onClick={() => setSelectedFile(null)}
                                             >
@@ -406,8 +413,8 @@ const TicketChat = () => {
                                     onSubmit={handleSubmit}
                                     sx={{
                                         p: 2,
-                                        borderTop: '1px solid #e2e8f0',
-                                        bgcolor: 'white',
+                                        borderTop: `1px solid ${theme.palette.divider}`,
+                                        bgcolor: theme.palette.background.paper,
                                         display: 'flex',
                                         gap: 1,
                                     }}
@@ -418,7 +425,17 @@ const TicketChat = () => {
                                         value={newMessage}
                                         onChange={(e) => setNewMessage(e.target.value)}
                                         size="medium"
-                                        sx={{ bgcolor: '#f1f5f9', borderRadius: 2 }}
+                                        sx={{
+                                            bgcolor: theme.palette.action.hover,
+                                            borderRadius: 2,
+                                            "& .MuiOutlinedInput-root": {
+                                                backgroundColor: theme.palette.action.hover,
+                                                color: theme.palette.text.primary,
+                                            },
+                                            "& .MuiInputLabel-root": {
+                                                color: theme.palette.text.secondary,
+                                            },
+                                        }}
                                     />
 
                                     <Button
@@ -427,8 +444,8 @@ const TicketChat = () => {
                                         variant="contained"
                                         size="small"
                                         sx={{
-                                            bgcolor: '#3B82F6',
-                                            "&:hover": { bgcolor: '#2563EB' },
+                                            bgcolor: theme.palette.primary.main,
+                                            "&:hover": { bgcolor: theme.palette.primary.dark },
                                             borderRadius: 2,
                                         }}
                                     >
@@ -441,8 +458,8 @@ const TicketChat = () => {
                                         variant="contained"
                                         size="small"
                                         sx={{
-                                            bgcolor: '#519380',
-                                            "&:hover": { bgcolor: '#7DAA8D' },
+                                            bgcolor: theme.palette.success.main,
+                                            "&:hover": { bgcolor: theme.palette.success.dark },
                                             borderRadius: 2,
                                         }}
                                     >
@@ -458,7 +475,7 @@ const TicketChat = () => {
                                 </Typography>
 
                                 <Typography variant="body2" sx={{ maxWidth: 300, mt: 1 }}>
-                                    Select an ticket to start a Chat
+                                    Select a ticket to start a Chat
                                 </Typography>
                             </Box>
                         )}
