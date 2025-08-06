@@ -12,7 +12,9 @@ import {
   DialogContent,
   DialogActions,
   Divider,
+  useMediaQuery
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Facebook, Twitter, Instagram } from '@mui/icons-material';
 import Lottie from 'lottie-react';
 import { useNavigate } from 'react-router-dom';
@@ -21,12 +23,11 @@ import { toast } from 'react-toastify';
 import { registerDevice } from '../../../utils/registerDevice';
 import { auth } from '../../../firebase';
 import { signInWithCustomToken } from 'firebase/auth';
-
 import lottieAnimation from '../../../assets/images/animations/Login.json';
 import stayImg from './stay.png';
 import { url } from '../../../../mainurl';
 
-// AnimatedLinesBackground component remains unchanged, with minor glow on circles
+// AnimatedLinesBackground remains unchanged
 function AnimatedLinesBackground() {
   const canvasRef = useRef(null);
 
@@ -39,8 +40,8 @@ function AnimatedLinesBackground() {
     const maxLines = 20;
 
     function resize() {
-      width = canvas.width = canvas.clientWidth;
-      height = canvas.height = canvas.clientHeight;
+      width = canvas.width = canvas.offsetWidth;
+      height = canvas.height = canvas.offsetHeight;
     }
     resize();
 
@@ -120,6 +121,9 @@ export default function AuthLogin() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // sm and below
+
   const navigate = useNavigate();
 
   const handleForgotPassword = () => setOpen(true);
@@ -183,42 +187,75 @@ export default function AuthLogin() {
     }
   };
 
-  const handleSignUpClick = () => {
-    toast.info('This feature is not available', {
-      position: 'top-right',
-      autoClose: 2000,
-    });
-  };
+  // Logo: only on mobile, centered above the form
+  const MobileLogo = () =>
+    isMobile && (
+    <Box
+  sx={{
+    width: 90, // slightly bigger than image
+    height: 90,
+    mx: 'auto',
+    mt: 4,
+    mb: 2,
+    borderRadius: 3,
+    background: 'linear-gradient(135deg, #0d1333 0%, #ffffff 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    p: 1,
+    boxShadow: '0 4px 18px rgba(0,0,0,0.07)',
+  }}
+>
+  <Box
+    component="img"
+    src={stayImg}
+    alt="Logo"
+    sx={{
+      width: 70,
+      height: 70,
+      objectFit: 'contain',
+      borderRadius: 2,
+      backgroundColor: 'rgba(255 255 255 / 0.12)',
+      p: 1,
+      filter: 'drop-shadow(0 0 8px rgba(247, 247, 247, 0.73))',
+    }}
+  />
+</Box>
+
+    );
 
   return (
     <Box
       sx={{
         display: 'flex',
         minHeight: '100vh',
+        flexDirection: { xs: 'column', md: 'row' },
         fontFamily: 'Inter, Roboto, Arial, sans-serif',
         color: '#333',
+        background: { xs: '#0d1b2a', md: 'none' },
       }}
     >
-      {/* Left Panel */}
+      {/* Left Panel - hidden on mobile */}
       <Box
         sx={{
           flex: 1,
+          display: { xs: 'none', sm: 'none', md: 'flex' },
           position: 'relative',
           overflow: 'hidden',
-          px: { xs: 4, md: 8 },
-          py: { xs: 6, md: 10 },
-          display: 'flex',
+          px: { md: 8 },
+          py: { md: 10 },
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
           color: 'white',
-          background: `linear-gradient(135deg, #22347dff, #203b9cff, #0d1b2a)`,
+          background: 'linear-gradient(135deg, #22347dff, #203b9cff, #0d1b2a)',
           backgroundSize: '400% 400%',
           animation: 'gradientShift 20s ease infinite',
           textAlign: 'center',
           userSelect: 'none',
           position: 'relative',
-          // Gradient text for headings
+          minHeight: '100vh',
+          borderRadius: '0',
           '& h3': {
             background: 'linear-gradient(45deg, #7b9aff, #b4a1ff)',
             WebkitBackgroundClip: 'text',
@@ -226,7 +263,6 @@ export default function AuthLogin() {
           },
         }}
       >
-        {/* Gradient animation keyframes */}
         <style>
           {`
             @keyframes gradientShift {
@@ -238,25 +274,44 @@ export default function AuthLogin() {
         </style>
 
         {/* Logo top-left */}
-        <Box
-          component="img"
-          src={stayImg}
-          alt="Logo"
-          sx={{
-            width: 80,
-            height: 80,
-            objectFit: 'contain',
-            position: 'absolute',
-            top: 32,
-            left: 32,
-            filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.4))',
-            borderRadius: 2,
-            backgroundColor: 'rgba(255 255 255 / 0.15)',
-            p: 1,
-          }}
-        />
+      <Box
+  sx={{
+    position: 'absolute',
+    top: 32,
+    left: 32,
+    width: 90,
+    height: 90,
+    borderRadius: '20%',
+    background: '#fff',                      // clean white card for contrast
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 8px 32px 0 rgba(119, 150, 217, 0.23)', // soft blue shadow for subtle elevation
+    border: '3px solid #fdfdfdff',             // gentle border for visibility on blue
+    zIndex: 10,
+    p: 0,
+  }}
+>
+  <Box
+    component="img"
+    src={stayImg}
+    alt="Logo"
+    sx={{
+      width: 66,
+      height: 66,
+      objectFit: 'contain',
+      borderRadius: '20%',
+      background: '#fff',
+      boxShadow: '0 0 0 2px #blue', // subtle green edge for brand touch
+      filter: 'drop-shadow(0 2px 6px rgba(63, 50, 246, 0.83))',
+      p: 0,
+    }}
+  />
+</Box>
 
-        {/* Decorative Circles with glow */}
+
+
+        {/* Decorative Circles */}
         <Box
           sx={{
             position: 'absolute',
@@ -284,7 +339,7 @@ export default function AuthLogin() {
           }}
         />
 
-        {/* Lottie Animation Container with subtle shadow */}
+        {/* Lottie Animation */}
         <Box
           sx={{
             maxWidth: 320,
@@ -325,20 +380,24 @@ export default function AuthLogin() {
         </Typography>
       </Box>
 
-      {/* Right Panel - Login Form with animated background */}
+      {/* Mobile: Centered logo above form */}
+      <MobileLogo />
+
+      {/* Right Panel - login form (full width on mobile) */}
       <Box
         sx={{
           flex: 1,
           position: 'relative',
-          px: { xs: 6, md: 10 },
-          py: { xs: 8, md: 10 },
+          px: { xs: 0, sm: 2, md: 10 },
+          py: { xs: 2, sm: 5, md: 10 },
           backgroundColor: 'transparent',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           overflow: 'hidden',
-          borderRadius: '0 10px 10px 0',
-          boxShadow: '-5px 0 15px rgba(0,0,0,0.05)',
+          borderRadius: { xs: 0, md: '0 10px 10px 0' },
+          minHeight: { xs: 340, md: '100vh' },
+          boxShadow: { xs: 'none', md: '-5px 0 15px rgba(0,0,0,0.05)' },
         }}
       >
         {/* Animated background */}
@@ -349,18 +408,21 @@ export default function AuthLogin() {
           sx={{
             position: 'relative',
             zIndex: 1,
-            backgroundColor: 'rgba(255,255,255,0.95)',
+            backgroundColor: 'rgba(255,255,255,0.98)',
             borderRadius: 3,
-            boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
-            px: 4,
-            py: 5,
-            maxWidth: 420,
-            margin: '0 auto',
+            boxShadow: {
+              xs: '0 4px 16px rgba(0,0,0,0.10)',
+              md: '0 8px 30px rgba(0,0,0,0.15)',
+            },
+            px: { xs: 2, sm: 3, md: 4 },
+            py: { xs: 3, sm: 4, md: 5 },
+            maxWidth: { xs: 350, sm: 400, md: 420 },
+            margin: { xs: '40px auto', md: '0 auto' },
             width: '100%',
             border: '1px solid #e0e0e0',
             transition: 'box-shadow 0.3s ease',
             '&:hover': {
-              boxShadow: '0 12px 40px rgba(76, 110, 245, 0.35)',
+              boxShadow: '0 12px 40px rgba(76, 110, 245, 0.15)',
             },
           }}
         >
@@ -371,9 +433,9 @@ export default function AuthLogin() {
             }}
           >
             <Typography
-              variant="h4"
+              variant={isMobile ? 'h6' : 'h4'}
               fontWeight={700}
-              mb={4}
+              mb={3}
               sx={{
                 color: '#3b4d61',
                 letterSpacing: 1.2,
@@ -382,6 +444,7 @@ export default function AuthLogin() {
                 letterSpacing: '2px',
                 userSelect: 'none',
                 textShadow: '0 1px 4px rgba(76, 110, 245, 0.5)',
+                fontSize: { xs: '1.3rem', sm: '1.8rem', md: '2rem' },
               }}
             >
               Sign In
@@ -396,8 +459,9 @@ export default function AuthLogin() {
               value={formData.email}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
+              size={isMobile ? 'small' : 'medium'}
               sx={{
-                mb: 3,
+                mb: 2,
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 6,
                   backgroundColor: '#f9fbff',
@@ -428,6 +492,7 @@ export default function AuthLogin() {
               value={formData.password}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
+              size={isMobile ? 'small' : 'medium'}
               sx={{
                 mb: 2,
                 '& .MuiOutlinedInput-root': {
@@ -472,10 +537,12 @@ export default function AuthLogin() {
             <Box
               sx={{
                 display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
                 justifyContent: 'space-between',
-                alignItems: 'center',
-                mb: 4,
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                mb: 3,
                 userSelect: 'none',
+                gap: { xs: 1, sm: 0 },
               }}
             >
               <FormControlLabel
@@ -495,7 +562,9 @@ export default function AuthLogin() {
                     fontWeight: 600,
                     color: '#4c6ef5',
                     userSelect: 'none',
+                    fontSize: { xs: '0.95rem', sm: '1rem' },
                   },
+                  mr: { xs: 0, sm: 1 },
                 }}
               />
               <Link
@@ -507,6 +576,8 @@ export default function AuthLogin() {
                   color: '#4c6ef5',
                   fontWeight: 600,
                   cursor: 'pointer',
+                  fontSize: { xs: '0.95rem', sm: '1rem' },
+                  alignSelf: { xs: 'flex-end', sm: 'auto' },
                   transition: 'color 0.3s ease',
                   '&:hover': { textDecoration: 'underline', color: '#3b57c1' },
                 }}
@@ -522,14 +593,15 @@ export default function AuthLogin() {
               type="submit"
               sx={{
                 backgroundColor: '#4c6ef5',
-                py: 1.8,
+                py: 1.3,
                 borderRadius: 6,
                 fontWeight: 700,
                 letterSpacing: 1.1,
                 transition: 'background-color 0.3s ease, transform 0.15s ease',
                 '&:hover': { backgroundColor: '#3b57c1', transform: 'scale(1.05)' },
                 userSelect: 'none',
-                boxShadow: '0 6px 15px rgba(76,110,245,0.4)',
+                boxShadow: '0 6px 15px rgba(76,110,245,0.18)',
+                fontSize: { xs: '1rem', sm: '1.1rem' },
               }}
             >
               Login
@@ -540,8 +612,8 @@ export default function AuthLogin() {
               variant="outlined"
               color="primary"
               sx={{
-                mt: 3,
-                py: 1.8,
+                mt: 2,
+                py: 1.3,
                 borderRadius: 6,
                 fontWeight: 700,
                 letterSpacing: 1.1,
@@ -549,13 +621,14 @@ export default function AuthLogin() {
                 userSelect: 'none',
                 borderColor: '#4c6ef5',
                 color: '#4c6ef5',
+                fontSize: { xs: '1rem', sm: '1.1rem' },
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   backgroundColor: '#e7f0ff',
                   borderColor: '#3b57c1',
                   color: '#3b57c1',
                   transform: 'scale(1.05)',
-                  boxShadow: '0 6px 15px rgba(59,87,193,0.3)',
+                  boxShadow: '0 6px 15px rgba(59,87,193,0.13)',
                 },
               }}
               onClick={() =>
@@ -570,33 +643,56 @@ export default function AuthLogin() {
             </Button>
 
             {/* Social Icons */}
-           <Box
-  sx={{
-    display: 'flex',
-    justifyContent: 'center',
-    gap: 5,
-    mt: 5,
-  }}
->
-  <Facebook
-    sx={{ cursor: 'pointer', fontSize: 34, color: '#1877F2', transition: 'transform 0.3s ease',
-      '&:hover': { transform: 'scale(1.2) rotate(10deg)', filter: 'brightness(1.2)' } }}
-  />
-  <Twitter
-    sx={{ cursor: 'pointer', fontSize: 34, color: '#1DA1F2', transition: 'transform 0.3s ease',
-      '&:hover': { transform: 'scale(1.2) rotate(10deg)', filter: 'brightness(1.2)' } }}
-  />
-  <Instagram
-    sx={{ cursor: 'pointer', fontSize: 34, color: '#E4405F', transition: 'transform 0.3s ease',
-      '&:hover': { transform: 'scale(1.2) rotate(10deg)', filter: 'brightness(1.2)' } }}
-  />
-</Box>
-
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 4,
+                mt: 4,
+              }}
+            >
+              <Facebook
+                sx={{
+                  cursor: 'pointer',
+                  fontSize: { xs: 28, sm: 32, md: 34 },
+                  color: '#1877F2',
+                  transition: 'transform 0.3s ease',
+                  '&:hover': {
+                    transform: 'scale(1.18) rotate(8deg)',
+                    filter: 'brightness(1.2)',
+                  },
+                }}
+              />
+              <Twitter
+                sx={{
+                  cursor: 'pointer',
+                  fontSize: { xs: 28, sm: 32, md: 34 },
+                  color: '#1DA1F2',
+                  transition: 'transform 0.3s ease',
+                  '&:hover': {
+                    transform: 'scale(1.18) rotate(8deg)',
+                    filter: 'brightness(1.2)',
+                  },
+                }}
+              />
+              <Instagram
+                sx={{
+                  cursor: 'pointer',
+                  fontSize: { xs: 28, sm: 32, md: 34 },
+                  color: '#E4405F',
+                  transition: 'transform 0.3s ease',
+                  '&:hover': {
+                    transform: 'scale(1.18) rotate(8deg)',
+                    filter: 'brightness(1.2)',
+                  },
+                }}
+              />
+            </Box>
           </form>
         </Box>
       </Box>
 
-      {/* Forgot Password Dialog */}
+      {/* Forgot Password Dialog remains unchanged */}
       <Dialog
         open={open}
         onClose={handleClose}
@@ -604,12 +700,12 @@ export default function AuthLogin() {
           sx: {
             borderRadius: 5,
             background:
-              'linear-gradient(135deg, rgba(227,242,253,0.9), rgba(187,222,251,0.9))',
-            boxShadow: '0px 15px 40px rgba(0,0,0,0.3)',
-            px: 5,
-            py: 5,
-            minWidth: 380,
-            maxWidth: 460,
+              'linear-gradient(135deg, rgba(227,242,253,0.93), rgba(187,222,251,0.93))',
+            boxShadow: '0px 15px 40px rgba(0,0,0,0.2)',
+            px: { xs: 2, sm: 4, md: 5 },
+            py: { xs: 2, sm: 4, md: 5 },
+            minWidth: { xs: 250, sm: 320, md: 380 },
+            maxWidth: { xs: 350, sm: 420, md: 460 },
             userSelect: 'none',
             backdropFilter: 'blur(8px)',
           },
@@ -618,12 +714,12 @@ export default function AuthLogin() {
         <DialogTitle
           sx={{
             fontWeight: '700',
-            fontSize: '1.9rem',
+            fontSize: { xs: '1.3rem', sm: '1.6rem', md: '1.9rem' },
             color: '#1a237e',
-            mb: 3,
+            mb: 2,
             letterSpacing: 0.6,
             fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-            textShadow: '0 1px 3px rgba(26, 35, 126, 0.3)',
+            textShadow: '0 1px 3px rgba(26, 35, 126, 0.15)',
           }}
         >
           Contact Admin
@@ -632,10 +728,10 @@ export default function AuthLogin() {
           <Typography
             variant="body1"
             sx={{
-              mb: 3,
+              mb: 2,
               color: '#3949ab',
               fontWeight: 700,
-              fontSize: '1.15rem',
+              fontSize: { xs: '1rem', sm: '1.1rem', md: '1.15rem' },
               lineHeight: 1.5,
               fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
             }}
@@ -648,9 +744,9 @@ export default function AuthLogin() {
               variant="body1"
               sx={{
                 fontWeight: 700,
-                fontSize: '1.1rem',
+                fontSize: { xs: '0.99rem', sm: '1.05rem', md: '1.1rem' },
                 color: '#1a237e',
-                minWidth: 70,
+                minWidth: 65,
                 fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
               }}
             >
@@ -661,7 +757,7 @@ export default function AuthLogin() {
               style={{
                 color: '#3b4d61',
                 textDecoration: 'none',
-                fontSize: '1.1rem',
+                fontSize: '1rem',
                 fontWeight: 600,
                 fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
               }}
@@ -675,9 +771,9 @@ export default function AuthLogin() {
               variant="body1"
               sx={{
                 fontWeight: 700,
-                fontSize: '1.1rem',
+                fontSize: { xs: '0.99rem', sm: '1.05rem', md: '1.1rem' },
                 color: '#1a237e',
-                minWidth: 70,
+                minWidth: 65,
                 fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
               }}
             >
@@ -688,7 +784,7 @@ export default function AuthLogin() {
               style={{
                 color: '#3b4d61',
                 textDecoration: 'none',
-                fontSize: '1.1rem',
+                fontSize: '1rem',
                 fontWeight: 600,
                 fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
               }}
@@ -708,7 +804,7 @@ export default function AuthLogin() {
               py: 1.5,
               borderRadius: 4,
               textTransform: 'none',
-              fontSize: '1.1rem',
+              fontSize: '1.05rem',
               letterSpacing: 0.5,
               transition: 'background-color 0.3s ease',
               '&:hover': { backgroundColor: '#c5cae9', color: '#0d1b2a' },
