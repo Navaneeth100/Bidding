@@ -59,7 +59,7 @@ const ServiceJobs = () => {
 
         axios.get(`${url}/service/jobpost`, {
             params: {
-                request: 'id,user,title,location_name,payment_type,created_at',
+                // request: 'id,user,title,location_name,payment_type,created_at',
                 search: onsearchText,
                 page: currentPage + 1,
                 page_size: rowsPerPage,
@@ -89,7 +89,7 @@ const ServiceJobs = () => {
                             const newToken = res.data.access; // grab the refreshed access token
                             axios.get(`${url}/service/jobpost`, {
                                 params: {
-                                    request: 'id,user,title,location_name,payment_type,created_at',
+                                    // request: 'id,user,title,location_name,payment_type,created_at',
                                     search: onsearchText,
                                     page: currentPage + 1,
                                     page_size: rowsPerPage,

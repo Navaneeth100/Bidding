@@ -477,7 +477,7 @@ const Notification = () => {
                                                     {item.title}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                    {item.read_by_users.join(", ")}
+                                                    {(item.read_by_users && item.read_by_users.length > 0 ) ? item.read_by_users.join(", ") : "N/A"}
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     {item.message}
